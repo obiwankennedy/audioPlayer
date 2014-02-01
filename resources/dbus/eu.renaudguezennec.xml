@@ -1,0 +1,39 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="local.Player">
+    <signal name="SetId">
+      <arg name="i" type="i" direction="out"/>
+    </signal>
+    <signal name="playingStop">
+    </signal>
+    <method name="nextSong">
+    </method>
+    <method name="playSong">
+    </method>
+    <method name="previousSong">
+    </method>
+    <method name="pauseSong">
+    </method>
+    <method name="stopSong">
+    </method>
+    <method name="setSelectionMode">
+      <arg name="mode" type="i" direction="in"/>
+    </method>
+    <method name="increaseSong">
+      <arg name="i" type="i" direction="in"/>
+    </method>
+    <method name="increaseSong">
+    </method>
+    <method name="decreaseSong">
+      <arg name="i" type="i" direction="in"/>
+    </method>
+    <method name="decreaseSong">
+    </method>
+    <method name="seek">
+      <arg type="s" direction="in"/>
+    </method>
+    <method name="setVolume">
+      <arg type="i" direction="in"/>
+    </method>
+  </interface>
+</node>
