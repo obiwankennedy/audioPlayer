@@ -4,6 +4,7 @@ CONFIG += qt \
     thread \
     assistant \
     warn_on
+
 include(factory/factory.pri)
 include(document/document.pri)
 include(directoryFacade/directoryFacade.pri)
@@ -119,7 +120,8 @@ SOURCES += edittagbox.cpp \
     tableheaderview.cpp \
     pl_databasemanager.cpp \
     dbus/dbusServer.cpp
-RESOURCES += playlistgenerator.qrc
+RESOURCES += \
+    audioPlayer.qrc
 #DEFINES += REPEAT
 
 LIBS += -lid3 \
@@ -139,14 +141,14 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 lessThan(QT_MAJOR_VERSION, 5): QT += phonon
 
 
-documentation.path = /usr/local/PlayListGenerator/documentation/
+documentation.path = /usr/local/audioPlayer/documentation/
 documentation.files = ../documentation/*
 target.path = /usr/local/bin
 INSTALLS += documentation \
     target
 VERSION = 0.9.1
-TARGET = ../bin/PlayListGenerator
-TRANSLATIONS = ../playlistgenerator_fr_FR.ts
+TARGET = ../bin/audioPlayer
+TRANSLATIONS = ../audioPlayer_fr_FR.ts
 UI_DIR = ../ui
 MOC_DIR = ../obj
 OBJECTS_DIR = ../obj
