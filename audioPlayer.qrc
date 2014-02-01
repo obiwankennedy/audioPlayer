@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/pixmaps/Infinite.svg</file>
+        <file>resources/pixmaps/arrow-up.xpm</file>
+        <file>resources/pixmaps/editcopy.xpm</file>
+        <file>resources/pixmaps/editcut.xpm</file>
+        <file>resources/pixmaps/editpaste.xpm</file>
+        <file>resources/pixmaps/filenew.xpm</file>
+        <file>resources/pixmaps/fileopen.xpm</file>
+        <file>resources/pixmaps/filesave.xpm</file>
+        <file>resources/pixmaps/gnome-settings.svg</file>
+        <file>resources/pixmaps/icon2.png</file>
+        <file>resources/pixmaps/next.png</file>
+        <file>resources/pixmaps/previous.png</file>
+        <file>resources/pixmaps/viewmag.png</file>
+        <file>resources/translations/qt_fr.qm</file>
+        <file>resources/pixmaps/gnome_settings.png</file>
+    </qresource>
+</RCC>

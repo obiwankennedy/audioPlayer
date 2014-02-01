@@ -36,6 +36,8 @@ DEPENDPATH += directoryFacade \
     tabapi \
     ../bin \
     plugins
+
+
 INCLUDEPATH += . \
     factory \
     Style \
@@ -54,6 +56,7 @@ INCLUDEPATH += . \
     tabapi \
     src \
     /usr/local/include/taglib/
+
 HEADERS += edittagbox.h \
     mediatype.h \
     pl_tableview.h \
@@ -85,11 +88,14 @@ HEADERS += edittagbox.h \
     tableheaderview.h \
     pl_databasemanager.h \
     dbus/dbusServer.h
+
 FORMS += tageditor/tageditordialog.ui \
     wizzardexport/wizzardexport.ui \
     sortui/sortui.ui \
     preferences/preferences.ui \
     findingassistant/findingassistant.ui
+
+
 SOURCES += edittagbox.cpp \
     main.cpp \
     pl_tableview.cpp \
@@ -120,12 +126,14 @@ SOURCES += edittagbox.cpp \
     tableheaderview.cpp \
     pl_databasemanager.cpp \
     dbus/dbusServer.cpp
-RESOURCES += \
-    audioPlayer.qrc
+
+
+
 #DEFINES += REPEAT
 
 LIBS += -lid3 \
     -L/usr/local/lib -ltag
+
 QT += xml \
     core \
     dbus \
@@ -138,7 +146,7 @@ QT += multimedia printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-lessThan(QT_MAJOR_VERSION, 5): QT += phonon
+#lessThan(QT_MAJOR_VERSION, 5): QT += phonon
 
 
 documentation.path = /usr/local/audioPlayer/documentation/
@@ -148,7 +156,7 @@ INSTALLS += documentation \
     target
 VERSION = 0.9.1
 TARGET = ../bin/audioPlayer
-TRANSLATIONS = ../audioPlayer_fr_FR.ts
+TRANSLATIONS = ../resources/translation/audioPlayer_fr_FR.ts
 UI_DIR = ../ui
 MOC_DIR = ../obj
 OBJECTS_DIR = ../obj
