@@ -175,7 +175,7 @@ private:
     headerlistview* headertitle;
     headerlistview* headertrack;
 
-SongPluginManager* pluginmanager;
+    SongPluginManager* pluginmanager;
 };
 
 #endif

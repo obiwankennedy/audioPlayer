@@ -13,7 +13,7 @@
         <file>resources/pixmaps/next.png</file>
         <file>resources/pixmaps/previous.png</file>
         <file>resources/pixmaps/viewmag.png</file>
-        <file>resources/translations/qt_fr.qm</file>
+        <file>resources/translation/qt_fr.qm</file>
         <file>resources/pixmaps/gnome_settings.png</file>
     </qresource>
 </RCC>

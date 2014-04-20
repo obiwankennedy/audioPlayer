@@ -97,6 +97,7 @@ void LyricsPlugin::show()
         finderwiki->search();
     }
     viewer->setVisible(true);
+    m_menuAct->setChecked(true);
 }
 void LyricsPlugin::refresh()
 {
@@ -145,12 +146,12 @@ QDockWidget* LyricsPlugin::getWidget()
 }
 QAction* LyricsPlugin::getAction()
 {
-    QAction* temp = new QAction("Show me the lyrics",this);
+      m_menuAct = new QAction("Show me the lyrics",this);
 
-      temp->setShortcut(tr("Ctrl+L"));
-      temp->setStatusTip(tr("Try to find and display the lyrics"));
-      connect(temp, SIGNAL(triggered()), this, SLOT(show()));
-      return temp;
+      m_menuAct->setShortcut(tr("Ctrl+L"));
+      m_menuAct->setStatusTip(tr("Try to find and display the lyrics"));
+      connect(m_menuAct, SIGNAL(triggered()), this, SLOT(show()));
+      return m_menuAct;
 }
 bool LyricsPlugin::isVisible()
 {

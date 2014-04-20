@@ -5,6 +5,7 @@
 #include <QVariant>
 #include "player.h"
 //
+#include <QtSvg>
 
 Player::Player(  QWidget * parent, Qt::WindowFlags f)
     : QWidget(parent, f)
@@ -283,7 +284,13 @@ void Player::setupActions()
     nextAction->setShortcut(tr("N"));
     previousAction = new QAction(style()->standardIcon(QStyle::SP_MediaSkipBackward), tr("Previous"), this);
     previousAction->setShortcut(tr("P"));
-    randomly= new QPushButton(/*QIcon(":/pixmaps/Infinite.svg"),*/tr(""),this);
+    QList<QByteArray> list = QImageReader::supportedImageFormats();
+    foreach(QByteArray tmp, list)
+    {
+        qDebug() << tmp;
+    }
+
+    randomly= new QPushButton(QIcon(":/resources/pixmaps/Infinite.svg"),tr(""),this);
     randomly->setFlat(true);
     randomly->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
     randomly->setCheckable(true);

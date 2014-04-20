@@ -31,7 +31,7 @@
 
 
 PL_TableView::PL_TableView(QWidget * p)
-    : QTableView(p)
+    : QTableView(p),m_model(NULL)
 {
     setAlternatingRowColors(true);
     m_behaviour = ALWAYSSHOWN;

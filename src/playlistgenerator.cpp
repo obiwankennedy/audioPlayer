@@ -54,7 +54,7 @@ PlayListGenerator::PlayListGenerator()
     model = new QDirModel;
 
     tree->setModel(model);//tree of directory
-    QIcon a(":/pixmaps/icon2.png");
+    QIcon a(":/resources/pixmaps/icon2.png");
     setWindowIcon ( a );
 
     setStatusBar(NULL);
@@ -199,7 +199,7 @@ void PlayListGenerator::open()
     {
         mytabs->reset();
         setCurrentFile("");
-        QString fileName = QFileDialog::getOpenFileName(this,tr("Play List Generator"),".",tr(
+        QString fileName = QFileDialog::getOpenFileName(this,tr("Audio Player"),".",tr(
             "Supported files (*.m3u *.qpl)\nM3U playList files (*.m3u)\nBinary playList files (*.qpl)"));
             if (!fileName.isEmpty())
             loadFile(fileName);
@@ -240,7 +240,7 @@ bool PlayListGenerator::save()
 
 bool PlayListGenerator::saveAs()
 {
-  QString fileName = QFileDialog::getSaveFileName(this,tr("Play List Generator"),".",tr("Supported files (*.m3u *.qpl)\nM3U playList files (*.m3u)\nBinary playList files (*.qpl)"));
+  QString fileName = QFileDialog::getSaveFileName(this,tr("Audio Player"),".",tr("Supported files (*.m3u *.qpl)\nM3U playList files (*.m3u)\nBinary playList files (*.qpl)"));
       if (fileName.isEmpty())
             return false;
 
@@ -250,7 +250,7 @@ bool PlayListGenerator::saveAs()
 
 void PlayListGenerator::about()
 {
-      QMessageBox::about(this, tr("About PlaylistGenerator"),
+      QMessageBox::about(this, tr("About Audio Player"),
                  tr(" <b>PlaylistGenerator</b> is an application to create and to manage "
                   "a MP3 playlist, writen by Renaud GUEZENNEC in C++ using Qt4 and Design Patterns  "
                   "This application is the main year project of the author for "
@@ -267,23 +267,23 @@ void PlayListGenerator::documentWasModified()
 
 void PlayListGenerator::createActions()
 {
-  newAct = new QAction(QIcon(":/pixmaps/filenew.xpm"), tr("&New"), this);
+  newAct = new QAction(QIcon(":/resources/pixmaps/filenew.xpm"), tr("&New"), this);
       newAct->setShortcut(tr("Ctrl+N"));
       newAct->setStatusTip(tr("Create a new file"));
       connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));
 
       
-      openAct2 = new QAction(QIcon(":/pixmaps/fileopen.xpm"), tr("&Open..."), this);
+      openAct2 = new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"), tr("&Open..."), this);
       openAct2->setShortcut(tr("Ctrl+O"));
       openAct2->setStatusTip(tr("Open an existing file"));
       connect(openAct2, SIGNAL(triggered()), this, SLOT(open2()));
       
-      openAct = new QAction(QIcon(":/pixmaps/fileopen.xpm"), tr("&Open..."), this);
+      openAct = new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"), tr("&Open..."), this);
       openAct->setShortcut(tr("Ctrl+O"));
       openAct->setStatusTip(tr("Open an existing file"));
       connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
-      saveAct = new QAction(QIcon(":/pixmaps/filesave.xpm"), tr("&Save"), this);
+      saveAct = new QAction(QIcon(":/resources/pixmaps/filesave.xpm"), tr("&Save"), this);
       saveAct->setShortcut(tr("Ctrl+S"));
       saveAct->setStatusTip(tr("Save the document to disk"));
       connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
@@ -297,19 +297,19 @@ void PlayListGenerator::createActions()
       exitAct->setStatusTip(tr("Exit the application"));
       connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-      cutAct = new QAction(QIcon(":/pixmaps/editcut.xpm"), tr("Cu&t"), this);
+      cutAct = new QAction(QIcon(":/resources/pixmaps/editcut.xpm"), tr("Cu&t"), this);
       cutAct->setShortcut(tr("Ctrl+X"));
       cutAct->setStatusTip(tr("Cut the current selection's contents to the "
                               "clipboard"));
       connect(cutAct, SIGNAL(triggered()), mytabs, SLOT(cut()));
 
-      copyAct = new QAction(QIcon(":/pixmaps/editcopy.xpm"), tr("&Copy"), this);
+      copyAct = new QAction(QIcon(":/resources/pixmaps/editcopy.xpm"), tr("&Copy"), this);
       copyAct->setShortcut(tr("Ctrl+C"));
       copyAct->setStatusTip(tr("Copy the current selection's contents to the "
                               "clipboard"));
       connect(copyAct, SIGNAL(triggered()), mytabs, SLOT(copy()));
 
-      pasteAct = new QAction(QIcon(":/pixmaps/editpaste.xpm"), tr("&Paste"), this);
+      pasteAct = new QAction(QIcon(":/resources/pixmaps/editpaste.xpm"), tr("&Paste"), this);
       pasteAct->setShortcut(tr("Ctrl+V"));
       pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "
                               "selection"));
@@ -327,7 +327,7 @@ void PlayListGenerator::createActions()
 
 
       
-      m_displayPreferencesDialog = new QAction(QIcon(":/pixmaps/gnome_settings.png"), tr("&Preferences"), this);
+      m_displayPreferencesDialog = new QAction(QIcon(":/resources/pixmaps/gnome_settings.png"), tr("&Preferences"), this);
       m_displayPreferencesDialog->setShortcut(tr("Ctrl+P"));
       m_displayPreferencesDialog->setStatusTip(tr("Display preferences dialog box"));
       connect(m_displayPreferencesDialog, SIGNAL(triggered()), this, SLOT(show_preferences()));
@@ -363,7 +363,7 @@ void PlayListGenerator::createActions()
       connect(parseDirAct, SIGNAL(triggered()), this, SLOT(openDir()));
       
       
-      parentDirAct = new QAction(QIcon(":/pixmaps/arrow-up.xpm"),tr("Up"), this);
+      parentDirAct = new QAction(QIcon(":/resources/pixmaps/arrow-up.xpm"),tr("Up"), this);
       parentDirAct->setStatusTip(tr("Use the parent directory as root directory"));
       connect(parentDirAct, SIGNAL(triggered()), this, SLOT(gotoparentDir()));
      
@@ -372,33 +372,33 @@ void PlayListGenerator::createActions()
       connect(useDirAct, SIGNAL(triggered()), this, SLOT(useDirasRoot()));
       
       
-      addfileAct= new QAction(QIcon(":/pixmaps/filenew.xpm"),tr("Add one file..."), this);
+      addfileAct= new QAction(QIcon(":/resources/pixmaps/filenew.xpm"),tr("Add one file..."), this);
       addfileAct->setStatusTip(tr("Add to the playlist one file"));
       connect(addfileAct, SIGNAL(triggered()), this, SLOT(openMusicFile()));
       
       
       
-      adddirAct = new QAction(QIcon(":/pixmaps/fileopen.xpm"),tr("Explore a directory..."), this);
+      adddirAct = new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"),tr("Explore a directory..."), this);
       adddirAct->setStatusTip(tr("Find every Mp3 files in a directory tree"));
       connect(adddirAct, SIGNAL(triggered()), this, SLOT(addDir()));
       
       
       
-      selectBoxAct = new QAction(QIcon(":/pixmaps/fileopen.xpm"),tr("Choose a dir..."), this);
+      selectBoxAct = new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"),tr("Choose a dir..."), this);
       selectBoxAct->setStatusTip(tr("Select a root directory"));
       connect(selectBoxAct, SIGNAL(triggered()), this, SLOT(selectRootDir()));
       
-      startsearch= new QAction(QIcon(":/pixmaps/viewmag.png"),tr("Find"), this);
+      startsearch= new QAction(QIcon(":/resources/pixmaps/viewmag.png"),tr("Find"), this);
       startsearch->setShortcut(tr("Ctrl+F"));
       startsearch->setStatusTip(tr("Find a song"));
       connect(startsearch, SIGNAL(triggered()), this, SLOT(Seekfile()));
       
-      nextsearch= new QAction(QIcon(":/pixmaps/next.png"),tr("Find Next"), this);
+      nextsearch= new QAction(QIcon(":/resources/pixmaps/next.png"),tr("Find Next"), this);
       nextsearch->setShortcut(tr("F3"));
       nextsearch->setStatusTip(tr("Find the next song"));
       connect(nextsearch, SIGNAL(triggered()), this, SLOT(nextfile()));
       
-      prevsearch= new QAction(QIcon(":/pixmaps/previous.png"),tr("Find Previous"), this);
+      prevsearch= new QAction(QIcon(":/resources/pixmaps/previous.png"),tr("Find Previous"), this);
       prevsearch->setShortcut(tr("Shift+F3"));
       prevsearch->setStatusTip(tr("Find the previous song"));
       connect(prevsearch, SIGNAL(triggered()), this, SLOT(previousfile()));
@@ -794,7 +794,7 @@ void PlayListGenerator::setCurrentFile(const QString &fileName)
          
         
       }
-      setWindowTitle(tr("%1[*] - %2").arg(shownName).arg(tr("PlaylistGenerator - V0.9.1")));
+      setWindowTitle(tr("%1[*] - %2").arg(shownName).arg(tr("Audio Player - V1.0.0")));
 }
 
 QString PlayListGenerator::strippedName(const QString &fullFileName)
@@ -803,7 +803,7 @@ QString PlayListGenerator::strippedName(const QString &fullFileName)
 }
 void PlayListGenerator::openMusicFile()
 {
-    QString *fileName = new QString(QFileDialog::getOpenFileName(this,tr("Play List Generator"),".",FileSupported));
+    QString *fileName = new QString(QFileDialog::getOpenFileName(this,tr("Audio Player"),".",FileSupported));
   
      if(!fileName->isEmpty())
      {

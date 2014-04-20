@@ -43,6 +43,7 @@ private:
     QProcess* m_proc;
     SongFields* m_p;
     Qt::DockWidgetArea m_currentArea;
+    QAction* m_menuAct;
 
 
 public slots:

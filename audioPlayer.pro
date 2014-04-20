@@ -4,5 +4,5 @@ CONFIG += ordered
 SUBDIRS = src srcplugin
 
 
-RESOURCES += \
-    audioPlayer.qrc
+#RESOURCES += \
+#    audioPlayer.qrc

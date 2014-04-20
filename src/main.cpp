@@ -44,9 +44,9 @@ int main(int argc, char *argv[])
       QStringList args = app.arguments();
       QTranslator translator;
       QTranslator translator2;
-      translator.load("translations/playlistgenerator_" + QLocale::system().name(),qApp->applicationDirPath());
+      translator.load("translations/audioPlayer_" + QLocale::system().name(),qApp->applicationDirPath());
       
-      translator2.load(":/translations/qt_" + QLocale::system().name(),qApp->applicationDirPath());
+      translator2.load(":/resources/translations/qt_" + QLocale::system().name(),qApp->applicationDirPath());
       app.installTranslator(&translator);
       app.installTranslator(&translator2);
       PlayListGenerator mw;

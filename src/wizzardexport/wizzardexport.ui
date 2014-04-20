@@ -347,7 +347,7 @@
                     <string>Add</string>
                    </property>
                    <property name="icon" >
-                    <iconset resource="../playlistgenerator.qrc" >:/pixmaps/next.png</iconset>
+                    <iconset resource="../playlistgenerator.qrc" >:/resources/pixmaps/next.png</iconset>
                    </property>
                   </widget>
                  </item>
@@ -357,7 +357,7 @@
                     <string>Remove</string>
                    </property>
                    <property name="icon" >
-                    <iconset resource="../playlistgenerator.qrc" >:/pixmaps/previous.png</iconset>
+                    <iconset resource="../playlistgenerator.qrc" >:/resources/pixmaps/previous.png</iconset>
                    </property>
                   </widget>
                  </item>

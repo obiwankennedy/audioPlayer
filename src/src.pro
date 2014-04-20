@@ -19,6 +19,8 @@ include(tabapi/tabapi.pri)
 include(listview/listview.pri)
 #include(Style/Style.pri)
 
+RESOURCES += \
+    ../audioPlayer.qrc
 
 DEPENDPATH += directoryFacade \
     factory \
@@ -142,7 +144,6 @@ QT += xml \
     gui
 
 QT += multimedia printsupport
-
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
