@@ -1,6 +1,5 @@
 /***************************************************************************
  *   Copyright (C) 2007 by Renaud Guezennec   *
- *   renaud.guezennec@gmail.com   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -24,7 +23,7 @@
 #include "pl_tableview.h"
 #include "playlist.h"
 #include "sortdialog.h"
-/**s
+/**
 	@author Renaud Guezennec <renaud.guezennec@gmail.com>
  * \class pl_sortcommand
  * \brief It belongs to the Command pattern. Sort a playlist part.
