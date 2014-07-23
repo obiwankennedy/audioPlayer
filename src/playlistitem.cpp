@@ -32,7 +32,7 @@ PlaylistItem::PlaylistItem()
   fields->Bitrate=-1;
   fields->Year=-1;
   urichanged = false;
-
+  qRegisterMetaTypeStreamOperators<PlaylistItem>("PlaylistItem");
 }
 
 PlaylistItem *PlaylistItem::Readingitem = NULL;
@@ -50,6 +50,7 @@ PlaylistItem::~PlaylistItem()
 PlaylistItem::PlaylistItem(const PlaylistItem& original)
 {
   this->facade = MediaFacade::getInstance();
+    this->myfile = NULL;
   
   this->fields = new SongFields;
   this->fields->Title = original.fields->Title;
@@ -60,8 +61,23 @@ PlaylistItem::PlaylistItem(const PlaylistItem& original)
   this->fields->Bitrate=original.fields-> Bitrate;
   this->fields->Comment =original.fields->Comment;
   this->fields->Year=original.fields->Year;
-  *this-> uri=*original.uri;
-  *this-> ext=*original.ext;
+
+    this->ext=new QString();
+    this->uri=new QString();
+
+  if(NULL!=original.uri)
+  {
+
+    *this-> uri=*original.uri;
+  }
+
+  if(NULL!=original.ext)
+  {
+
+    *this-> ext=*original.ext;
+  }
+
+  findmedia();
 
 }
 //MediaFacade *PlaylistItem::facade = NULL;

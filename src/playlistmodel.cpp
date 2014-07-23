@@ -93,6 +93,17 @@ QVariant PlayListModel::data ( const QModelIndex &parent, int role ) const
 
 
         }
+        else if ( role == Qt::BackgroundColorRole)
+        {
+            if(fileAvailable(parent.row()))
+            {
+                return QVariant();
+            }
+            else
+            {
+                return QColor(Qt::red);
+            }
+        }
         return QVariant();
 }
 QVariant PlayListModel::getValue ( int x,int y ) const
@@ -110,6 +121,24 @@ QVariant PlayListModel::getValue ( int x,int y ) const
     return QVariant();
 
 }
+bool PlayListModel::fileAvailable(int x)  const
+{
+    if ( ( x>-1 ) && ( x<myPlaylist->size() ) )
+    {
+        PlaylistItem* p = myPlaylist->value(x);
+        QFileInfo file(p->getURI());
+
+        if(file.isReadable() && file.isFile() && file.exists())
+        {
+            return true;
+        }
+        else
+            return false;
+
+
+    }
+}
+
 void PlayListModel::updateModel()
 {
       //  reset();

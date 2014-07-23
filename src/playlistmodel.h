@@ -72,6 +72,7 @@ public:
     void addColunm(headerlistview* x);
     void removeColunm(headerlistview* x);
     QList<PlaylistItem*> getmyPlaylist() const;
+    bool fileAvailable(int x)  const;
 
 };
 

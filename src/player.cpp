@@ -308,7 +308,7 @@ void Player::setupActions()
 QMediaContent* Player::playSong(PlaylistItem* p)
 {
     //QFile* file = new QFile(p->getURI());
-    //qDebug() << p->getURI();
+    qDebug() << p->getURI();
     if(QFile::exists(p->getURI()))
     {
         return new QMediaContent(QUrl::fromLocalFile(p->getURI()));
@@ -569,6 +569,7 @@ int Player::playListItem2Index(PlaylistItem* current)
 {
     return myPlaylist->item2index(current);
 }
+
 void Player::stopAndClear()
 {
     m_mediaPlayer->stop();
@@ -612,6 +613,13 @@ void Player::readSettings(QSettings& settings)
     m_repeatState = settings.value("repeat",m_repeatState).toBool();
 #endif
 
+    m_current = new PlaylistItem();
+    *m_current = settings.value("currentSong").value<PlaylistItem>();
+
+
+
+
+
     m_mediaPlayer->setVolume(settings.value("volume",m_mediaPlayer->volume()).toInt());
     m_volumeSlider->setValue(m_mediaPlayer->volume());
 
@@ -627,6 +635,9 @@ void Player::writeSettings(QSettings& settings)
         settings.setValue(QString(i), m_positions[m_positions.size()-(1+i)]);
 
     }
+    QVariant var;
+    var.setValue(*m_current);
+    settings.setValue("currentSong",var);
 #ifdef REPEAT
     settings.setValue("repeat",m_repeatState);
 #endif
@@ -637,3 +648,18 @@ void Player::setTime(int time)
 {
     m_mediaPlayer->setPosition(time);
 }
+void Player::showEvent(QShowEvent* event)
+{
+    /*if(NULL!=m_current)
+        playSong(m_current);*/
+
+    QWidget::showEvent(event);
+}
+
+//void Player::setVisible(bool visible)
+//{
+//    if(NULL!=m_current)
+//     playSong(m_current);
+
+//    QWidget::setVisible(visible);
+//}

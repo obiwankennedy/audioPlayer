@@ -612,6 +612,7 @@ void PlayListGenerator::readSettings()
     m_searchList = settings.value("recentSearch",m_searchList).toStringList();
 
     recentfiles = settings.value("recentFiles").toStringList();
+    QString currentSong = settings.value("currentSong").toString();
     mytabs->readSettings(settings);
     mypreferences->readSettings(settings);
     pluginmanager->readSettings(settings);
@@ -639,6 +640,7 @@ void PlayListGenerator::writeSettings()
 
 
     settings.setValue("dockplayerstatut", playerdock->isVisible());
+    //settings.setValue("currentSong", myplayer->pl->isVisible());
 
     mytabs->writeSettings(settings);
     mypreferences->writeSettings(settings);
@@ -1103,6 +1105,8 @@ void PlayListGenerator::addDockplayer(const QModelIndex & index)
  	if(!mypreferences->getShowPlayerOnStartReading())
 		showDockplayer();
 		
+
+
 		myplayer->setFile(index);
       	
 }

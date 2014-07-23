@@ -89,5 +89,5 @@ public:
 };
 
  Q_DECLARE_METATYPE(PlaylistItem)
-// qRegisterMetaTypeStreamOperators<PlaylistItem>("PlaylistItem");
+
 #endif

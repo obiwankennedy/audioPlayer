@@ -55,6 +55,7 @@ public:
     void readSettings(QSettings& settings);
     void writeSettings(QSettings& settings);
     void stopAndClear();
+
 	
 signals: 
 	void SetId(int i);
@@ -94,6 +95,9 @@ private slots:
      #ifdef REPEAT
      void setRepeat();
 #endif
+
+protected:
+     void showEvent(QShowEvent* event);
 
 private:
      int playListItem2Index(PlaylistItem* m_current);
