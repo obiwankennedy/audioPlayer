@@ -24,6 +24,7 @@
 #include <id3/readers.h>
 #include <QTextCodec>
 #include <QTextStream>
+#include <QDebug>
 
 PL_TaggerID3::PL_TaggerID3()
 {
@@ -40,10 +41,6 @@ PL_TaggerID3::PL_TaggerID3(QString* _filename)
   myTaggger = new ID3_Tag;
   myTaggger->Link(filename->toStdString().c_str());
 
-  
-  
-
-  
 
   m_mp3header=NULL;
 
@@ -55,7 +52,7 @@ PL_TaggerID3::~PL_TaggerID3()
   delete myTaggger;
 }
 
-QString* PL_TaggerID3::getValue(int i)
+QVariant PL_TaggerID3::getValue(int i)
 {
   
   ID3_FrameID id =getIDFrame(i);
@@ -66,15 +63,12 @@ QString* PL_TaggerID3::getValue(int i)
 
   if(myFrame!=0) 
   {
-    
-    
-    
     char* tmp= new char[ SIZE_DATA ];
     myFrame->Field(ID3FN_TEXT).Get(tmp,SIZE_DATA);
-    return new QString(tmp);
+    return QString(tmp);
   }
   
-  return new QString("");
+  return QString();
 }
 void PL_TaggerID3::setValue(dataColumn x,QVariant& data,bool replace)
 {

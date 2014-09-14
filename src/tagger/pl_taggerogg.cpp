@@ -4,16 +4,19 @@
 #include <taglib/tpropertymap.h>
 #include <taglib/tstring.h>
 #include <taglib/xiphcomment.h>
+#include <taglib/mp4tag.h>
 #include <taglib/id3v2frame.h>
 #include <taglib/id3v2tag.h>
+#include <taglib/id3v1tag.h>
 #include <taglib/tlist.h>
-
+#include <taglib/attachedpictureframe.h>
 #include <QDebug>
+#include <QFileInfo>
 //
 PL_TaggerOgg::PL_TaggerOgg(  ) 
-	: PL_TagLibFile()
+    : PL_TagLibFile()
 {
-	// TODO
+    // TODO
 }
 //
 
@@ -21,134 +24,175 @@ PL_TaggerOgg::PL_TaggerOgg(QString* _filename)
 {
 
 
-  filename=_filename;
+    filename=_filename;
 
-  //myTaggger = new TagLib::FileRef(filename->toStdString().c_str());
-  myTaggger = new TagLib::FileRef(filename->toLocal8Bit());
+    //myTaggger = new TagLib::FileRef(filename->toStdString().c_str());
+    myTaggger = new TagLib::FileRef(filename->toLocal8Bit());
+    QFileInfo info(*filename);
+    if(info.suffix()=="mp3")
+    {
+        myTagggerFileMPG = new TagLib::MPEG::File(filename->toLocal8Bit());
+    }
 
-  TagLib::PropertyMap map = myTaggger->tag()->properties();
-  TagLib::ID3v2::Tag* tag=dynamic_cast<TagLib::ID3v2::Tag*>(myTaggger->tag());
 
-  if(tag!=NULL)
-  {
-      for(std::list<TagLib::ID3v2::Frame*>::const_iterator iter = tag->frameList().begin(); iter !=  tag->frameList().end();++iter)
-      {
-          //qDebug()<<  TStringToQString((*iter)->toString());
-      }
-  }
+    TagLib::ID3v2::Tag* tag=dynamic_cast<TagLib::ID3v2::Tag*>(myTaggger->tag());
 
-  for(TagLib::SimplePropertyMap::Iterator iter = map.begin(); iter !=  map.end();++iter)
-  {
-      //qDebug()<<  TStringToQString((*iter).first) << " - \"" << TStringToQString((*iter).second.toString());
-  }
+    if(tag!=NULL)
+    {
+        TagLib::PropertyMap map = myTaggger->tag()->properties();
+    }
+
 
 
 }
 
 PL_TaggerOgg::~PL_TaggerOgg()
 {
-  delete myTaggger;
+    delete myTaggger;
 }
 
-QString* PL_TaggerOgg::getValue(int i)
+QVariant PL_TaggerOgg::getValue(int i)
 {
 
-if(NULL == myTaggger->tag())
-{
-            return new QString();
-}
+    if(NULL == myTaggger->tag())
+    {
+        return QString();
+    }
 
 
 
-switch(i)
-  {
+    switch(i)
+    {
     case TITLE:
     {
-             return new QString(TStringToQString(myTaggger->tag()->title()));
+        return QString(TStringToQString(myTaggger->tag()->title()));
     }
     case ARTIST:
     {
 
-         return  new QString(TStringToQString(myTaggger->tag()->artist ()));
+        return  QString(TStringToQString(myTaggger->tag()->artist ()));
 
     }
-    case YEAR: 
+    case YEAR:
+    {
+        return myTaggger->tag()->year();
+    }
+    case ALBUM:
     {
 
-    	QString* tmp = new QString;
-    	 tmp->setNum(myTaggger->tag()->year());
-    	 return tmp;
-   	}
-    case ALBUM:
-        {
-
-            return  new QString(TStringToQString(myTaggger->tag()->album()));
-        }
+        return  QString(TStringToQString(myTaggger->tag()->album()));
+    }
     case TIME:
     {
+        return myTaggger->audioProperties()->length()*1000;
 
-    	QString* tmp = new QString;
-       tmp->setNum(myTaggger->audioProperties()->length()*1000);
-       return tmp;
-   	}
+    }
     case GENRE:
-      return  new QString(TStringToQString(myTaggger->tag()->genre())); 
-    case COMMENT:          
-      return  new QString(TStringToQString(myTaggger->tag()->comment()));
+        return   QString(TStringToQString(myTaggger->tag()->genre()));
+    case COMMENT:
+        return  QString(TStringToQString(myTaggger->tag()->comment()));
     case TRACK:
-      {
+    {
+        return myTaggger->tag()->track();
 
-          QString* tmp = new QString;
-         tmp->setNum(myTaggger->tag()->track());
-         return tmp;
-      }
+    }
 
     case BITRATE:
-    	return new QString(myTaggger->audioProperties()->bitrate());
+        return QString(myTaggger->audioProperties()->bitrate());
+    case PICTURE:
+    {
+        qDebug() << "try to read picture";
+        QImage image;
+        if(NULL!=myTagggerFileMPG)
+        {
+
+            TagLib::ID3v2::Tag* tag=dynamic_cast<TagLib::ID3v2::Tag*>(myTagggerFileMPG->ID3v2Tag());
+
+          //  TagLib::ID3v1::Tag* tagv1=dynamic_cast<TagLib::ID3v1::Tag*>(myTaggger->tag());
+
+
+          //  TagLib::MP4::Tag* tagMP4=dynamic_cast<TagLib::MP4::Tag*>(myTaggger->tag());
+
+          //  TagLib::Ogg::XiphComment* tagOgg=dynamic_cast<TagLib::Ogg::XiphComment*>(myTaggger->tag());
+//            if(tagMP4!=NULL)
+//            {
+//                qDebug() << "file MP4";
+//            }
+//            if(tagOgg!=NULL)
+//            {
+//                qDebug() << "file tagOgg";
+//            }
+//            if(tagv1!=NULL)
+//            {
+//                qDebug() << "file ID3v1";
+//            }
+
+            if(NULL!=tag)
+            {
+                TagLib::ID3v2::FrameList frames = tag->frameList("APIC");
+
+
+
+                if(frames.isEmpty())
+                {
+                    qDebug() << "No pictuer to read";
+                    return image;
+                }
+                TagLib::ID3v2::AttachedPictureFrame *picFrame =
+                        static_cast<TagLib::ID3v2::AttachedPictureFrame *>(frames.front());
+
+                image.loadFromData((const uchar *) picFrame->picture().data(), picFrame->picture().size());
+
+                qDebug() << "Picture has been found.";
+
+            }
+        }
+        return image;
+    }
     default:
-      return new QString("");
-  }
-  
-  return new QString("");
+        return QString("");
+    }
+
+    return QString("");
 }
 void PL_TaggerOgg::setValue(dataColumn x,QVariant& data,bool /*replace*/)
 {
-if(NULL == myTaggger->tag())
-            return ;
-  switch(x)
-  {
+    if(NULL == myTaggger->tag())
+        return ;
+    switch(x)
+    {
     case TITLE:
-      myTaggger->tag()->setTitle(TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
-      break;
+        myTaggger->tag()->setTitle(TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
+        break;
     case ARTIST:
 
-      myTaggger->tag()->setArtist(TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
-      break;
+        myTaggger->tag()->setArtist(TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
+        break;
     case YEAR:
-      myTaggger->tag()->setYear(data.toString().toInt());
-      break;
+        myTaggger->tag()->setYear(data.toString().toInt());
+        break;
     case ALBUM:
-      {
-     //   TagLib::Ogg::XiphComment* ab = (TagLib::Ogg::XiphComment*)myTaggger->tag();
-       // ab->addField("TITLE",TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
-      myTaggger->tag()->setAlbum(TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
+    {
+        //   TagLib::Ogg::XiphComment* ab = (TagLib::Ogg::XiphComment*)myTaggger->tag();
+        // ab->addField("TITLE",TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
+        myTaggger->tag()->setAlbum(TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
 
-      break;
+        break;
     }
     case GENRE:
-      myTaggger->tag()->setGenre(TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
-      break;
+        myTaggger->tag()->setGenre(TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
+        break;
     case COMMENT:
-      myTaggger->tag()->setComment(TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
-      break;
-  case TRACK:
-      myTaggger->tag()->setTrack(data.toString().toInt());
+        myTaggger->tag()->setComment(TagLib::String(data.toString().toStdString(),TagLib::String::UTF8));
+        break;
+    case TRACK:
+        myTaggger->tag()->setTrack(data.toString().toInt());
     case TIME:
     case BITRATE:
-      return;
-  }
-  
-	myTaggger->save();
+        return;
+    }
+
+    myTaggger->save();
 
 
 }
@@ -162,11 +206,11 @@ QStringList *PL_TaggerOgg::listgenre = NULL;
 
 QStringList* PL_TaggerOgg::getgenres()
 {
-  return listgenre;
+    return listgenre;
 }
 
 
 /* const Mp3_Headerinfo* PL_TaggerOgg::GetMp3HeaderInfo()
 {
-  return myTaggger->GetMp3HeaderInfo();   
+  return myTaggger->GetMp3HeaderInfo();
 }*/

@@ -39,7 +39,7 @@ class PL_TagLibFile
   
 public:
    virtual ~PL_TagLibFile();
-   virtual QString* getValue(int i)=0;
+   virtual QVariant getValue(int i)=0;
    virtual void setValue(dataColumn x,QVariant& value,bool replace)=0;
 
 };

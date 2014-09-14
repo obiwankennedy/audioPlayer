@@ -30,7 +30,6 @@
 #include "pl_taglibfile.h"
 #define SIZE_DATA 1024
 /**
-	@author Renaud Guezennec <renaud.guezennec@gmail.com>
  * \class PL_TaggerID3
  * \brief Class used for adapt the PlayListGenerator with Id3lib (mp3 file support). Must inherit from it to allow the use of new library.
  * \version 1.0
@@ -59,7 +58,7 @@ class PL_TaggerID3 : public PL_TagLibFile
    void setValue(dataColumn x,QVariant& data,bool replace);
   // static void initGenreList();
    virtual ~PL_TaggerID3();
-   virtual QString* getValue(int i);
+   virtual QVariant getValue(int i);
    virtual QStringList* getgenres();
    bool readheader();
    const Mp3_Headerinfo* GetMp3HeaderInfo();
