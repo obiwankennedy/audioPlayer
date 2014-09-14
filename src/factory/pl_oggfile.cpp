@@ -30,12 +30,12 @@ int PL_OggFile::getDuration()
       
      
       
-    QString* a = oggtagger->getValue(TIME);
+    QVariant tmpDuration = oggtagger->getValue(TIME);
     
     
     bool ok;
-    out << *a << endl;
-    fields->duration=a->toInt(&ok,10);
+    out << tmpDuration.toInt() << endl;
+    fields->duration=tmpDuration.toInt();
     if(!ok)
     {
      
@@ -57,7 +57,7 @@ QString* PL_OggFile::getTitle()
     if(!linked)
       link();
   
-    fields->Title = *oggtagger->getValue(TITLE);
+    fields->Title = oggtagger->getValue(TITLE).toString();
   }
   
   if(fields->Title.isEmpty())
@@ -84,7 +84,7 @@ QString* PL_OggFile::getArtist()
   {
     if(!linked)
       link();
-    fields->Artist = *oggtagger->getValue(ARTIST);
+    fields->Artist = oggtagger->getValue(ARTIST).toString();
   }
   return &fields->Artist;
 }
@@ -97,17 +97,17 @@ int PL_OggFile::getGenre()
       if(!linked)
         link();
       
-    QString* a = oggtagger->getValue(GENRE);
+    QString genre = oggtagger->getValue(GENRE).toString();
     
     bool ok;
     
     QRegExp rxlen("(\\d+)");
-    int pos = rxlen.indexIn(*a);
+    int pos = rxlen.indexIn(genre);
     if (pos > -1) {
-      *a = rxlen.cap(1); 
+      genre = rxlen.cap(1);
       
     }
-    fields->genre=a->toInt(&ok,10);
+    fields->genre=genre.toInt(&ok,10);
     if(!ok)
     fields->genre=-1;
   }
@@ -121,7 +121,7 @@ QString* PL_OggFile::getAlbumtitle()
     if(!linked)
       link();
     
-    fields->album =*oggtagger->getValue(ALBUM);
+    fields->album =oggtagger->getValue(ALBUM).toString();
   }
   return &fields->album;
 }
@@ -132,7 +132,7 @@ QString* PL_OggFile::getComment()
     if(!linked)
       link();
     
-    fields->Comment =*oggtagger->getValue(COMMENT);
+    fields->Comment =oggtagger->getValue(COMMENT).toString();
   }
   return &fields->Comment;
   
@@ -145,11 +145,8 @@ int PL_OggFile::getYear()
     if(!linked)
       link();
       
-    QString* a = oggtagger->getValue(YEAR);
-    bool ok;
-    fields->Year=a->toInt(&ok,10);
-    if(!ok)
-      fields->Year=-1;
+     fields->Year = oggtagger->getValue(YEAR).toInt();
+
   }
   
   return fields->Year;
@@ -163,7 +160,7 @@ int PL_OggFile::getBitrate()
     if(!linked)
       link();
         
-    oggtagger->getValue(BITRATE);
+    fields->Bitrate = oggtagger->getValue(BITRATE).toInt();
     
   } 
   
@@ -257,11 +254,27 @@ void PL_OggFile::setValue(dataColumn x,QVariant& value,bool replace)
     break;
   case TIME:
   case BITRATE:
+  case PICTURE:
     break;
   }
   
  
 }
+QImage& PL_OggFile::getPicture()
+{
+
+    if((fields->Bitrate==-1)||(mode))
+    {
+      if(!linked)
+        link();
+
+      fields->m_image = oggtagger->getValue(PICTURE).value<QImage>();
+
+    }
+
+    return fields->m_image;
+}
+
 void PL_OggFile::readering(QDataStream & in)
 {
   

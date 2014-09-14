@@ -32,6 +32,7 @@ public:
     int getBitrate();
 	QStringList* getgenres();
     int getTrack();
+    virtual QImage& getPicture();
 
 
 

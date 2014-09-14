@@ -57,13 +57,10 @@ int PL_Mp3File::getDuration()
       
      
       
-    QString* a = Mp3tagger->getValue(TIME);
+    fields->duration = Mp3tagger->getValue(TIME).toInt();
     
     
-    bool ok;
-    
-    fields->duration=a->toInt(&ok,10);
-    if(!ok)
+   /* if(!ok)
     {
       fields->duration=-1;
       if(header == NULL)
@@ -71,7 +68,7 @@ int PL_Mp3File::getDuration()
       
       if(header!= NULL) 
       fields->duration=(header->time*1000);
-    }
+    }*/
     
     
   }
@@ -84,7 +81,7 @@ QString* PL_Mp3File::getTitle()
     if(!linked)
       link();
   
-    fields->Title = *Mp3tagger->getValue(TITLE);
+    fields->Title = Mp3tagger->getValue(TITLE).toString();
   }
   
   if(fields->Title.isEmpty())
@@ -111,7 +108,7 @@ QString* PL_Mp3File::getArtist()
   {
     if(!linked)
       link();
-    fields->Artist = *Mp3tagger->getValue(ARTIST);
+    fields->Artist = Mp3tagger->getValue(ARTIST).toString();
   }
   return &fields->Artist;
 }
@@ -124,17 +121,17 @@ int PL_Mp3File::getGenre()
       if(!linked)
         link();
       
-    QString* a = Mp3tagger->getValue(GENRE);
+    QString a = Mp3tagger->getValue(GENRE).toString();
     
     bool ok;
     
     QRegExp rxlen("(\\d+)");
-    int pos = rxlen.indexIn(*a);
+    int pos = rxlen.indexIn(a);
     if (pos > -1) {
-      *a = rxlen.cap(1); 
+      a = rxlen.cap(1);
       
     }
-    fields->genre=a->toInt(&ok,10);
+    fields->genre=a.toInt(&ok,10);
     if(!ok)
     fields->genre=-1;
   }
@@ -148,7 +145,7 @@ QString* PL_Mp3File::getAlbumtitle()
     if(!linked)
       link();
     
-    fields->album =*Mp3tagger->getValue(ALBUM);
+    fields->album =Mp3tagger->getValue(ALBUM).toString();
   }
   return &fields->album;
 }
@@ -159,7 +156,7 @@ QString* PL_Mp3File::getComment()
     if(!linked)
       link();
     
-    fields->Comment =*Mp3tagger->getValue(COMMENT);
+    fields->Comment = Mp3tagger->getValue(COMMENT).toString();
   }
   return &fields->Comment;
   
@@ -172,11 +169,8 @@ int PL_Mp3File::getYear()
     if(!linked)
       link();
       
-    QString* a = Mp3tagger->getValue(YEAR);
-    bool ok;
-    fields->Year=a->toInt(&ok,10);
-    if(!ok)
-      fields->Year=-1;
+   fields->Year = Mp3tagger->getValue(YEAR).toInt();
+
   }
   
   return fields->Year;
@@ -210,11 +204,8 @@ int PL_Mp3File::getTrack()
       if(!linked)
         link();
 
-      QString* a = Mp3tagger->getValue(TRACK);
-      bool ok;
-      fields->Year=a->toInt(&ok,10);
-      if(!ok)
-        fields->Year=-1;
+      fields->track = Mp3tagger->getValue(TRACK).toInt();
+
     }
     return fields->track;
 }
@@ -271,6 +262,19 @@ void PL_Mp3File::link()
   Mp3tagger = new PL_TaggerID3(uri);
   linked=true;
 }
+QImage& PL_Mp3File::getPicture()
+{
+    if((fields->m_image.isNull())||(mode))
+    {
+
+      if(!linked)
+        link();
+
+     fields->m_image = Mp3tagger->getValue(PICTURE).value<QImage>();
+
+    }
+    return fields->m_image;
+}
 
 void PL_Mp3File::setValue(dataColumn x,QVariant& value,bool replace)
 {
@@ -303,6 +307,7 @@ void PL_Mp3File::setValue(dataColumn x,QVariant& value,bool replace)
     break;
   case TIME:
   case BITRATE:
+  case PICTURE:
     break;
   }
   

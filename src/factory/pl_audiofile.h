@@ -39,6 +39,17 @@ public:
 
     ~PL_AudioFile();
 
+  virtual int getDuration() =0;
+  virtual QString* getTitle() =0;
+  virtual QString* getArtist() =0;
+  virtual int getGenre() =0;
+  virtual QString* getAlbumtitle() =0;
+  virtual QString* getComment() =0;
+  virtual int getYear() =0;
+  virtual int getBitrate() =0;
+  virtual int getTrack() =0;
+  virtual QImage& getPicture() =0;
+
 };
 
 #endif

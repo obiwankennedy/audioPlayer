@@ -61,6 +61,7 @@ public:
     int getYear();   
     int getBitrate();
     int getTrack();
+    QImage& getPicture();
 
     void setTitle(QString p);
     void setArtist(QString p);
