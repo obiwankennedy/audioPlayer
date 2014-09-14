@@ -65,6 +65,8 @@ QVariant Mp3Decorator::getMember(dataColumn x) const
       return tmp->getBitrate();
     case TRACK:
      return tmp->getTrack();
+    case PICTURE:
+      return tmp->getPicture();
         
   }
   return QVariant();  

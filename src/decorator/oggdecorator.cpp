@@ -1,4 +1,5 @@
 #include "oggdecorator.h"
+#include <QDebug>
 //
 OggDecorator::OggDecorator(  ) 
 	: ItemDecorator()
@@ -8,6 +9,7 @@ OggDecorator::OggDecorator(  )
 //
 QVariant OggDecorator::getMember(dataColumn x) const
 {
+    qDebug() << "get member ogg";
   PL_OggFile* tmp =(PL_OggFile*) item->getMediaFile();
   
   if(item==NULL)
@@ -29,6 +31,8 @@ QVariant OggDecorator::getMember(dataColumn x) const
       return tmp->getGenre();
     case TRACK:
       return tmp->getTrack();
+  case PICTURE:
+      return tmp->getPicture();
     case COMMENT:
     case YEAR:
     case BITRATE:
