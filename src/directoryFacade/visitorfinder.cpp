@@ -18,6 +18,7 @@
  ***************************************************************************/
 #include "../directoryFacade/visitorfinder.h"
 #include <QDebug>
+
 VisitorFinder::VisitorFinder()
  : VisitorNode()
 {
