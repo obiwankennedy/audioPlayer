@@ -2,19 +2,19 @@ TEMPLATE = lib \
     plugin
 CONFIG += plugin debug
 QT += network dbus
-QT += multimedia printsupport
+QT +=  printsupport
 
-
+#multimedia
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 include(../../src/plugins/plugins.pri)
 
-INCLUDEPATH += /usr/include/gstreamer-0.10/ \
-    /usr/include/glib-2.0 \
-    /usr/include/glib-2.0 \
-    /usr/include/libxml2/ \
-    /usr/lib/glib-2.0/include/
-LIBS += -lgstreamer-0.10 -lglib-2.0
+#INCLUDEPATH += /usr/include/gstreamer-0.10/ \
+#    /usr/include/glib-2.0 \
+ #   /usr/include/glib-2.0 \
+ #   /usr/include/libxml2/ \
+ #   /usr/lib/glib-2.0/include/
+#LIBS += -lgstreamer-0.10 -lglib-2.0
 INCLUDEPATH += ../../src \
     ../../src/decorator \
     ../../src/tagger \

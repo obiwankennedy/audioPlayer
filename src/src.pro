@@ -143,8 +143,8 @@ QT += xml \
     svg \
     gui
 
-QT += multimedia printsupport
-
+QT +=  multimedia printsupport
+#multimedia
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 #lessThan(QT_MAJOR_VERSION, 5): QT += phonon

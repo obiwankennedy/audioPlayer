@@ -3,8 +3,8 @@ TEMPLATE = lib \
 CONFIG += plugin debug
 QT += dbus
 
-QT += multimedia printsupport
-
+QT +=  printsupport
+#multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
