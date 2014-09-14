@@ -3,9 +3,9 @@ TEMPLATE = lib \
 CONFIG += plugin
 QT += xml \
     network
-QT += multimedia printsupport
+QT +=  printsupport
 
-
+#multimedia
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 include(../../src/plugins/plugins.pri)
