@@ -61,6 +61,7 @@ PlaylistItem::PlaylistItem(const PlaylistItem& original)
   this->fields->Bitrate=original.fields-> Bitrate;
   this->fields->Comment =original.fields->Comment;
   this->fields->Year=original.fields->Year;
+  this->fields->m_image=original.fields->m_image;
 
     this->ext=new QString();
     this->uri=new QString();
@@ -98,6 +99,13 @@ const QString PlaylistItem::getURI() const
 
   return *uri;
 }
+QImage& PlaylistItem::getPicture()
+{
+    fields->m_image = getKey()->getMember(PICTURE).value<QImage>();
+
+    return fields->m_image;
+}
+
 void PlaylistItem::setURI(QString & p) 
 {
     if(uri==NULL)

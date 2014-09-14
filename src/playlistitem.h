@@ -80,6 +80,7 @@ public:
      void ForceTagReading();
      QString getReadableTitle();
      QString toString();
+     QImage& getPicture();
      //qRegisterMetaTypeStreamOperators<PlaylistItem>("PlaylistItem");
      
      friend QTextStream& operator<<(QTextStream& os,const PlaylistItem&);

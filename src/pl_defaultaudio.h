@@ -53,6 +53,7 @@ public:
     QString* getComment();    
     int getYear();   
     int getTrack();
+    virtual QImage& getPicture();
     
     void setTitle(QString p);
     void setArtist(QString p);

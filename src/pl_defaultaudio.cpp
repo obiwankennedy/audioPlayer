@@ -139,6 +139,12 @@ QString* PL_DefaultAudio::getComment()
   return &fields->Comment;
 
 }
+
+QImage& PL_DefaultAudio::getPicture()
+{
+    return fields->m_image;
+}
+
 int PL_DefaultAudio::getBitrate()
 {
  return -1;         
