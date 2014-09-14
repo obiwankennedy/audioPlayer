@@ -52,15 +52,16 @@ struct SongFields
   int Bitrate;
   QString lyrics;
   int track;
+  QImage m_image;
 };
 
-enum dataColumn{TITLE,ARTIST,TIME,YEAR,ALBUM,TRACK,GENRE,COMMENT,BITRATE};
+enum dataColumn{TITLE,ARTIST,TIME,YEAR,ALBUM,TRACK,GENRE,COMMENT,BITRATE,PICTURE};
 
  Q_DECLARE_METATYPE(dataColumn)
  static QStringList SLlistcolumn = (QStringList() << QObject::tr("TITLE") 
      <<QObject::tr("ARTIST")  << QObject::tr("TIME") <<QObject::tr("YEAR") 
      << QObject::tr("ALBUM") << QObject::tr("TRACK")<< QObject::tr("GENRE") <<QObject::tr("COMMENT")
-     <<QObject::tr("BITRATE"));
+     <<QObject::tr("BITRATE")<<QObject::tr("PICTURE"));
  
  static QString FileSupported = (QString(QObject::tr("MP3 media files (*.mp3)\nother media files (*.*)")));
  
