@@ -55,9 +55,9 @@ MediaFacade* MediaFacade::getInstance()
 void MediaFacade::verify()
 {
   if(mp3factory==NULL)
-  mp3factory = FactoryMP3::getInstance();
+     mp3factory = FactoryMP3::getInstance();
   if(otherfactory==NULL)
-  otherfactory= factoryOTHER::getInstance();
+    otherfactory= factoryOTHER::getInstance();
   if(oggfactory==NULL)
   	oggfactory=FactoryOgg::getInstance();
 }
@@ -69,8 +69,10 @@ PL_MediaFile* MediaFacade::buildaMedia(QString& txt,ItemDecorator*& key,SongFiel
  // static int i = 0;
   if(txt.endsWith(".mp3",Qt::CaseInsensitive))
   {
-    tmp=mp3factory->buildMedia(txt,fields);
-    key = new Mp3Decorator;
+//    tmp=mp3factory->buildMedia(txt,fields);
+//    key = new Mp3Decorator;
+    tmp=oggfactory->buildMedia(txt,fields);
+    key = new OggDecorator;
   }
   else if((txt.endsWith(".ogg",Qt::CaseInsensitive))||((txt.endsWith(".m4a",Qt::CaseInsensitive))) ||((txt.endsWith(".mpc",Qt::CaseInsensitive)))||((txt.endsWith(".oga",Qt::CaseInsensitive)))||((txt.endsWith(".flac",Qt::CaseInsensitive))))
   {
