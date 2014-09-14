@@ -56,6 +56,16 @@ void Player::setupUi()
 
     m_seekSlider = new QSlider(this);
 
+    m_pictureLabel = new QLabel();
+    m_pictureLabel->setMaximumHeight(150);
+    m_pictureLabel->setMaximumWidth(150);
+    m_pictureLabel->setScaledContents(true);
+    QHBoxLayout* m_horizonLayout = new QHBoxLayout();
+
+
+    m_horizonLayout->addWidget(m_pictureLabel);
+
+
     m_seekSlider->setOrientation(Qt::Horizontal);
     connect(this,SIGNAL(positionTime(int)),m_seekSlider,SLOT(setValue(int)));
     connect(m_mediaPlayer,SIGNAL(positionChanged(qint64)),this,SLOT(tick(qint64)));
@@ -112,8 +122,8 @@ void Player::setupUi()
     mainLayout->addLayout(playbackLayout);
 
 
-
-    setLayout(mainLayout);
+    m_horizonLayout->addLayout(mainLayout);
+    setLayout(m_horizonLayout);
 
 
     
@@ -193,11 +203,23 @@ void Player::setRepeat()
 #endif
 void Player::sourceChanged(const QMediaContent & media)
 {
-
+qDebug() << "source changed 1";
     if(m_current!=NULL)
     {
+        qDebug() << "source changed";
         setTitle(m_current->getReadableTitle());
         m_current->setReading(true);
+        QPixmap* img = new QPixmap();
+        img->convertFromImage(m_current->getPicture());
+        m_pictureLabel->setPixmap(*img);
+        if(m_current->getPicture().isNull())
+        {
+            m_pictureLabel->setVisible(false);
+        }
+        else
+        {
+            m_pictureLabel->setVisible(true);
+        }
         emit playingSongChanged(m_current->getFields2());
         if(last!=NULL)
         {

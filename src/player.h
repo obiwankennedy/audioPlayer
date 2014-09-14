@@ -27,13 +27,7 @@
 
 #include <QtWidgets>
 
-//#include <phonon>
-/*#include <Phonon/phononnamespace.h>
-#include <Phonon/audiooutput.h>
-#include <Phonon/seekslider.h>
-#include <Phonon/mediaobject.h>
-#include <Phonon/volumeslider.h>
-#include <Phonon/backendcapabilities.h>*/
+
 
 #include "playlist.h"
 #include "preference_data.h"
@@ -121,6 +115,7 @@ private:
      QAction *previousAction;
      //Phonon::Path* path;
      QPushButton *randomly;
+     QLabel* m_pictureLabel;
      #ifdef REPEAT
      QCheckBox* m_repeatCheck;
     #endif
