@@ -14,7 +14,7 @@
 #include <QFileInfo>
 //
 PL_TaggerOgg::PL_TaggerOgg(  ) 
-    : PL_TagLibFile()
+    : PL_TagLibFile(),myTagggerFileMPG(NULL)
 {
     // TODO
 }
@@ -35,12 +35,7 @@ PL_TaggerOgg::PL_TaggerOgg(QString* _filename)
     }
 
 
-    TagLib::ID3v2::Tag* tag=dynamic_cast<TagLib::ID3v2::Tag*>(myTaggger->tag());
 
-    if(tag!=NULL)
-    {
-        TagLib::PropertyMap map = myTaggger->tag()->properties();
-    }
 
 
 
