@@ -89,9 +89,9 @@ void PL_TreeModel::fetchMore ( const QModelIndex & parent )
  Qt::ItemFlags PL_TreeModel::flags(const QModelIndex &index) const
  {
      if (!index.isValid())
-         return Qt::ItemIsEnabled;
+         return Qt::NoItemFlags;
 
-     return Qt::ItemIsEnabled | Qt::ItemIsEditable;
+     return Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemIsSelectable;
  }
 
  QVariant PL_TreeModel::headerData(int section, Qt::Orientation orientation,
