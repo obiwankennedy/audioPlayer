@@ -28,7 +28,7 @@
 #include "data.h"
 
 /**
-	@author Renaud Guezennec <renaud.guezennec@gmail.com>
+    @author Renaud Guezennec
  * \class PlayListModel
  * \brief Re-implemented model for a QTableView. 
  * \version 1.0
