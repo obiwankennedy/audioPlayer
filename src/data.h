@@ -55,20 +55,21 @@ struct SongFields
   QImage m_image;
 };
 
-enum dataColumn{TITLE,ARTIST,TIME,YEAR,ALBUM,TRACK,GENRE,COMMENT,BITRATE,PICTURE};
+enum DataField{TITLE,ARTIST,TIME,YEAR,ALBUM,TRACK,GENRE,COMMENT,BITRATE,PICTURE};
 
- Q_DECLARE_METATYPE(dataColumn)
+ Q_DECLARE_METATYPE(DataField)
  static QStringList SLlistcolumn = (QStringList() << QObject::tr("TITLE") 
      <<QObject::tr("ARTIST")  << QObject::tr("TIME") <<QObject::tr("YEAR") 
      << QObject::tr("ALBUM") << QObject::tr("TRACK")<< QObject::tr("GENRE") <<QObject::tr("COMMENT")
      <<QObject::tr("BITRATE")<<QObject::tr("PICTURE"));
  
+
  static QString FileSupported = (QString(QObject::tr("MP3 media files (*.mp3)\nother media files (*.*)")));
  
  
 typedef struct 
 {
-  dataColumn x;
+  DataField x;
   QVariant name;
   QHeaderView::ResizeMode resize;
   bool visible;

@@ -74,7 +74,7 @@ void Playlist::addfile(QString& filename)
   p->setURI(filename);
   append(p);
 }
-void Playlist::sort(int start,QList<PlaylistItem*>* myselection,dataColumn _criteria,Qt::SortOrder order)
+void Playlist::sort(int start,QList<PlaylistItem*>* myselection,DataField _criteria,Qt::SortOrder order)
 {
   PL_ItemCompare compare;
   compare.x=_criteria;

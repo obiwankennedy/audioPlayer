@@ -36,7 +36,7 @@ class PL_ItemCompare
 public:
   bool operator()(const PlaylistItem* s1, const PlaylistItem* s2) const;
 
-  dataColumn x;
+  DataField x;
   bool* order;
 };
 

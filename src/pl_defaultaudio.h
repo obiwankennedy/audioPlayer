@@ -64,7 +64,7 @@ public:
     void setTrack(int p);
 
 
-    void setValue(dataColumn x,QVariant& value,bool replace);
+    void setValue(DataField x,QVariant& value,bool replace);
     void ForceTagReading();
     
     virtual void readering(QDataStream & in);

@@ -61,7 +61,7 @@ public:
 
     void removeAt(int a);
     void reset();
-    void sort(int start,QList<PlaylistItem*>* _myselection,dataColumn _criteria,Qt::SortOrder order);
+    void sort(int start,QList<PlaylistItem*>* _myselection,DataField _criteria,Qt::SortOrder order);
     void addfile(QString& filename);    
     qlonglong reckOnTime();
     PlaylistItem*& operator[](int column) const;

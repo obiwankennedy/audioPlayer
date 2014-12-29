@@ -170,7 +170,7 @@ void PL_DefaultAudio::setComment(QString /*p*/)
 {
   return;
 }
-void PL_DefaultAudio::setValue(dataColumn/* x*/,QVariant& /*value*/,bool /*replace*/)
+void PL_DefaultAudio::setValue(DataField/* x*/,QVariant& /*value*/,bool /*replace*/)
 {
   return;
 }
