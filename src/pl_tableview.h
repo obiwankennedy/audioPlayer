@@ -105,6 +105,9 @@ public slots:
     void paste();
     void onFileNameAsTitle();
     void onPluginListGroup(QAction * action);
+    void sendSelectedFileToDevice();
+    void setDeviceList(QMenu* menu);
+    void sendFile();
 
 signals:
     void actiondone(int a);
@@ -118,6 +121,8 @@ signals:
     void isCopiable(bool a);
     void isPastable(bool a);
     void dataModelChanged();
+    void sendFileToPhone(QString uri);
+
 private slots:
     void addColunm();
 
@@ -152,6 +157,7 @@ private:
     QAction *regexp;
     QAction *moveSelectionTo;
     QAction *filenameAsTitle;
+    QAction *m_sendFileToAndroid;
 
     QAction *viewbitrate;
     QAction *viewYear;
@@ -175,6 +181,8 @@ private:
     headerlistview* headertrack;
 
     SongPluginManager* pluginmanager;
+
+    QList<QAction*>* m_listDevice;
 };
 
 #endif

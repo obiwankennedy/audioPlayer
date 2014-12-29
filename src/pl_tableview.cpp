@@ -88,6 +88,12 @@ PL_TableView::PL_TableView(QWidget * p)
     filenameAsTitle->setStatusTip(tr("Useful for defining the title of many songs."));
     connect(filenameAsTitle, SIGNAL(triggered()), this, SLOT(onFileNameAsTitle()));
 
+
+    m_sendFileToAndroid = new QAction(tr("Send this file to your phone"), this);
+    m_sendFileToAndroid->setStatusTip(tr("Send this file to your phone."));
+    connect(m_sendFileToAndroid, SIGNAL(triggered()), this, SLOT(sendFile()));
+
+
     ForcetitleWriting= new QAction(tr("force the title tag writing"), this);
     ForcetitleWriting->setStatusTip(tr("Put the current title in the title tag"));
     connect(ForcetitleWriting, SIGNAL(triggered()), this, SLOT(OnForceWriting()));
@@ -330,6 +336,7 @@ void  PL_TableView::PopupMenurequested(const QPoint & pos)
     menu.addAction(regexp);
     menu.addAction(moveSelectionTo);
     menu.addAction(filenameAsTitle);
+    menu.addAction(m_sendFileToAndroid);
 
     QActionGroup *m_group=new QActionGroup(this);
     pluginmanager->setPopupMenu(&menu,m_group);
@@ -345,6 +352,7 @@ void  PL_TableView::PopupMenurequested(const QPoint & pos)
         regexp->setEnabled(false);
         moveSelectionTo->setEnabled(false);
         filenameAsTitle->setEnabled(false);
+        m_sendFileToAndroid->setEnabled(false);
     }
     else
     {
@@ -356,6 +364,7 @@ void  PL_TableView::PopupMenurequested(const QPoint & pos)
         regexp->setEnabled(true);
         moveSelectionTo->setEnabled(true);
         filenameAsTitle->setEnabled(true);
+        m_sendFileToAndroid->setEnabled(true);
     }
     menu.exec(QCursor::pos());
     delete m_group;
@@ -500,6 +509,15 @@ void  PL_TableView::onFileNameAsTitle()
     addinstack(new PL_FilenameAsTitle(*getSelectedItem()));
 
 }
+void PL_TableView::sendFile()
+{
+    QList<PlaylistItem*>* list = getSelectedItem();
+    foreach(PlaylistItem* item, *list)
+    {
+        emit sendFileToPhone(item->getURI());
+    }
+}
+
 void PL_TableView::addinstack(PL_COMMAND* plcmd)
 {
     if(plcmd->check())
@@ -532,7 +550,8 @@ void PL_TableView::OnRegex()
 {
 
 
-    RegexWizzard* regexWizzard= new RegexWizzard;
+    RegexWizzard* regexWizzard= new RegexWizzard(myselection);
+
     regexWizzard->show();
     //addinstack(new pl_regexcommand(*getSelectedItem(),start,TITLE,this));
 }
@@ -1033,7 +1052,6 @@ void PL_TableView::onPluginListGroup(QAction * action)
 }
 void PL_TableView::updateHeader()
 {
-
     foreach(headerlistview* p,*mapheader)
     {
         if(p->visible)
@@ -1044,4 +1062,13 @@ void PL_TableView::updateHeader()
         horizontalHeader()->setSectionResizeMode(p->x, p->resize );
     }
     SynchronizeActionAndColunm();
+}
+void PL_TableView::sendSelectedFileToDevice()
+{
+
+}
+void PL_TableView::setDeviceList(QMenu* menu)
+{
+
+
 }
