@@ -70,7 +70,7 @@ QVariant PL_TaggerID3::getValue(int i)
   
   return QString();
 }
-void PL_TaggerID3::setValue(dataColumn x,QVariant& data,bool replace)
+void PL_TaggerID3::setValue(DataField x,QVariant& data,bool replace)
 {
   
 

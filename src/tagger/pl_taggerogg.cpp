@@ -33,6 +33,10 @@ PL_TaggerOgg::PL_TaggerOgg(QString* _filename)
     {
         myTagggerFileMPG = new TagLib::MPEG::File(filename->toLocal8Bit());
     }
+    else
+    {
+        myTagggerFileMPG = NULL;
+    }
 
 
 
@@ -150,7 +154,7 @@ QVariant PL_TaggerOgg::getValue(int i)
 
     return QString("");
 }
-void PL_TaggerOgg::setValue(dataColumn x,QVariant& data,bool /*replace*/)
+void PL_TaggerOgg::setValue(DataField x,QVariant& data,bool /*replace*/)
 {
     if(NULL == myTaggger->tag())
         return ;

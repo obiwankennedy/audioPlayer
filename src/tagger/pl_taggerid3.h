@@ -55,7 +55,7 @@ class PL_TaggerID3 : public PL_TagLibFile
  public:
    PL_TaggerID3();
    PL_TaggerID3(QString* _filename);
-   void setValue(dataColumn x,QVariant& data,bool replace);
+   void setValue(DataField x,QVariant& data,bool replace);
   // static void initGenreList();
    virtual ~PL_TaggerID3();
    virtual QVariant getValue(int i);

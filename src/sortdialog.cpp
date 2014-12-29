@@ -31,7 +31,7 @@ SortDialog::~SortDialog()
 {
 }
 
-dataColumn SortDialog::getColunm()
+DataField SortDialog::getColunm()
 {
   switch(column->currentIndex())
   {

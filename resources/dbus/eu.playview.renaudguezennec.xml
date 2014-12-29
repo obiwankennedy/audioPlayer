@@ -1,0 +1,76 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="local.qdbuscpp2xml.PL_TableView">
+    <signal name="actiondone">
+      <arg name="a" type="i" direction="out"/>
+    </signal>
+    <signal name="dataChanged">
+    </signal>
+    <signal name="Maximum">
+      <arg name="M" type="i" direction="out"/>
+    </signal>
+    <signal name="Minimum">
+      <arg name="m" type="i" direction="out"/>
+    </signal>
+    <signal name="valueChanged">
+      <arg name="v" type="i" direction="out"/>
+    </signal>
+    <signal name="CommandStart">
+    </signal>
+    <signal name="done">
+    </signal>
+    <signal name="isCutable">
+      <arg name="a" type="b" direction="out"/>
+    </signal>
+    <signal name="isCopiable">
+      <arg name="a" type="b" direction="out"/>
+    </signal>
+    <signal name="isPastable">
+      <arg name="a" type="b" direction="out"/>
+    </signal>
+    <signal name="dataModelChanged">
+    </signal>
+    <signal name="sendFileToPhone">
+      <arg name="uri" type="s" direction="out"/>
+    </signal>
+    <method name="PopupMenurequested">
+      <arg name="pos" type="(ii)" direction="in"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QPoint"/>
+    </method>
+    <method name="onModify">
+    </method>
+    <method name="onRemove">
+    </method>
+    <method name="onForce">
+    </method>
+    <method name="OnSort">
+    </method>
+    <method name="cancel">
+    </method>
+    <method name="OnForceWriting">
+    </method>
+    <method name="OnUpdate">
+    </method>
+    <method name="onSelect">
+      <arg name="p" type="i" direction="in"/>
+    </method>
+    <method name="onremoveFile">
+    </method>
+    <method name="OnRegex">
+    </method>
+    <method name="onMoveSelection">
+    </method>
+    <method name="cut">
+    </method>
+    <method name="copy">
+    </method>
+    <method name="paste">
+    </method>
+    <method name="onFileNameAsTitle">
+    </method>
+    <method name="sendSelectedFileToDevice">
+    </method>
+    <method name="sendFile">
+    </method>
+  </interface>
+</node>

@@ -38,7 +38,7 @@ public:
   SortDialog(QWidget *parent = 0);
 
     ~SortDialog();
-    dataColumn  getColunm();
+    DataField  getColunm();
     Qt::SortOrder getOrder();
 };
 

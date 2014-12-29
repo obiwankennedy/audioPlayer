@@ -17,7 +17,7 @@ public:
 	PL_TaggerOgg(QString* _filename);
    virtual ~PL_TaggerOgg();
    virtual QVariant getValue(int i);
-   virtual void setValue(dataColumn x,QVariant& value,bool replace);
+   virtual void setValue(DataField x,QVariant& value,bool replace);
    QStringList* getgenres();
 };
 #endif

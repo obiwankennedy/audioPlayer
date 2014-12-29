@@ -7,7 +7,6 @@
 
 class PL_AbstractListViewer
 {
-
 public:
     virtual bool hasCopyPasteSupport() const  = 0 ;
     virtual bool isTabVisible() const = 0;
@@ -28,8 +27,6 @@ public:
     virtual ViewerBehaviour Behaviour(){return m_behaviour;}
  public slots:
     virtual void cancel() = 0;
-signals:
-
 
  protected:
     bool m_closed;
