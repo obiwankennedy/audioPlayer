@@ -25,11 +25,11 @@ class pl_regexcommand : public PL_COMMAND
 {
   QList<PlaylistItem*>  myselection;
   int start;
-  dataColumn criteria;
+  DataField criteria;
   PL_TableView* tableview;
   Playlist* myPlaylist;
 public:
-    pl_regexcommand(QList<PlaylistItem*> _myselection,int _start, dataColumn _criteria,PL_TableView* _tableview);
+    pl_regexcommand(QList<PlaylistItem*> _myselection,int _start, DataField _criteria,PL_TableView* _tableview);
     ~pl_regexcommand();
     virtual void doCommand();
     virtual void undo();

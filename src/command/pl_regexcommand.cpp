@@ -1,5 +1,5 @@
 #include "pl_regexcommand.h"
- pl_regexcommand::pl_regexcommand(QList<PlaylistItem*> _myselection,int _start, dataColumn _criteria,PL_TableView* _tableview)
+ pl_regexcommand::pl_regexcommand(QList<PlaylistItem*> _myselection,int _start, DataField _criteria,PL_TableView* _tableview)
 : PL_COMMAND(),myselection(_myselection),start(_start),criteria(_criteria),tableview(_tableview)
  {
 

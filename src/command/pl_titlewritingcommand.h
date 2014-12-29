@@ -31,12 +31,12 @@ class pl_titlewritingcommand : public PL_COMMAND
   
   QList<PlaylistItem*>  myselection;
   int start;
-  dataColumn criteria;
+  DataField criteria;
   PL_TableView* tableview;
   Playlist* myPlaylist;
   
 public:
-  pl_titlewritingcommand(QList<PlaylistItem*> _myselection,int _start, dataColumn _criteria,PL_TableView* _tableview);
+  pl_titlewritingcommand(QList<PlaylistItem*> _myselection,int _start, DataField _criteria,PL_TableView* _tableview);
 
     ~pl_titlewritingcommand();
     virtual void doCommand();

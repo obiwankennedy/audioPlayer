@@ -39,12 +39,12 @@ class pl_sortcommand : public PL_COMMAND
   
   QList<PlaylistItem*>  myselection;
   int start;
-  dataColumn criteria;
+  DataField criteria;
   PL_TableView* tableview;
   Playlist* myPlaylist;
 SortDialog* a;
 public:
-  pl_sortcommand(QList<PlaylistItem*> _myselection,int _start, dataColumn _criteria,PL_TableView* tableview);
+  pl_sortcommand(QList<PlaylistItem*> _myselection,int _start, DataField _criteria,PL_TableView* tableview);
 
     ~pl_sortcommand();
     
