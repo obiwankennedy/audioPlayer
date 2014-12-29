@@ -28,8 +28,11 @@
 class QString;
 class QAction;
 class PlaylistItem;
-//PlayListGenerator gives all informations about the reading song and the plugin do
-//what is supposed to do with it: find and display lyrics or the show the album picture.
+
+/**
+ * @brief The SongInterface class - PlayListGenerator gives all informations about the reading song and the plugin do
+ * what is supposed to do with it: find and display lyrics or the show the album picture.
+ */
 class SongInterface
 {
 

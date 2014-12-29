@@ -23,7 +23,7 @@
 
 #include <QtWidgets>
 
-
+#include "tableviewadaptor.h"
 
 PlayListViewer::PlayListViewer(QWidget *p)
  : QTabWidget(p),m_tabList(NULL)
@@ -48,6 +48,11 @@ PlayListViewer::PlayListViewer(QWidget *p)
 
 
         main = new PL_TableView(this);
+        new TableViewAdaptor(main);
+        QDBusConnection connection = QDBusConnection::sessionBus();
+        bool rel = connection.registerService("eu.playview.renaudguezennec");
+        rel = connection.registerObject("/",main);
+
         listview = new PL_ListView(this);
         mytreeview = new PL_treeview;
         mytreeview->setSizePolicy ( QSizePolicy::Expanding, QSizePolicy::Expanding );
