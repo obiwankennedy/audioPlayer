@@ -3,20 +3,33 @@
 
 #include "ui_regexwizzard.h"
 #include <QDialog>
-class RegexWizzard : public QDialog,private Ui_regexwizzard
+#include "playlistitem.h"
+
+namespace Ui {
+class regexwizzard;
+}
+
+/**
+ * @brief The RegexWizzard class
+ */
+class RegexWizzard : public QDialog
 {
     Q_OBJECT
 public:
-    RegexWizzard();
+    RegexWizzard(QList<PlaylistItem*>* m);
 
 
 private slots:
+    void updateInputList();
     void appendField();
     void updateRegexToEdit();
     void updateEditToRegex();
 
 private:
+    Ui::regexwizzard *m_ui;
     QString m_regex;
+
+    QList<PlaylistItem*>* m_selection;
 };
 
 #endif // REGEXWIZZARD_H

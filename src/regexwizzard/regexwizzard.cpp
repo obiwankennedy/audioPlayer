@@ -1,26 +1,28 @@
 #include "regexwizzard.h"
 
-RegexWizzard::RegexWizzard()
+RegexWizzard::RegexWizzard(QList<PlaylistItem*>* m)
+    : m_selection(m),m_ui(new Ui::regexwizzard)
 {
-    setupUi(this);
-    FieldsSelector->addItem(tr("Number"),"(\\d+)");
-    FieldsSelector->addItem(tr("Anything"),"(.*)");
+    m_ui->setupUi(this);
 
-    connect(addButton,SIGNAL(pressed()),this,SLOT(appendField()));
-    connect(regexEdit,SIGNAL(editingFinished()),this,SLOT(updateEditToRegex()));
+    connect(m_ui->m_regexpEdit,SIGNAL(editingFinished()),this,SLOT(updateEditToRegex()));
 }
 void RegexWizzard::appendField()
 {
-   m_regex += FieldsSelector->itemData(FieldsSelector->currentIndex()).toString();
-   updateRegexToEdit();
+
 }
 void RegexWizzard::updateRegexToEdit()
 {
-regexEdit->setText(m_regex);
+
 
 
 }
 void RegexWizzard::updateEditToRegex()
 {
-m_regex = regexEdit->text();
+
+}
+
+void RegexWizzard::updateInputList()
+{
+    m_ui->m_inputField->currentData();
 }
