@@ -29,6 +29,8 @@
 #include "factory/mediafacade.h"
 #include "data.h"
 #include "itemdecorator.h"
+
+#include "data/song.h"
 /**
 	@author Renaud Guezennec <renaud.guezennec@gmail.com>
  * \class PlaylistItem
@@ -45,15 +47,11 @@ class PlaylistItem
 {
 
 
-  QString* uri;
-  QString* ext;
-  PL_MediaFile* myfile;
-  MediaFacade* facade;
   ItemDecorator* key;
-  SongFields* fields;
+  //SongFields* fields;
   bool urichanged;
 
-  static PlaylistItem* Readingitem;
+  static PlaylistItem* ms_currentPlayedItem;
 
   void findmedia();
 
@@ -64,8 +62,11 @@ public:
     bool isReading() const;
     void setReading(bool t);
 
-    const SongFields* getFields();
-    SongFields* getFields2();
+   /* const SongFields* getFields();
+    SongFields* getFields2();*/
+
+    const Song* getConstSong();
+    Song* getSong();
 
 
      const QString getURI() const;
@@ -87,8 +88,15 @@ public:
      friend QTextStream& operator>>(QTextStream& is,PlaylistItem&);
      friend QDataStream& operator<<(QDataStream& os,const PlaylistItem&);
      friend QDataStream& operator>>(QDataStream& is,PlaylistItem&);
+
+private:
+     Song m_song;
+     PL_MediaFile* m_mediaFile;
+  /*   QString* m_uri;
+     QString* m_ext;*/
+     MediaFacade* facade;
 };
 
  Q_DECLARE_METATYPE(PlaylistItem)
-
+ Q_DECLARE_METATYPE(PlaylistItem*)
 #endif
