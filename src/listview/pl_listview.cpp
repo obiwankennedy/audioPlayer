@@ -1,5 +1,9 @@
 #include "pl_listview.h"
 #include <QMenu>
+#include <QMouseEvent>
+
+#include "pl_listmodel.h"
+
 PL_ListView::PL_ListView(QWidget* p)
         : QListView(p)
 {
@@ -52,12 +56,19 @@ QList<PlaylistItem*>* PL_ListView::getSelectedItem()
 }
 QList<int>* PL_ListView::getVisibleColumn()
 {
-return NULL;
-
-
+    return NULL;
 }
 void PL_ListView::cancel()
 {
 
 
+}
+void PL_ListView::mouseDoubleClickEvent(QMouseEvent* e)
+{
+    QModelIndex index = indexAt(e->pos());
+    if(index.isValid())
+    {
+       PlaylistItem* item =  index.data(PL_ListModel::DATA).value<PlaylistItem*>();
+       emit playSong(item);
+    }
 }
