@@ -1,95 +1,97 @@
-#include "servertext.h"
+#include "sendingserver.h"
+
 #include <QDebug>
+#include <QFile>
+#include <QFileInfo>
+#define PORT 40001
 
-#define PORT 40000
 
-
-ServerText::ServerText(QObject *parent) :
-    QObject(parent),m_blockSize(0)
+SendingServer::SendingServer(QObject *parent) :
+    QObject(parent),m_blockSize(0),m_client(NULL)
 {
-    m_adap = new DbusAdaptor("eu.renaudguezennec","/",QDBusConnection::sessionBus(),0);
     m_tcpServer = new QTcpServer(this);
     connect(m_tcpServer,SIGNAL(newConnection()),this,SLOT(sessionOpened()));
+    m_adaptor = new SendFileAdaptor("eu.playview.renaudguezennec","/",QDBusConnection::sessionBus(),0);
+
+    connect(m_adaptor,SIGNAL(sendFileToPhone(QString)),this,SLOT(sendFile(QString)));
 
 }
 
-void ServerText::startListing()
+void SendingServer::startListing()
 {
     if (!m_tcpServer->listen(QHostAddress::Any,PORT))
     {
         //qDebug() << "Error! no listen on the server";
+        /*
+         *
+         * Quiche en entrée salée
+         * purée de carottes au cumin
+         * et
+         * mange-tout ou celeri
+         * et
+         * champignon
+         *
+         *
+         *
+         * */
     }
 }
-void ServerText::sessionOpened()
+void SendingServer::sessionOpened()
 {
-  m_client = m_tcpServer->nextPendingConnection();
-  connect(m_client,SIGNAL(readyRead()),this,SLOT(readCommand()));
+    m_client = m_tcpServer->nextPendingConnection();
+    connect(m_client,SIGNAL(readyRead()),this,SLOT(readCommand()));
 }
 
-void ServerText::processCommand(QStringList list)
+void SendingServer::readCommand()
 {
-  //  qDebug() << "Process command" << list;
-    if(list.empty())
-    {
-        //displayHelp();
-        //exit(-1);
-    }
+    qDebug() << "connection received";
+}
+void SendingServer::sendFile(QString uri)
+{
+    if(NULL==m_client)
+        return;
+    QFile inputFile(uri);
+    QFileInfo info(uri);
 
-    if((list.at(0)=="-n")||(list.at(0)=="next"))
+    int sizeBuf = sizeof(quint32)+sizeof(QChar)*info.fileName().size();
+
+  char* fileNameData= new char[sizeBuf];
+  char* position=fileNameData;
+  *((quint32 *)position)=info.fileName().size();
+
+  position+= sizeof(quint32);
+
+  memcpy(position,info.fileName().toLatin1().data(),sizeof(QChar)*info.fileName().size());
+
+
+
+
+  m_client->write(fileNameData,sizeBuf);
+
+
+
+
+
+
+
+
+    QByteArray read;
+    if(m_client->isWritable())
     {
-        m_adap->nextSong();
-    }
-    else if((list.at(0)=="-p")||(list.at(0)=="previous"))
-    {
-        m_adap->previousSong();
-    }
-    else if((list.at(0)=="-i")||(list.at(0)=="increase"))
-    {
-        m_adap->increaseSong();
-    }
-    else if((list.at(0)=="-d")||(list.at(0)=="decrease"))
-    {
-        m_adap->decreaseSong();
-    }
-    else if((list.at(0)=="-v"))
-    {
-        if(list.size()>=2)
+
+        inputFile.open(QIODevice::ReadOnly);
+        while(1)
         {
-            int i = list.at(1).toInt();
-           m_adap->setVolume(i);
+            read.clear();
+            read = inputFile.read(32768*8);
+            qDebug() << "Read : " << read.size();
+            if(read.size()==0)
+                break;
+
+            qDebug() << "Written : " << m_client->write(read);
+            m_client->waitForBytesWritten();
+            read.clear();
         }
+        inputFile.close();
     }
-    else if((list.at(0)=="play"))
-    {
-        m_adap->playSong();
-    }
-    else if((list.at(0)=="pause"))
-    {
-        m_adap->pauseSong();
-    }
-
-}
-
-void ServerText::readCommand()
-{
-        quint16 blockSize=0;
-        QDataStream in(m_client);
-        in.setVersion(QDataStream::Qt_4_0);
-
-        if (blockSize == 0) {
-            if (m_client->bytesAvailable() < (int)sizeof(quint16))
-                return;
-
-            in >> blockSize;
-        }
-
-        if (m_client->bytesAvailable() < blockSize)
-            return;
-
-        QString nextCommand;
-        in >> nextCommand;
-
-        QStringList arg=nextCommand.split(" ",QString::SkipEmptyParts);
-        processCommand(arg);
-
 }

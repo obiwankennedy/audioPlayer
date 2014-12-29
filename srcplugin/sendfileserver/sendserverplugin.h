@@ -9,7 +9,7 @@
 class SendServerPlugin : public QObject,public SongInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.playlistgenerator.SongInterface.servercontrol" FILE "servercontrol.json")
+    Q_PLUGIN_METADATA(IID "org.playlistgenerator.SongInterface.SendServerPlugin" FILE "SendServerPlugin.json")
     Q_INTERFACES(SongInterface)
 
 private:

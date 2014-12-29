@@ -7,8 +7,8 @@ ServerThread::ServerThread(QObject *parent) :
 }
 void ServerThread::run()
 {
-    text = new ServerText();
-    text->startListing();
+    m_server = new SendingServer();
+    m_server->startListing();
 
     exec();
 }

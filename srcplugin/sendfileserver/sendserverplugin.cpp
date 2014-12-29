@@ -1,31 +1,29 @@
 #include "sendserverplugin.h"
 
-#include <QDBusConnection>
-#include <QDBusInterface>
+
 #include <QtGui>
-#include <QDBusMessage>
 #include <QtWidgets>
 #include <QDebug>
 
 
-bool ControlServerPlugin::hasUI()
+bool SendServerPlugin::hasUI()
 {
     return false;
 }
 
-void ControlServerPlugin::SetSong(SongFields* p)
+void SendServerPlugin::SetSong(SongFields* p)
 {
     return;
 }
-void ControlServerPlugin::stopped()
+void SendServerPlugin::stopped()
 {
     
 }
 
-QString ControlServerPlugin::getName()
+QString SendServerPlugin::getName()
 {
 
-    m_action = new QAction(tr("Remote Control Server"),this);
+    m_action = new QAction(tr("Send Server"),this);
     m_external = new ServerThread;
     m_action->setCheckable(true);
     m_action->setChecked(true);
@@ -36,43 +34,43 @@ QString ControlServerPlugin::getName()
     return tr("Remote");
 }
 
-QAction* ControlServerPlugin::getAction()
+QAction* SendServerPlugin::getAction()
 {
     return m_action;
 }
 
-QDockWidget* ControlServerPlugin::getWidget()
+QDockWidget* SendServerPlugin::getWidget()
 {
     return NULL;
 }
-bool ControlServerPlugin::isVisible()
+bool SendServerPlugin::isVisible()
 {
     return false;
 }
 
-Qt::DockWidgetArea ControlServerPlugin::orientation()
+Qt::DockWidgetArea SendServerPlugin::orientation()
 {
     return Qt::BottomDockWidgetArea;
 }
 
 
-void ControlServerPlugin::readSetting(QSettings& )
+void SendServerPlugin::readSetting(QSettings& )
 {
     return;
 }
 
-void ControlServerPlugin::writeSetting(QSettings& )
+void SendServerPlugin::writeSetting(QSettings& )
 {
     return;
 }
-void ControlServerPlugin::show()
-{
-    return;
-}
-
-void ControlServerPlugin::refresh()
+void SendServerPlugin::show()
 {
     return;
 }
 
-//Q_EXPORT_PLUGIN2(ControlServer, ControlServerPlugin);
+void SendServerPlugin::refresh()
+{
+    return;
+}
+
+

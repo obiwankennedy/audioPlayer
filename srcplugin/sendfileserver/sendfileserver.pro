@@ -9,12 +9,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 include(../../src/plugins/plugins.pri)
 
-#INCLUDEPATH += /usr/include/gstreamer-0.10/ \
-#    /usr/include/glib-2.0 \
- #   /usr/include/glib-2.0 \
- #   /usr/include/libxml2/ \
- #   /usr/lib/glib-2.0/include/
-#LIBS += -lgstreamer-0.10 -lglib-2.0
+
 INCLUDEPATH += ../../src \
     ../../src/decorator \
     ../../src/tagger \
@@ -22,17 +17,17 @@ INCLUDEPATH += ../../src \
     /usr/include/taglib/
 HEADERS =  \
     serverthread.h \
-    servertext.h \
-    adaptor.h \
-    sendserverplugin.h
+    sendserverplugin.h \
+    sendingserver.h \
+    sendfileadaptor.h
 
 SOURCES =  \
     serverthread.cpp \
-    servertext.cpp \
-    adaptor.cpp \
-    sendserverplugin.cpp
+    sendserverplugin.cpp \
+    sendingserver.cpp \
+    sendfileadaptor.cpp
 
-TARGET = $$qtLibraryTarget(ControlServer)
+TARGET = $$qtLibraryTarget(SendServerPlugin)
 DESTDIR = ../../bin/plugins
 
 OTHER_FILES +=

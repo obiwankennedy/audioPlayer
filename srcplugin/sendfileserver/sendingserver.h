@@ -4,26 +4,29 @@
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include "sendfileadaptor.h"
 
-#include "adaptor.h"
-
-class ServerText : public QObject
+class SendingServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit ServerText(QObject *parent = 0);
-    void processCommand(QStringList list);
+    explicit SendingServer(QObject *parent = 0);
+    //void processCommand(QStringList list);
     void startListing();
-    
+
+
+public slots:
+    void sendFile(QString uri);
+
 private slots:
     void sessionOpened();
     void readCommand();
     
 private:
-    DbusAdaptor* m_adap ;
     QTcpServer * m_tcpServer;
     QTcpSocket* m_client;
     quint16 m_blockSize;
+    SendFileAdaptor* m_adaptor;
 
 
 };

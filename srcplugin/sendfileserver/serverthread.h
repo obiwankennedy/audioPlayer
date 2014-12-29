@@ -2,7 +2,7 @@
 #define SERVERTHREAD_H
 
 #include <QThread>
-#include "servertext.h"
+#include "sendingserver.h"
 
 class ServerThread : public QThread
 {
@@ -14,7 +14,7 @@ public:
 
     
 private:
-    ServerText* text;
+    SendingServer* m_server;
     
 };
 
