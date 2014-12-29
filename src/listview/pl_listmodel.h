@@ -7,6 +7,7 @@
 class PL_ListModel : public QAbstractListModel
 {
 public:
+    enum CustomRole {DATA = Qt::UserRole+1};
     PL_ListModel();
 
 
