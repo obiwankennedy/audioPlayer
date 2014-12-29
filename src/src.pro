@@ -17,6 +17,7 @@ include(plugins/plugins.pri)
 include(regexwizzard/regexwizzard.pri)
 include(tabapi/tabapi.pri)
 include(listview/listview.pri)
+include(data/data.pri)
 #include(Style/Style.pri)
 
 RESOURCES += \
@@ -89,7 +90,8 @@ HEADERS += edittagbox.h \
     searchdialogitem.h \
     tableheaderview.h \
     pl_databasemanager.h \
-    dbus/dbusServer.h
+    dbus/dbusServer.h \
+    tableviewadaptor.h
 
 FORMS += tageditor/tageditordialog.ui \
     wizzardexport/wizzardexport.ui \
@@ -127,7 +129,8 @@ SOURCES += edittagbox.cpp \
     searchdialogitem.cpp \
     tableheaderview.cpp \
     pl_databasemanager.cpp \
-    dbus/dbusServer.cpp
+    dbus/dbusServer.cpp \
+    tableviewadaptor.cpp
 
 
 
@@ -141,7 +144,8 @@ QT += xml \
     dbus \
     sql \
     svg \
-    gui
+    gui \
+    bluetooth
 
 QT +=  multimedia printsupport
 #multimedia
@@ -150,11 +154,16 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 #lessThan(QT_MAJOR_VERSION, 5): QT += phonon
 
 
-documentation.path = /usr/local/audioPlayer/documentation/
+documentation.path = /opt/bin/audioPlayer/documentation/
 documentation.files = ../documentation/*
-target.path = /usr/local/bin
+target.path = /opt/bin/audioPlayer/
+
+plugin.path=/opt/bin/audioPlayer/plugins/
+plugin.files=../bin/plugins/*
 INSTALLS += documentation \
-    target
+    target \
+    plugin
+
 VERSION = 0.9.1
 TARGET = ../bin/audioPlayer
 TRANSLATIONS = ../resources/translation/audioPlayer_fr_FR.ts
