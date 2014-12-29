@@ -7,9 +7,9 @@ OggDecorator::OggDecorator(  )
 	// TODO
 }
 //
-QVariant OggDecorator::getMember(dataColumn x) const
+QVariant OggDecorator::getMember(DataField x) const
 {
-    qDebug() << "get member ogg";
+  //  qDebug() << "get member ogg";
   PL_OggFile* tmp =(PL_OggFile*) item->getMediaFile();
   
   if(item==NULL)
@@ -43,7 +43,7 @@ QVariant OggDecorator::getMember(dataColumn x) const
       
 
 }
-void OggDecorator::setValue(dataColumn x,QVariant& value,bool replace)
+void OggDecorator::setValue(DataField x,QVariant& value,bool replace)
 {
 
   PL_OggFile* tmp =(PL_OggFile*) item->getMediaFile();

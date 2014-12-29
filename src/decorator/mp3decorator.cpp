@@ -33,7 +33,7 @@ Mp3Decorator::~Mp3Decorator()
 {
   
 }
-QVariant Mp3Decorator::getMember(dataColumn x) const
+QVariant Mp3Decorator::getMember(DataField x) const
 {
 
   PL_Mp3File* tmp =(PL_Mp3File*) item->getMediaFile();
@@ -72,7 +72,7 @@ QVariant Mp3Decorator::getMember(dataColumn x) const
   return QVariant();  
 }
 
-void Mp3Decorator::setValue(dataColumn x,QVariant& value,bool replace)
+void Mp3Decorator::setValue(DataField x,QVariant& value,bool replace)
 {
   PL_Mp3File* tmp =(PL_Mp3File*) item->getMediaFile();
   tmp->setValue(x,value,replace);

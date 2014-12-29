@@ -35,7 +35,7 @@ Defaultdecorator::~Defaultdecorator()
 {
 }
 
-QVariant Defaultdecorator::getMember(dataColumn x) const
+QVariant Defaultdecorator::getMember(DataField x) const
 {
   PL_DefaultAudio* tmp =(PL_DefaultAudio*) item->getMediaFile();
   
@@ -60,6 +60,7 @@ QVariant Defaultdecorator::getMember(dataColumn x) const
         return tmp->getTrack();
     case COMMENT:
     case YEAR:
+    case PICTURE:
     case BITRATE:
       return QVariant();  
   }
@@ -68,7 +69,7 @@ QVariant Defaultdecorator::getMember(dataColumn x) const
       
 
 }
-void Defaultdecorator::setValue(dataColumn x,QVariant& value,bool )
+void Defaultdecorator::setValue(DataField x,QVariant& value,bool )
 {
     SongFields* sf = item->getFields2();
   switch(x)
@@ -86,6 +87,7 @@ void Defaultdecorator::setValue(dataColumn x,QVariant& value,bool )
       sf->album = value.toString();
       break;
     case BITRATE:
+    case PICTURE:
     case TIME:
       break;
     case COMMENT:

@@ -223,7 +223,7 @@ void PL_OggFile::link()
   linked=true;
 }
 
-void PL_OggFile::setValue(dataColumn x,QVariant& value,bool replace)
+void PL_OggFile::setValue(DataField x,QVariant& value,bool replace)
 {
   if(!linked)
     link();

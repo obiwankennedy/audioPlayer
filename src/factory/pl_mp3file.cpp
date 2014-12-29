@@ -276,7 +276,7 @@ QImage& PL_Mp3File::getPicture()
     return fields->m_image;
 }
 
-void PL_Mp3File::setValue(dataColumn x,QVariant& value,bool replace)
+void PL_Mp3File::setValue(DataField x,QVariant& value,bool replace)
 {
   if(!linked)
     link();

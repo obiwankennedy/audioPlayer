@@ -41,8 +41,8 @@ public:
     virtual ~Defaultdecorator();
    
     
-    QVariant getMember(dataColumn x) const;
-    virtual void setValue(dataColumn x,QVariant& value,bool replace);
+    QVariant getMember(DataField x) const;
+    virtual void setValue(DataField x,QVariant& value,bool replace);
     
     PlaylistItem* getItem()  ;
     virtual void setItem(PlaylistItem* _item);

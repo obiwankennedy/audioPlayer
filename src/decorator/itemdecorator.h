@@ -44,11 +44,11 @@ public:
   ItemDecorator();
   ItemDecorator(PlaylistItem* _item);
   virtual ~ItemDecorator() {}
-  virtual QVariant getMember(dataColumn x) const=0;
+  virtual QVariant getMember(DataField x) const=0;
   
   virtual void setItem(PlaylistItem* _item) =0;
   virtual  QStringList* getgenres() = 0;
-  virtual void setValue(dataColumn x,QVariant& value,bool replace)=0;
+  virtual void setValue(DataField x,QVariant& value,bool replace)=0;
   virtual void acceptVisitor(VisitorMedia* visitor);
   virtual void ForceTagReading()=0;
   virtual PlaylistItem* getItem();
