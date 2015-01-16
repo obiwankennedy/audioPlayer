@@ -619,7 +619,7 @@ void PlayListGenerator::readSettings()
     updateRecentFileActions();
     if((recentfiles.size()>0)&&(mypreferences->getLoadlastfile())&&(curFile.isEmpty()))
     {
-        loadFile(recentfiles[0]);
+       // loadFile(recentfiles[0]);
     }
 
     myplayer->readSettings(settings);

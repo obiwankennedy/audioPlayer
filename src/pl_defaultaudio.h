@@ -21,7 +21,7 @@
 
 #include <pl_audiofile.h>
 #include <data.h>
-
+#include "data/song.h"
 /**
 	@author Renaud Guezennec <renaud.guezennec@gmail.com>
  * \class PL_DefaultAudio
@@ -37,23 +37,23 @@ class PL_DefaultAudio : public PL_AudioFile
    // Q_OBJECT
 
   QString* uri;
-  SongFields* fields;
+  Song* fields;
 
 public:
-  PL_DefaultAudio(QString& uri,SongFields* fields);
+  PL_DefaultAudio(QString& uri,Song* fields);
   
     ~PL_DefaultAudio();
     
-    int getDuration();
-    QString* getTitle();
-    QString* getArtist();
-    int getGenre();
-    QString* getAlbumtitle();
-    int getBitrate();   
-    QString* getComment();    
-    int getYear();   
-    int getTrack();
-    virtual QImage& getPicture();
+    int getDuration() const;
+    const QString& getTitle() const ;
+    const QString& getArtist()const;
+    int getGenre()const;
+    const QString& getAlbumtitle()const;
+    int getBitrate()const;
+    const QString& getComment()const;
+    int getYear()const;
+    int getTrack()const;
+    virtual const QImage& getPicture()const;
     
     void setTitle(QString p);
     void setArtist(QString p);
@@ -67,7 +67,7 @@ public:
     void setValue(DataField x,QVariant& value,bool replace);
     void ForceTagReading();
     
-    virtual void readering(QDataStream & in);
+    virtual void readData(QDataStream & in);
     virtual void writting(QDataStream & out) const;
 
 /*private slots:

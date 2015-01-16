@@ -51,7 +51,7 @@ public:
     
 
     ~MediaFacade();
-    PL_MediaFile* buildaMedia(QString& txt,ItemDecorator*& key,SongFields* fields);
+    PL_MediaFile* buildaMedia(QString txt,ItemDecorator*& key,Song* song);
     static MediaFacade* getInstance();
     void verify();
 private:   

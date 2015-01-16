@@ -3,24 +3,26 @@
 
 #include <QImage>
 #include "media.h"
+#include "factory/pl_mediafile.h"
 
 class Song : public Media
 {
 public:
     Song();
+    Song(const Song& original);
 
     // gets
-    QString getTitle() const;
-    QString getArtistName() const;
-    QString getAlbum() const;
-    QString getComment() const;
-    QString getLyrics() const;
+    const QString& getTitle() const;
+    const QString& getArtistName() const;
+    const QString& getAlbum() const;
+    const QString& getComment() const;
+    const QString& getLyrics() const;
 
-    QImage getImage() const;
+    const QImage& getImage() const;
     int getYear() const;
     int getBitrate() const;
     int getGenre() const;
-    int getTracNumber() const;
+    int getTrackNumber() const;
     int getDuration() const;
 
 
@@ -35,8 +37,10 @@ public:
     void setYear(int) ;
     void setBitrate(int) ;
     void setGenre(int) ;
-    void setTracNumber(int) ;
+    void setTrackNumber(int) ;
     void setDuration(int) ;
+
+    PL_MediaFile* getMediaFile() const;
 
 private:
     QString m_title;
@@ -51,6 +55,8 @@ private:
     int m_genre;
     int m_trackNumber;
     int m_duration;
+
+    PL_MediaFile* m_mediaFile;
 };
 
 #endif // SONG_H

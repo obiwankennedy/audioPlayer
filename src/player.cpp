@@ -220,7 +220,8 @@ qDebug() << "source changed 1";
         {
             m_pictureLabel->setVisible(true);
         }
-        emit playingSongChanged(m_current->getFields2());
+        //emit playingSongChanged(m_current->getFields2());
+        /// @todo sendSignal with Song*
         if(last!=NULL)
         {
             last->setReading(false);

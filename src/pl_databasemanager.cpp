@@ -35,7 +35,7 @@ void PL_DataBaseManager::WriteList()
 
 QString sql = "Insert into mediafile (id, position, uri, title,artist,album, comment,lyrics,year,duration,genre,bitrate,piste) VALUES (nextval(\'mediafile_id_seq\'),%1, \'%2\',\'%3\', \'%4\',\'%5\',\'%6\',\'%7\',%8,%9,%10,%11,%12)";
 
-QString ressql = sql.arg(i).arg(tmp->getURI()).arg(tmp->getFields()->Title).arg(tmp->getFields()->Artist).arg(tmp->getFields()->album).arg(tmp->getFields()->Comment).arg(tmp->getFields()->lyrics).arg(tmp->getFields()->Year).arg(tmp->getFields()->duration).arg(tmp->getFields()->genre).arg(tmp->getFields()->Bitrate).arg(tmp->getFields()->track);
+QString ressql = sql.arg(i).arg(tmp->getURI()).arg(tmp->getSong()->getTitle()).arg(tmp->getSong()->getArtistName()).arg(tmp->getSong()->getAlbum()).arg(tmp->getSong()->getComment()).arg(tmp->getSong()->getLyrics()).arg(tmp->getSong()->getYear()).arg(tmp->getSong()->getDuration()).arg(tmp->getSong()->getGenre()).arg(tmp->getSong()->getBitrate()).arg(tmp->getSong()->getTrackNumber());
               query.prepare(ressql);
 
 

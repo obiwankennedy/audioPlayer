@@ -20,18 +20,15 @@ PL_TaggerOgg::PL_TaggerOgg(  )
 }
 //
 
-PL_TaggerOgg::PL_TaggerOgg(QString* _filename)
+PL_TaggerOgg::PL_TaggerOgg(QString _filename)
+    : filename (_filename)
 {
-
-
-    filename=_filename;
-
     //myTaggger = new TagLib::FileRef(filename->toStdString().c_str());
-    myTaggger = new TagLib::FileRef(filename->toLocal8Bit());
-    QFileInfo info(*filename);
+    myTaggger = new TagLib::FileRef(filename.toLatin1());
+    QFileInfo info(filename);
     if(info.suffix()=="mp3")
     {
-        myTagggerFileMPG = new TagLib::MPEG::File(filename->toLocal8Bit());
+        myTagggerFileMPG = new TagLib::MPEG::File(filename.toLatin1());
     }
     else
     {
@@ -83,7 +80,18 @@ QVariant PL_TaggerOgg::getValue(int i)
     }
     case TIME:
     {
-        return myTaggger->audioProperties()->length()*1000;
+        if(NULL!=myTagggerFileMPG)
+        {
+            return myTagggerFileMPG->audioProperties()->length()*1000;
+        }
+        else if(NULL!=myTaggger)
+        {
+            return myTaggger->audioProperties()->length()*1000;
+        }
+        else
+        {
+            return 0;
+        }
 
     }
     case GENRE:

@@ -14,7 +14,7 @@ public:
     QString getUri() const;
 
     void setUri(QString uri);
-private:
+protected:
     QString m_uri;
 };
 

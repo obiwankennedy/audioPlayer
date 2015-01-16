@@ -21,16 +21,17 @@
 #define PL_AUDIOFILE_H
 
 #include "pl_mediafile.h"
-
+#include <QString>
+#include <QImage>
 /**
 	@author Renaud Guezennec <renaud.guezennec@gmail.com>
  * \class PL_AudioFile
- * \brief this class was only created to make a real oriented object architecture but it does not use.
+ * \brief this class was only created to make a real oriented object architecture but it is not used.
  * \version 1.0
  * \date 21/04/2008
  * \bug no known 
  * \warning no known 
- * \todo   no          
+ * \todo  REMOVE IT!!!!!!!!!!!
 */
 class PL_AudioFile : public PL_MediaFile
 {
@@ -39,16 +40,16 @@ public:
 
     ~PL_AudioFile();
 
-  virtual int getDuration() =0;
-  virtual QString* getTitle() =0;
-  virtual QString* getArtist() =0;
-  virtual int getGenre() =0;
-  virtual QString* getAlbumtitle() =0;
-  virtual QString* getComment() =0;
-  virtual int getYear() =0;
-  virtual int getBitrate() =0;
-  virtual int getTrack() =0;
-  virtual QImage& getPicture() =0;
+  virtual int getDuration() const =0;
+  virtual const  QString& getTitle() const =0;
+  virtual const QString& getArtist() const =0;
+  virtual int getGenre() const =0;
+  virtual const QString& getAlbumtitle() const =0;
+  virtual const QString& getComment() const =0;
+  virtual int getYear() const =0;
+  virtual int getBitrate() const =0;
+  virtual int getTrack() const =0;
+  virtual const QImage& getPicture() const =0;
 
 };
 

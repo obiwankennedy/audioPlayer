@@ -40,7 +40,7 @@ public:
     
 
     ~factoryOTHER();
-    PL_MediaFile* buildMedia(QString& uri,SongFields* fields);
+    PL_MediaFile* buildMedia(QString& uri,Song* fields);
     static factoryOTHER* getInstance();
 };
 

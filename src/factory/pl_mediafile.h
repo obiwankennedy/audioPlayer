@@ -40,15 +40,15 @@ public:
   PL_MediaFile(QString& uri);
     virtual ~PL_MediaFile();
     
-    virtual int getDuration()=0;
-    virtual QString* getTitle()=0;
-    virtual QString* getArtist()=0;
-    virtual int getGenre()=0;
-    virtual QString* getAlbumtitle()=0;
-    virtual QString* getComment()=0;    
-    virtual int getYear()=0;   
-    virtual int getBitrate()=0;
-    virtual int getTrack()=0;
+    virtual int getDuration()const =0;
+    virtual const QString& getTitle() const =0;
+    virtual const QString& getArtist()const =0;
+    virtual int getGenre() const=0;
+    virtual const QString& getAlbumtitle()const =0;
+    virtual const QString& getComment()const =0;
+    virtual int getYear()const =0;
+    virtual int getBitrate()const =0;
+    virtual int getTrack()const =0;
     
     virtual void PreReading();
 
@@ -62,7 +62,7 @@ public:
 
     virtual void ForceTagReading()=0;
     
-    virtual void readering(QDataStream & in)=0;
+    virtual void readData(QDataStream & in)=0;
     virtual void writting(QDataStream & out) const =0;
     
     friend QDataStream& operator<<(QDataStream& os,const PL_MediaFile&);

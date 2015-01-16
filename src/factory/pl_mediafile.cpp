@@ -38,7 +38,7 @@ QDataStream& operator<<(QDataStream& os,const PL_MediaFile& c)
 }
 QDataStream& operator>>(QDataStream& is,PL_MediaFile& c)
 {
-  c.readering(is);
+  c.readData(is);
   return is;
 }
 void PL_MediaFile::PreReading()

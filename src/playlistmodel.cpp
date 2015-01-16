@@ -115,6 +115,7 @@ QVariant PlayListModel::getValue ( int x,int y ) const
 
         a = p->getKey();
 
+
         return a->getMember(( *mapheader )[y]->x);
     }
 

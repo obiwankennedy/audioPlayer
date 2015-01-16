@@ -11,7 +11,7 @@ class FactoryOgg : public FactoryMedia
 	FactoryOgg();
 	static FactoryOgg* singleton;
 public:
-	 PL_MediaFile* buildMedia(QString& uri,SongFields* fields);
+     PL_MediaFile* buildMedia(QString& uri,Song* fields);
     static FactoryOgg* getInstance();
 };
 #endif

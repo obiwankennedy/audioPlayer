@@ -29,7 +29,7 @@
 {
   linked=false;
 }*/
-PL_Mp3File::PL_Mp3File(QString& uri,SongFields* fields)
+PL_Mp3File::PL_Mp3File(QString& uri,Song* fields)
   :PL_AudioFile(uri),fields(NULL)
 {
   mode=0;
@@ -44,47 +44,38 @@ PL_Mp3File::~PL_Mp3File()
 {
 
 }
-int PL_Mp3File::getDuration()
+int PL_Mp3File::getDuration() const
 {
-  if((fields->duration==-1)||(mode))
+  if((fields->getDuration()==-1)||(mode))
   {
     
-      if(!linked)
-        link();
+//      if(!linked)
+//        link();
 
       
       
       
      
       
-    fields->duration = Mp3tagger->getValue(TIME).toInt();
+    fields->setDuration(Mp3tagger->getValue(TIME).toInt());
     
     
-   /* if(!ok)
-    {
-      fields->duration=-1;
-      if(header == NULL)
-        parseHeader();
-      
-      if(header!= NULL) 
-      fields->duration=(header->time*1000);
-    }*/
-    
+
     
   }
-  return  fields->duration;
+  return  fields->getDuration();
 }
-QString* PL_Mp3File::getTitle() 
+const QString& PL_Mp3File::getTitle() const
 {
-  if((fields->Title.isNull())||(mode))
+  if((fields->getTitle().isNull())||(mode))
   {
-    if(!linked)
-      link();
+//    if(!linked)
+//      link();
   
-    fields->Title = Mp3tagger->getValue(TITLE).toString();
+    fields->setTitle(Mp3tagger->getValue(TITLE).toString());
   }
   
-  if(fields->Title.isEmpty())
+  if(fields->getTitle().isEmpty())
   {
     
     QFileInfo a(*this);
@@ -94,32 +85,32 @@ QString* PL_Mp3File::getTitle()
     QStringList ab = a.fileName().split(".");
     if (ab.size() > 0) 
     {
-      fields->Title = ab[ab.size()-2]; 
+      fields->setTitle(ab[ab.size()-2]);
       
     }
   }
   
   
-  return &fields->Title;
+  return fields->getTitle();
 }
-QString* PL_Mp3File::getArtist()
+const QString& PL_Mp3File::getArtist() const
 { 
-  if((fields->Artist.isNull())||(mode))
+  if((fields->getArtistName().isNull())||(mode))
   {
-    if(!linked)
-      link();
-    fields->Artist = Mp3tagger->getValue(ARTIST).toString();
+//    if(!linked)
+//      link();
+    fields->setArtistName(Mp3tagger->getValue(ARTIST).toString());
   }
-  return &fields->Artist;
+  return fields->getArtistName();
 }
-int PL_Mp3File::getGenre() 
+int PL_Mp3File::getGenre() const
 {
  
-  if((fields->genre==-1)||(mode))
+  if((fields->getGenre()==-1)||(mode))
   {
    
-      if(!linked)
-        link();
+//      if(!linked)
+//        link();
       
     QString a = Mp3tagger->getValue(GENRE).toString();
     
@@ -131,83 +122,83 @@ int PL_Mp3File::getGenre()
       a = rxlen.cap(1);
       
     }
-    fields->genre=a.toInt(&ok,10);
+    fields->setGenre(a.toInt(&ok,10));
     if(!ok)
-    fields->genre=-1;
+    fields->setGenre(-1);
   }
-  return fields->genre;
+  return fields->getGenre();
 }
 
-QString* PL_Mp3File::getAlbumtitle() 
+const QString& PL_Mp3File::getAlbumtitle() const
 {
-  if((fields->album.isNull())||(mode))
+  if((fields->getAlbum().isNull())||(mode))
   {
-    if(!linked)
-      link();
+    /*if(!linked)
+      link();*/
     
-    fields->album =Mp3tagger->getValue(ALBUM).toString();
+    fields->setAlbum(Mp3tagger->getValue(ALBUM).toString());
   }
-  return &fields->album;
+  return fields->getAlbum();
 }
-QString* PL_Mp3File::getComment() 
+const QString& PL_Mp3File::getComment() const
 {
-  if((fields->Comment.isNull())||(mode))
+  if((fields->getComment().isNull())||(mode))
   {
-    if(!linked)
-      link();
+//    if(!linked)
+//      link();
     
-    fields->Comment = Mp3tagger->getValue(COMMENT).toString();
+    fields->setComment(Mp3tagger->getValue(COMMENT).toString());
   }
-  return &fields->Comment;
+  return fields->getComment();
   
 }
-int PL_Mp3File::getYear() 
+int PL_Mp3File::getYear() const
 {
-  if((fields->Year==-1)||(mode))
+  if((fields->getYear()==-1)||(mode))
   {
    
-    if(!linked)
-      link();
+//    if(!linked)
+//      link();
       
-   fields->Year = Mp3tagger->getValue(YEAR).toInt();
+   fields->setYear(Mp3tagger->getValue(YEAR).toInt());
 
   }
   
-  return fields->Year;
+  return fields->getYear();
 }   
-int PL_Mp3File::getBitrate() 
+int PL_Mp3File::getBitrate() const
 {
   
   
-  if((fields->Bitrate==-1)||(mode))
+  if((fields->getBitrate()==-1)||(mode))
   {
-    if(!linked)
-      link();
+//    if(!linked)
+//      link();
         
     
-    if(header == NULL)
-      parseHeader();
+//    if(header == NULL)
+//      parseHeader();
         
     if((header != NULL)&&(header->bitrate>0))
-      fields->Bitrate = header->bitrate;
+      fields->setBitrate(header->bitrate);
     else if(header != NULL)
-      fields->Bitrate = header->vbr_bitrate;
+      fields->setBitrate(header->vbr_bitrate);
   } 
   
-  return fields->Bitrate;
+  return fields->getBitrate();
 }
-int PL_Mp3File::getTrack()
+int PL_Mp3File::getTrack()const
 {
-    if((fields->Year==-1)||(mode))
+    if((fields->getTrackNumber()==-1)||(mode))
     {
 
-      if(!linked)
-        link();
+//      if(!linked)
+//        link();
 
-      fields->track = Mp3tagger->getValue(TRACK).toInt();
+      fields->setTrackNumber(Mp3tagger->getValue(TRACK).toInt());
 
     }
-    return fields->track;
+    return fields->getTrackNumber();
 }
 
 QStringList* PL_Mp3File::getgenres()
@@ -216,36 +207,35 @@ QStringList* PL_Mp3File::getgenres()
 }
 void PL_Mp3File::setTitle(QString p)
 {
-
-  (fields->Title) = p;
+    fields->setTitle(p);
 }
 void PL_Mp3File::setArtist(QString p)
 {
 
-  fields->Artist = p;
+  fields->setArtistName( p);
 }
 void PL_Mp3File::setGenre(int p)
 {
-  fields->genre = p;
+  fields->setGenre(p);
 }
 void PL_Mp3File::setYear(int p)
 {
-  fields->Year = p;
+  fields->setYear(p);
 }
 void PL_Mp3File::setAlbumtitle(QString p)
 {
 
-  fields->album = p;
+  fields->setAlbum(p);
 }
 
 void PL_Mp3File::setComment(QString p)
 {
 
-  fields->Comment = p;
+  fields->setComment(p);
 }
 void PL_Mp3File::setTrack(int p)
 {
-    fields->track = p;
+    fields->setTrackNumber(p);
 
 }
 
@@ -262,18 +252,18 @@ void PL_Mp3File::link()
   Mp3tagger = new PL_TaggerID3(uri);
   linked=true;
 }
-QImage& PL_Mp3File::getPicture()
+const QImage& PL_Mp3File::getPicture()const
 {
-    if((fields->m_image.isNull())||(mode))
+    if((fields->getImage().isNull())||(mode))
     {
 
-      if(!linked)
-        link();
+//      if(!linked)
+//        link();
 
-     fields->m_image = Mp3tagger->getValue(PICTURE).value<QImage>();
+     fields->setImage(Mp3tagger->getValue(PICTURE).value<QImage>());
 
     }
-    return fields->m_image;
+    return fields->getImage();
 }
 
 void PL_Mp3File::setValue(DataField x,QVariant& value,bool replace)
@@ -313,31 +303,16 @@ void PL_Mp3File::setValue(DataField x,QVariant& value,bool replace)
   
  
 }
-void PL_Mp3File::readering(QDataStream & in)
+void PL_Mp3File::readData(QDataStream & in)
 {
-  in >> (fields->Title);
-  in >> (fields->Artist);
-  in >> (fields->duration);
-  in >> (fields->Year);
-  in >> (fields->genre);
-  in >> (fields->album);
-  in >> (fields->Comment);
-  in>> (fields->Bitrate);
-  in>> (fields->lyrics);
-
+    /// @warning readData
+  //in >> fields;
 }
 void PL_Mp3File::writting(QDataStream & out) const
 {
 
-  out     << (fields->Title.simplified())
-          << (fields->Artist.simplified())  
-          << (fields->duration) 
-          << (fields->Year)  
-          << (fields->genre) 
-          << (fields->album.simplified()) 
-          <<(fields->Comment.simplified()) 
-          << (fields->Bitrate) 
-          << (fields->lyrics.simplified());
+  out     << fields;
+
 }
 void PL_Mp3File::ForceTagReading()
 {

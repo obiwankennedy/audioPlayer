@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "../factory/factoryother.h"
 #include "../pl_defaultaudio.h"
+#include "data/song.h"
+
 factoryOTHER::factoryOTHER()
   : FactoryMedia()
 {
@@ -38,7 +40,7 @@ factoryOTHER* factoryOTHER::getInstance()
   
   return singleton;
 }
-PL_MediaFile* factoryOTHER::buildMedia(QString& uri,SongFields* fields)
+PL_MediaFile* factoryOTHER::buildMedia(QString& uri,Song* fields)
 {
   PL_DefaultAudio* tmp = new PL_DefaultAudio(uri,fields);
   

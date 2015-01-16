@@ -40,7 +40,7 @@ FactoryMP3* FactoryMP3::getInstance()
   
   return singleton;
 }
-PL_MediaFile* FactoryMP3::buildMedia(QString& uri,SongFields* fields)
+PL_MediaFile* FactoryMP3::buildMedia(QString& uri,Song* fields)
 {
   PL_Mp3File* tmp = new PL_Mp3File(uri,fields);
   

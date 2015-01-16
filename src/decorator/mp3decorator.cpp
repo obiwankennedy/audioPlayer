@@ -41,24 +41,28 @@ QVariant Mp3Decorator::getMember(DataField x) const
   if(tmp==NULL)
     return QVariant();
   
+  if(!tmp->is_linked())
+  {
+      tmp->link();
+  }
 
 
   switch(x)
   {
     case TITLE:
     {
-      return (*tmp->getTitle());
+      return (tmp->getTitle());
     }
     case ARTIST:
-      return (*tmp->getArtist());
+      return (tmp->getArtist());
     case TIME:
       return tmp->getDuration();
     case ALBUM:
-      return (*tmp->getAlbumtitle());
+      return (tmp->getAlbumtitle());
     case GENRE:
       return tmp->getGenre();
     case COMMENT:
-      return (*tmp->getComment());
+      return (tmp->getComment());
     case YEAR:
       return tmp->getYear();
     case BITRATE:

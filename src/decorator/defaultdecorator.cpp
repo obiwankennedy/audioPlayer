@@ -37,31 +37,40 @@ Defaultdecorator::~Defaultdecorator()
 
 QVariant Defaultdecorator::getMember(DataField x) const
 {
-  PL_DefaultAudio* tmp =(PL_DefaultAudio*) item->getMediaFile();
+
   
   if(item==NULL)
     return QVariant();
+
+  //PL_DefaultAudio* tmp =(PL_DefaultAudio*) item->getMediaFile();
+
+    Song* song = item->getSong();
 
   switch(x)
   {
     case TITLE:
     {
-      return (*tmp->getTitle());
+      return song->getTitle();
     }
     case ARTIST:
-      return (*tmp->getArtist());
+      return song->getArtistName();
     case TIME:
-      return tmp->getDuration();
+      return song->getDuration();
     case ALBUM:
-      return (*tmp->getAlbumtitle());
+      return song->getAlbum();
     case GENRE:
-      return tmp->getGenre();
+      return song->getGenre();
     case TRACK:
-        return tmp->getTrack();
+        return song->getTrackNumber();
     case COMMENT:
+      return song->getComment();
     case YEAR:
+      return song->getYear();
     case PICTURE:
+      return song->getImage();
     case BITRATE:
+      return song->getBitrate();
+  default:
       return QVariant();  
   }
   return QVariant(); 
@@ -71,33 +80,33 @@ QVariant Defaultdecorator::getMember(DataField x) const
 }
 void Defaultdecorator::setValue(DataField x,QVariant& value,bool )
 {
-    SongFields* sf = item->getFields2();
+    Song* song = item->getSong();
   switch(x)
   {
     case TITLE:
-      sf->Title = value.toString();
+      song->setTitle(value.toString());
       break;
     case ARTIST:
-      sf->Artist =  value.toString();
+      song->setArtistName(value.toString());
       break;
     case YEAR:
-      sf->Year = value.toInt();
+      song->setYear( value.toInt());
       break;
     case ALBUM:
-      sf->album = value.toString();
+      song->setAlbum(value.toString());
       break;
     case BITRATE:
     case PICTURE:
     case TIME:
       break;
     case COMMENT:
-      sf->Title =  value.toString();
+      song->setComment(value.toString());
       break;
     case GENRE:
-      sf->genre= value.toInt();
+      song->setGenre(value.toInt());
       break;
   case TRACK:
-      sf->track = value.toInt();
+      song->setTrackNumber(value.toInt());
 
   }
 

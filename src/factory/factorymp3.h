@@ -40,7 +40,7 @@ public:
     
 
     ~FactoryMP3();
-    PL_MediaFile* buildMedia(QString& uri,SongFields* fields);
+    PL_MediaFile* buildMedia(QString& uri,Song* fields);
     static FactoryMP3* getInstance();
 };
 

@@ -1,4 +1,5 @@
 #include "factoryogg.h"
+#include "data/song.h"
 //
 FactoryOgg::FactoryOgg(  ) 
 	: FactoryMedia()
@@ -17,7 +18,7 @@ FactoryOgg* FactoryOgg::getInstance()
   
   return singleton;
 }
-PL_MediaFile* FactoryOgg::buildMedia(QString& uri,SongFields* fields)
+PL_MediaFile* FactoryOgg::buildMedia(QString& uri,Song* fields)
 {
   PL_OggFile* tmp = new PL_OggFile(uri,fields);
   

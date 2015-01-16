@@ -32,7 +32,7 @@
 
 #include "data/song.h"
 /**
-	@author Renaud Guezennec <renaud.guezennec@gmail.com>
+    @author Renaud Guezennec
  * \class PlaylistItem
  * \brief represent a playlist item. it is the main data class.
  * \version 1.0
@@ -75,13 +75,13 @@ public:
      const QString getExt() const; 
      void SetExt(QString & p);
      
-     void buildExt();
+     QString buildExt() const;
      void exploseExt();
      PL_MediaFile* getMediaFile();
      void ForceTagReading();
      QString getReadableTitle();
      QString toString();
-     QImage& getPicture();
+     const QImage& getPicture();
      //qRegisterMetaTypeStreamOperators<PlaylistItem>("PlaylistItem");
      
      friend QTextStream& operator<<(QTextStream& os,const PlaylistItem&);

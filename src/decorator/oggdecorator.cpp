@@ -11,6 +11,11 @@ QVariant OggDecorator::getMember(DataField x) const
 {
   //  qDebug() << "get member ogg";
   PL_OggFile* tmp =(PL_OggFile*) item->getMediaFile();
+
+  if(!tmp->is_linked())
+  {
+      tmp->link();
+  }
   
   if(item==NULL)
     return QVariant();
@@ -19,14 +24,14 @@ QVariant OggDecorator::getMember(DataField x) const
   {
     case TITLE:
     {
-      return (*tmp->getTitle());
+      return (tmp->getTitle());
     }
     case ARTIST:
-      return (*tmp->getArtist());
+      return (tmp->getArtist());
     case TIME:
       return tmp->getDuration();
     case ALBUM:
-      return (*tmp->getAlbumtitle());
+      return (tmp->getAlbumtitle());
     case GENRE:
       return tmp->getGenre();
     case TRACK:

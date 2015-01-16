@@ -8,31 +8,31 @@
 
 #include <pl_taggerogg.h>
 #include "../data.h"
-
+#include "data/song.h"
 #define FORCING_MODE 1
 #define NORMAL_MODE 0
 //
 class PL_OggFile : public PL_AudioFile
 {
 	PL_TaggerOgg* oggtagger;
-	QString* uri;
-    SongFields* fields;
+    //QString* m_uri;
+    Song* m_song;
     bool linked;
  //TagLib::FileRef *f
 public:
 	PL_OggFile();
-	PL_OggFile(QString& uri,SongFields* fields);
-	int getDuration();
-    QString* getTitle();
-    QString* getArtist();
-    int getGenre();
-    QString* getAlbumtitle();
-    QString* getComment();    
-    int getYear();   
-    int getBitrate();
+    PL_OggFile(QString& uri,Song* song);
+    int getDuration() const;
+    virtual const QString& getTitle() const;
+    virtual const QString& getArtist() const;
+    int getGenre() const;
+    virtual const QString& getAlbumtitle() const;
+    virtual const QString& getComment() const;
+    int getYear() const;
+    int getBitrate() const;
 	QStringList* getgenres();
-    int getTrack();
-    virtual QImage& getPicture();
+    int getTrack() const;
+    virtual const QImage& getPicture() const;
 
 
 
@@ -49,7 +49,7 @@ public:
     void setValue(DataField x,QVariant& value,bool replace);
     void ForceTagReading();
     void parseHeader();
-    virtual void readering(QDataStream & in);
+    virtual void readData(QDataStream & in);
     virtual void writting(QDataStream & out) const;
 };
 #endif

@@ -23,12 +23,11 @@
 #include <QDebug>
 
 PlaylistItem::PlaylistItem()
-  :m_uri(NULL),m_ext(NULL),m_mediaFile(NULL)
 {
-  m_song = new Song;
-  facade = MediaFacade::getInstance();
-  urichanged = false;
-  qRegisterMetaTypeStreamOperators<PlaylistItem>("PlaylistItem");
+    //m_song = new Song;
+    facade = MediaFacade::getInstance();
+    urichanged = false;
+    qRegisterMetaTypeStreamOperators<PlaylistItem>("PlaylistItem");
 }
 
 PlaylistItem *PlaylistItem::ms_currentPlayedItem = NULL;
@@ -36,188 +35,165 @@ PlaylistItem *PlaylistItem::ms_currentPlayedItem = NULL;
 PlaylistItem::~PlaylistItem()
 {
 
-  facade = NULL;
-  delete m_song;
-  delete m_mediaFile;
-  delete m_uri;
-  delete m_ext;
+    facade = NULL;
+    // delete m_song;
+    //delete m_mediaFile;
+
 }
 
 PlaylistItem::PlaylistItem(const PlaylistItem& original)
 {
-  this->facade = MediaFacade::getInstance();
+    this->facade = MediaFacade::getInstance();
     this->m_mediaFile = NULL;
-  
-  m_song = new SongFields;
-  *m_song = original.getSong();
-//  this->fields->Title = original.fields->Title;
-//  this->fields->Artist= original.fields->Artist;
-//  this->fields->genre=original.fields->genre;
-//  this->fields->album= original.fields-> album;
-//  this->fields->duration=original.fields->duration;
-//  this->fields->Bitrate=original.fields-> Bitrate;
-//  this->fields->Comment =original.fields->Comment;
-//  this->fields->Year=original.fields->Year;
-//  this->fields->m_image=original.fields->m_image;
 
-    this->m_ext=new QString();
-    this->m_uri=new QString();
+    //m_song = new Song();
+    /// @todo constructor by copy for song.
+    //m_song = original.getSong();
 
-  if(NULL!=original.m_uri)
-  {
+    //  this->fields->Title = original.fields->Title;
+    //  this->fields->Artist= original.fields->Artist;
+    //  this->fields->genre=original.fields->genre;
+    //  this->fields->album= original.fields-> album;
+    //  this->fields->duration=original.fields->duration;
+    //  this->fields->Bitrate=original.fields-> Bitrate;
+    //  this->fields->Comment =original.fields->Comment;
+    //  this->fields->Year=original.fields->Year;
+    //  this->fields->m_image=original.fields->m_image;
 
-    *this-> m_uri=*original.m_uri;
-  }
+    // this->m_ext=new QString();
 
-  if(NULL!=original.m_ext)
+    /* if(NULL!=original.m_ext)
   {
 
     *this-> m_ext=*original.m_ext;
-  }
+  }*/
 
-  findmedia();
+    findmedia();
 
 }
 //MediaFacade *PlaylistItem::facade = NULL;
 QString PlaylistItem::getReadableTitle()
 {
-	return QString("%1 - %2").arg(this->fields->Artist).arg(this->fields->Title);
+    return QString("%1 - %2").arg(m_song.getArtistName()).arg(m_song.getTitle());
 }
 const QString PlaylistItem::getURI() const
 {
-  if(NULL!=m_song)
-  {
-      m_song->getUri();
-  }
-}
-QImage& PlaylistItem::getPicture()
-{
-    fields->m_image = getKey()->getMember(PICTURE).value<QImage>();
 
-    return fields->m_image;
+    return m_song.getUri();
+
+}
+const QImage& PlaylistItem::getPicture()
+{
+    m_song.setImage(getKey()->getMember(PICTURE).value<QImage>());
+
+    return m_song.getImage();
 }
 
 void PlaylistItem::setURI(QString & p) 
 {
-    if(NULL!=m_song)
-    {
-        m_song->setUri(p);
-        urichanged = true;
-        findmedia();
-    }
+
+    m_song.setUri(p);
+    urichanged = true;
+    findmedia();
+
 }
 
 void PlaylistItem::findmedia()
 {
-  if((m_mediaFile==NULL)||(urichanged))
-  {
-    exploseExt();
-    m_mediaFile=facade->buildaMedia(*m_uri,key,fields);
-    key->setItem(this);
-  }
+    if((m_mediaFile==NULL)||(urichanged))
+    {
+       // exploseExt();
+        m_mediaFile=facade->buildaMedia(m_song.getUri(),key,&m_song);
+        key->setItem(this);
+    }
 }
 QString PlaylistItem::toString()
 {
 
-     
-        if((fields->Title.isNull()))
-         fields->Title=getKey()->getMember(TITLE).toString();
-        if((fields->Artist.isNull()))
-          fields->Artist=getKey()->getMember(ARTIST).toString();
-        
 
-            
-       return QString(fields->Artist+" - "+fields->Title);
-	
+    if((m_song.getTitle().isNull()))
+    {
+        m_song.setTitle(getKey()->getMember(TITLE).toString());
+    }
+    if((m_song.getArtistName().isNull()))
+    {
+        m_song.setArtistName(getKey()->getMember(ARTIST).toString());
+    }
+
+
+
+    return QString(m_song.getArtistName()+" - "+m_song.getTitle());
+
 }
 const QString PlaylistItem::getExt() const
 {
-  if(m_ext==NULL)
-    return QString();
-  
-  return *m_ext;
+    return buildExt();
 }
 void PlaylistItem::SetExt(QString& p)
 {
-  m_ext=&p;
-  exploseExt();
+    /* m_ext=&p;
+  exploseExt();*/
 }
 
 
-void PlaylistItem::buildExt()
+QString PlaylistItem::buildExt()  const
 {
-  int a;
-  
-  if(m_ext==NULL)
-  { 
-    m_ext = new QString;
-  }
-        if(fields->duration==-1)
-           a = 0;
-        else
-           a=fields->duration;
-        a/=1000;
-        
-        if((fields->Title.isNull()))
-         /* *fields->Title=*/getKey()->getMember(TITLE).toString();
-        if((fields->Artist.isNull()))
-         /* *fields->Artist=*/ getKey()->getMember(ARTIST).toString();
-        
+    int a;
 
-            
-       (*m_ext) = "#EXTINF:"+QString::number(a)+","+fields->Artist.simplified()+" - "+fields->Title.simplified();
- 
-  
+    QString ext("#EXTINF:%1, %2 - %3");
+
+    if(m_song.getDuration()<0)
+        a = 0;
+    else
+        a=m_song.getDuration();
+    a/=1000;
+
+
+    return ext.arg(QString::number(a)).arg(m_song.getArtistName().simplified()).arg(m_song.getTitle().simplified());
+
+
 }
 void PlaylistItem::exploseExt()
 {
-  if((m_ext!=NULL)&&(!m_ext->isEmpty()))
-  {
-    QStringList a = m_ext->split(':');
-    if(a.size()==2)
+  /*  if((m_ext!=NULL)&&(!m_ext->isEmpty()))
     {
-    a = a[1].split(',');
+        QStringList a = buildExt()->split(':');
         if(a.size()==2)
         {
+            a = a[1].split(',');
+            if(a.size()==2)
+            {
                 bool ok;
                 int tmptime = a[0].toInt(&ok,10);
                 if(ok)
-                  fields->duration = (1000*tmptime);
+                    fields->duration = (1000*tmptime);
                 
                 a = a[1].split("- ");
                 if(a.size()==2)
                 {
 
-                  (fields->Title) = a[1].simplified();
+                    (fields->Title) = a[1].simplified();
 
-                  (fields->Artist) = a[0].simplified();
+                    (fields->Artist) = a[0].simplified();
                 }
+            }
         }
     }
-  }
-  m_ext=NULL;
+    m_ext=NULL;*/
 }
 PL_MediaFile* PlaylistItem::getMediaFile()
 {
-  return m_mediaFile;
+    return m_mediaFile;
 }
 
 ItemDecorator* PlaylistItem::getKey() const
 {
-  return key;
-}
-const SongFields* PlaylistItem::getFields()
-{
-    return fields;
-}
-SongFields* PlaylistItem::getFields2()
-{
-    return fields;
+    return key;
 }
 void PlaylistItem::ForceTagReading()
 {
-  key->setItem(this);
-  key->ForceTagReading();
+    key->setItem(this);
+    key->ForceTagReading();
 }
 bool PlaylistItem::isReading() const
 {
@@ -232,75 +208,72 @@ void PlaylistItem::setReading(bool t)
 }
 Song* PlaylistItem::getSong()
 {
-    return m_song;
+    return &m_song;
 }
 
 const Song* PlaylistItem::getConstSong()
 {
-    return m_song;
+    return &m_song;
 }
 
 QTextStream& operator<<(QTextStream& Out, const PlaylistItem& B) 
 { 
-  
 
-  Out << B.getExt()<< endl;
-  Out << B.getURI()<< endl;
-  
-  return Out; 
+
+    Out << B.getExt()<< endl;
+    Out << B.getURI()<< endl;
+
+    return Out;
 }
 
 QTextStream& operator>>(QTextStream& is,PlaylistItem& B)
 {
-  QString* a = new QString(); 
+    QString a;
 
-  B.m_uri = new QString();
-  
-  (*a)= is.readLine();
-  if(!a->startsWith("#EXTINF",Qt::CaseSensitive))
-  {
-    
-    B.m_uri=a;
-    B.m_ext = new QString();
-  }
-  else
-  {
-    B.m_uri = new QString();
-    B.m_ext = a;
-    (*B.m_uri)=is.readLine();
-  }
-  B.findmedia();
-  return is;
+    //B.m_uri = new QString();
 
-            
+    a= is.readLine();
+    if(!a.startsWith("#EXTINF",Qt::CaseSensitive))
+    {
+        B.getSong()->setUri(a);
+    }
+    else
+    {
+        //B.getSong()->setExt(a);
+        B.getSong()->setUri(is.readLine());
+    }
+    B.findmedia();
+    return is;
+
+
 }
 
 QDataStream& operator<<(QDataStream& Out, const PlaylistItem& B) 
 { 
 
+    QString a;
+    Out << a;
+    Out << B.getURI();
 
-  Out << B.getExt();
-  Out << B.getURI();
+    Out << (*B.m_mediaFile);
 
-  Out << (*B.m_mediaFile);
-  
-  
-  return Out; 
+
+    return Out;
 }
 
 QDataStream& operator>>(QDataStream& is,PlaylistItem& B)
 {
-  B.m_ext = new QString;
-  B.m_uri = new QString;
-  is >>(*B.m_ext);
-  is >>(*B.m_uri);
+    QString a;
+    is >>a;
+    is >>a;
+    B.getSong()->setUri(a);
 
-  //qDebug() <<( *B.uri) << endl;
-  B.findmedia();
-  is >> (*B.m_mediaFile);
-  
-  
-  return is;
+    //qDebug() <<( *B.uri) << endl;
+    B.findmedia();
+    is >> (*B.m_mediaFile);
 
-            
+
+    return is;
+
+
 }

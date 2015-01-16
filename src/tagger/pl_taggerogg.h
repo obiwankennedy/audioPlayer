@@ -10,11 +10,11 @@ class PL_TaggerOgg : public PL_TagLibFile
 {
  TagLib::FileRef* myTaggger;
  TagLib::MPEG::File* myTagggerFileMPG;
- QString* filename;
+ QString filename;
   static QStringList* listgenre;
 public:
 	PL_TaggerOgg();
-	PL_TaggerOgg(QString* _filename);
+    PL_TaggerOgg(QString _filename);
    virtual ~PL_TaggerOgg();
    virtual QVariant getValue(int i);
    virtual void setValue(DataField x,QVariant& value,bool replace);

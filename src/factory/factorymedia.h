@@ -23,6 +23,7 @@
 #include <QString>
 #include "pl_mediafile.h"
 #include "../data.h"
+#include "data/song.h"
 
 /**
 	@author Renaud Guezennec <renaud.guezennec@gmail.com>
@@ -38,7 +39,7 @@ class FactoryMedia
 {
 public:
      virtual ~FactoryMedia();
-    virtual PL_MediaFile* buildMedia(QString& txt,SongFields* fields)=0;
+    virtual PL_MediaFile* buildMedia(QString& txt,Song* fields)=0;
     
 };
 
