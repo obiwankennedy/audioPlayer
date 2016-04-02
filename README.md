@@ -18,3 +18,5 @@ The original goal was to implement a Qt application with many design patterns.
 -MVC
 
 
+
+This project was designed to fit the project suject. 
