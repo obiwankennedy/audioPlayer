@@ -9,3 +9,12 @@ Features:
 -Read many kinds of file
 -Export playlist
 
+
+Patterns:
+-Command
+-Singleton
+-Visitor
+-Composite
+-MVC
+
+
