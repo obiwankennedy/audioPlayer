@@ -45,36 +45,14 @@ PlaylistItem::PlaylistItem(const PlaylistItem& original)
 {
     this->facade = MediaFacade::getInstance();
     this->m_mediaFile = NULL;
-
-    //m_song = new Song();
-    /// @todo constructor by copy for song.
-    //m_song = original.getSong();
-
-    //  this->fields->Title = original.fields->Title;
-    //  this->fields->Artist= original.fields->Artist;
-    //  this->fields->genre=original.fields->genre;
-    //  this->fields->album= original.fields-> album;
-    //  this->fields->duration=original.fields->duration;
-    //  this->fields->Bitrate=original.fields-> Bitrate;
-    //  this->fields->Comment =original.fields->Comment;
-    //  this->fields->Year=original.fields->Year;
-    //  this->fields->m_image=original.fields->m_image;
-
-    // this->m_ext=new QString();
-
-    /* if(NULL!=original.m_ext)
-  {
-
-    *this-> m_ext=*original.m_ext;
-  }*/
-
+    m_song = *original.getConstSong();
     findmedia();
-
 }
 //MediaFacade *PlaylistItem::facade = NULL;
 QString PlaylistItem::getReadableTitle()
 {
-    return QString("%1 - %2").arg(m_song.getArtistName()).arg(m_song.getTitle());
+   // return QString("%1 - %2").arg(m_song.getArtistName()).arg(m_song.getTitle());
+   return QString("%1 - %2").arg(m_mediaFile->getArtist()).arg(m_mediaFile->getTitle());
 }
 const QString PlaylistItem::getURI() const
 {
@@ -91,22 +69,12 @@ const QImage& PlaylistItem::getPicture()
 
 void PlaylistItem::setURI(QString & p) 
 {
-
     m_song.setUri(p);
     urichanged = true;
     findmedia();
-
 }
 
-void PlaylistItem::findmedia()
-{
-    if((m_mediaFile==NULL)||(urichanged))
-    {
-       // exploseExt();
-        m_mediaFile=facade->buildaMedia(m_song.getUri(),key,&m_song);
-        key->setItem(this);
-    }
-}
+
 QString PlaylistItem::toString()
 {
 
@@ -121,7 +89,6 @@ QString PlaylistItem::toString()
     }
 
 
-
     return QString(m_song.getArtistName()+" - "+m_song.getTitle());
 
 }
@@ -131,8 +98,7 @@ const QString PlaylistItem::getExt() const
 }
 void PlaylistItem::SetExt(QString& p)
 {
-    /* m_ext=&p;
-  exploseExt();*/
+
 }
 
 
@@ -155,31 +121,6 @@ QString PlaylistItem::buildExt()  const
 }
 void PlaylistItem::exploseExt()
 {
-  /*  if((m_ext!=NULL)&&(!m_ext->isEmpty()))
-    {
-        QStringList a = buildExt()->split(':');
-        if(a.size()==2)
-        {
-            a = a[1].split(',');
-            if(a.size()==2)
-            {
-                bool ok;
-                int tmptime = a[0].toInt(&ok,10);
-                if(ok)
-                    fields->duration = (1000*tmptime);
-                
-                a = a[1].split("- ");
-                if(a.size()==2)
-                {
-
-                    (fields->Title) = a[1].simplified();
-
-                    (fields->Artist) = a[0].simplified();
-                }
-            }
-        }
-    }
-    m_ext=NULL;*/
 }
 PL_MediaFile* PlaylistItem::getMediaFile()
 {
@@ -206,12 +147,16 @@ void PlaylistItem::setReading(bool t)
 
 
 }
+void PlaylistItem::acceptVisitor(VisitorMedia* visitor)
+{
+  visitor->visitMedia(this);
+}
 Song* PlaylistItem::getSong()
 {
     return &m_song;
 }
 
-const Song* PlaylistItem::getConstSong()
+const Song* PlaylistItem::getConstSong() const
 {
     return &m_song;
 }
@@ -230,8 +175,6 @@ QTextStream& operator>>(QTextStream& is,PlaylistItem& B)
 {
     QString a;
 
-    //B.m_uri = new QString();
-
     a= is.readLine();
     if(!a.startsWith("#EXTINF",Qt::CaseSensitive))
     {
@@ -239,7 +182,6 @@ QTextStream& operator>>(QTextStream& is,PlaylistItem& B)
     }
     else
     {
-        //B.getSong()->setExt(a);
         B.getSong()->setUri(is.readLine());
     }
     B.findmedia();
@@ -252,11 +194,8 @@ QDataStream& operator<<(QDataStream& Out, const PlaylistItem& B)
 { 
 
     QString a;
-    Out << a;
     Out << B.getURI();
-
-    Out << (*B.m_mediaFile);
-
+    Out << (B.m_song);
 
     return Out;
 }
@@ -265,14 +204,9 @@ QDataStream& operator>>(QDataStream& is,PlaylistItem& B)
 {
     QString a;
     is >>a;
-    is >>a;
-    B.getSong()->setUri(a);
-
-    //qDebug() <<( *B.uri) << endl;
-    B.findmedia();
-    is >> (*B.m_mediaFile);
-
-
+    B.setURI(a);
+    is >> (B.m_song);
+    key->setItem(*B);
     return is;
 
 

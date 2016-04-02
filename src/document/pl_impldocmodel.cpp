@@ -49,7 +49,7 @@ QVariant PL_ImplDocModel::getData(int x,int y)
                 
     
                
-    return p->getKey()->getMember(( *listheader )[y]->x);
+    return p->getConstSong()->getMember(( *listheader )[y]->x);
   }
   return QVariant();
 }

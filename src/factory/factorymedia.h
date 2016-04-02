@@ -23,7 +23,9 @@
 #include <QString>
 #include "pl_mediafile.h"
 #include "../data.h"
-#include "data/song.h"
+
+
+class Song;
 
 /**
 	@author Renaud Guezennec <renaud.guezennec@gmail.com>

@@ -1,8 +1,8 @@
+#include "song.h"
+#include "factory/mediafacade.h"
+
 
 #include <QTextStream>
-
-#include "song.h"
-
 Song::Song()
     : m_genre(-1),m_duration(-1),m_bitrate(-1),m_year(-1)
 {
@@ -152,6 +152,13 @@ QTextStream& operator>>(QTextStream& is, Song& B)
 
 
 }
+void Song::findmedia()
+{
+    if((m_mediaFile==NULL))
+    {
+        m_mediaFile=facade->buildaMedia(m_song.getUri(),key,&m_song);
+    }
+}
 PL_MediaFile* Song::getMediaFile() const
 {
     return m_mediaFile;
@@ -159,32 +166,102 @@ PL_MediaFile* Song::getMediaFile() const
 
 QDataStream& operator<<(QDataStream& Out, const Song& B)
 {
-
-
   Out << QString();
   Out << B.getUri();
-
-  Out << (*(B.getMediaFile()));
-
-
   return Out;
 }
 
 QDataStream& operator>>(QDataStream& is,Song& B)
 {
-    QString a;
+  QString a;
   is >> a;
 
   QString b;
   is >> b;
   B.setUri(b);
-
-
-  //B.findmedia();
-  //is >> (*B.m_mediaFile);
-
-
   return is;
 
+
+}
+void Song::readData(QDataStream& data)
+{
+    data >> m_uri;
+}
+
+void Song::writeData(QDataStream& data)
+{
+    data << m_uri;
+}
+QVariant Song::getMember(DataField x) const
+{
+  switch(x)
+  {
+    case TITLE:
+    {
+      return (getTitle());
+    }
+    case ARTIST:
+      return (getArtist());
+    case TIME:
+      return getDuration();
+    case ALBUM:
+      return (getAlbumtitle());
+    case GENRE:
+      return getGenre();
+    case TRACK:
+      return getTrack();
+  case PICTURE:
+      return getPicture();
+    case COMMENT:
+      return getComment();
+    case YEAR:
+      return getYear();
+    case BITRATE:
+      return getBitrate();
+
+  }
+  return QVariant();
+
+
+
+}
+void Song::setValue(DataField x,QVariant& value,bool replace)
+{
+
+    switch(x)
+    {
+      case TITLE:
+      {
+        setTitle(value.toString());
+        break;
+      }
+      case ARTIST:
+        setArtistName(value.toString());
+        break;
+      case TIME:
+        break;
+      case ALBUM:
+        setAlbum(value.toString());
+        break;
+      case GENRE:
+        setGenre(value.toInt());
+        break;
+      case TRACK:
+        setTrackNumber(value.toInt());
+        break;
+    case PICTURE:
+        break;
+      case COMMENT:
+        setComment(value.toString());
+          break;
+      case YEAR:
+        setYear(value.toInt());
+          break;
+      case BITRATE:
+        setBitrate(value.toInt());
+          break;
+
+    }
+  tmp->setValue(x,value,replace);
 
 }

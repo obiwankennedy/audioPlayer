@@ -307,6 +307,7 @@ void PL_Mp3File::readData(QDataStream & in)
 {
     /// @warning readData
   //in >> fields;
+    qDebug() << "PL_Mp3File::readData";
 }
 void PL_Mp3File::writting(QDataStream & out) const
 {

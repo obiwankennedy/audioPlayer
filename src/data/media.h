@@ -14,6 +14,11 @@ public:
     QString getUri() const;
 
     void setUri(QString uri);
+
+
+
+    virtual void readData(QDataStream& data);
+    virtual void writeData(QDataStream& data);
 protected:
     QString m_uri;
 };

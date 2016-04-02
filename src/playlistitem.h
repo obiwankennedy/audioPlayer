@@ -41,20 +41,10 @@
  * \warning no known 
  * \todo   no           
 */
-class ItemDecorator;
-class MediaFacade;
+
 class PlaylistItem
 {
-
-
-  ItemDecorator* key;
-  //SongFields* fields;
-  bool urichanged;
-
   static PlaylistItem* ms_currentPlayedItem;
-
-  void findmedia();
-
 public:
     PlaylistItem();
     PlaylistItem(const PlaylistItem& original);
@@ -62,10 +52,7 @@ public:
     bool isReading() const;
     void setReading(bool t);
 
-   /* const SongFields* getFields();
-    SongFields* getFields2();*/
-
-    const Song* getConstSong();
+    const Song* getConstSong() const;
     Song* getSong();
 
 
@@ -82,7 +69,6 @@ public:
      QString getReadableTitle();
      QString toString();
      const QImage& getPicture();
-     //qRegisterMetaTypeStreamOperators<PlaylistItem>("PlaylistItem");
      
      friend QTextStream& operator<<(QTextStream& os,const PlaylistItem&);
      friend QTextStream& operator>>(QTextStream& is,PlaylistItem&);
@@ -91,10 +77,6 @@ public:
 
 private:
      Song m_song;
-     PL_MediaFile* m_mediaFile;
-  /*   QString* m_uri;
-     QString* m_ext;*/
-     MediaFacade* facade;
 };
 
  Q_DECLARE_METATYPE(PlaylistItem)

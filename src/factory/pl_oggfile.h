@@ -15,10 +15,8 @@
 class PL_OggFile : public PL_AudioFile
 {
 	PL_TaggerOgg* oggtagger;
-    //QString* m_uri;
     Song* m_song;
     bool linked;
- //TagLib::FileRef *f
 public:
 	PL_OggFile();
     PL_OggFile(QString& uri,Song* song);

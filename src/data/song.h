@@ -4,12 +4,16 @@
 #include <QImage>
 #include "media.h"
 #include "factory/pl_mediafile.h"
+#include "itemdecorator.h"
 
+class MediaFacade;
 class Song : public Media
 {
 public:
     Song();
     Song(const Song& original);
+
+    void findmedia();
 
     // gets
     const QString& getTitle() const;
@@ -42,6 +46,12 @@ public:
 
     PL_MediaFile* getMediaFile() const;
 
+
+    void readData(QDataStream& data);
+    void writeData(QDataStream& data);
+
+    friend QDataStream& operator<<(QDataStream& os,const Song&);
+    friend QDataStream& operator>>(QDataStream& is,Song&);
 private:
     QString m_title;
     QString m_artistName;
@@ -57,6 +67,9 @@ private:
     int m_duration;
 
     PL_MediaFile* m_mediaFile;
+    ItemDecorator* key;
+    MediaFacade* facade;
+    bool urichanged;
 };
 
 #endif // SONG_H

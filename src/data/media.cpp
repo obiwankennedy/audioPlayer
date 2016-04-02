@@ -12,3 +12,12 @@ void Media::setUri(QString uri)
 {
     m_uri = uri;
 }
+void Media::readData(QDataStream& data)
+{
+    data >> m_uri;
+}
+
+void Media::writeData(QDataStream& data)
+{
+    data << m_uri;
+}

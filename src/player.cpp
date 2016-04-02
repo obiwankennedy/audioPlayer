@@ -203,7 +203,6 @@ void Player::setRepeat()
 #endif
 void Player::sourceChanged(const QMediaContent & media)
 {
-qDebug() << "source changed 1";
     if(m_current!=NULL)
     {
         qDebug() << "source changed";

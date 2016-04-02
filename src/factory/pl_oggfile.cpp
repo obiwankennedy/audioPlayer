@@ -1,6 +1,9 @@
 #include "pl_oggfile.h"
 #include <QFileInfo>
 #include <QTextStream>
+
+#include <QDebug>
+
 /*PL_OggFile::PL_OggFile(  ) 
 	: PL_MediaFile()
 {
@@ -17,43 +20,18 @@ PL_OggFile::PL_OggFile( QString& uri,Song* fields )
 }
 int PL_OggFile::getDuration()const
 {
-	QTextStream out(stderr,QIODevice::WriteOnly);
+
   if((m_song->getDuration()==-1)||(mode))
   {
-    
-//      if(!linked)
-//        link();
-
-      
-      
-      
-     
-      
-    QVariant tmpDuration = oggtagger->getValue(TIME);
-    
-    
-    bool ok;
-    out << tmpDuration.toInt() << endl;
+    QVariant tmpDuration = oggtagger->getValue(TIME);  
     m_song->setDuration(tmpDuration.toInt());
-    if(!ok)
-    {
-     
-      m_song->setDuration(-1);
-
-      //fields->duration=(header->time*1000);
-    }
-    
-    
   }
   return  m_song->getDuration();
 }
 const QString& PL_OggFile::getTitle() const
 {
-  if((m_song->getTitle().isNull())||(mode))
-  {
-//    if(!linked)
-//      link();
-  
+  if((m_song->getTitle().isEmpty())||(mode))
+  { 
     m_song->setTitle(oggtagger->getValue(TITLE).toString());
   }
   
@@ -61,9 +39,6 @@ const QString& PL_OggFile::getTitle() const
   {
     
     QFileInfo a(*this);
-    
-    
-
     QStringList ab = a.fileName().split(".");
     if (ab.size() > 0) 
     {
@@ -71,16 +46,12 @@ const QString& PL_OggFile::getTitle() const
       
     }
   }
-  
-  
   return m_song->getTitle();
 }
 const QString& PL_OggFile::getArtist() const
 { 
-  if((m_song->getArtistName().isNull())||(mode))
+  if((m_song->getArtistName().isEmpty())||(mode))
   {
-//    if(!linked)
-//      link();
     m_song->setArtistName(oggtagger->getValue(ARTIST).toString());
   }
   return m_song->getArtistName();
@@ -90,10 +61,7 @@ int PL_OggFile::getGenre() const
  
   if((m_song->getGenre()==-1)||(mode))
   {
-   
-//      if(!linked)
-//        link();
-      
+
     QString genre = oggtagger->getValue(GENRE).toString();
     
     bool ok;
@@ -115,9 +83,6 @@ const QString& PL_OggFile::getAlbumtitle() const
 {
   if((m_song->getAlbum().isNull())||(mode))
   {
-//    if(!linked)
-//      link();
-    
     m_song->setAlbum(oggtagger->getValue(ALBUM).toString());
   }
   return m_song->getAlbum();
@@ -125,10 +90,7 @@ const QString& PL_OggFile::getAlbumtitle() const
 const QString& PL_OggFile::getComment() const
 {
   if((m_song->getComment().isNull())||(mode))
-  {
-//    if(!linked)
-//      link();
-    
+  {   
     m_song->setComment(oggtagger->getValue(COMMENT).toString());
   }
   return m_song->getComment();
@@ -138,29 +100,16 @@ int PL_OggFile::getYear() const
 {
   if((m_song->getYear()==-1)||(mode))
   {
-   
-//    if(!linked)
-//      link();
-      
      m_song->setYear(oggtagger->getValue(YEAR).toInt());
-
-  }
-  
+  }  
   return m_song->getYear();
 }   
 int PL_OggFile::getBitrate() const
 {
-  
-  
   if((m_song->getBitrate()==-1)||(mode))
   {
-//    if(!linked)
-//      link();
-        
     m_song->setBitrate(oggtagger->getValue(BITRATE).toInt());
-    
   } 
-  
   return m_song->getBitrate();
 }        
 QStringList* PL_OggFile::getgenres()
@@ -273,11 +222,13 @@ const QImage& PL_OggFile::getPicture() const
 void PL_OggFile::readData(QDataStream & in)
 {
     /// @warning readData
-  //in>> m_song ;
+   m_song = new Song();
+    in>> *m_song ;
+    qDebug() << "readdate ogg";
 }
 void PL_OggFile::writting(QDataStream & out) const
 {
-  out << m_song ;
+  out << *m_song ;
 }
 void PL_OggFile::ForceTagReading()
 {

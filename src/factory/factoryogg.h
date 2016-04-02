@@ -3,7 +3,8 @@
 //
 #include "factorymedia.h"
 #include "pl_oggfile.h"
-//
+
+class Song;
 class FactoryOgg : public FactoryMedia
 {
 
