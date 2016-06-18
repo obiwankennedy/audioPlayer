@@ -636,7 +636,8 @@ void Player::readSettings(QSettings& settings)
 #endif
 
     m_current = new PlaylistItem();
-    *m_current = settings.value("currentSong").value<PlaylistItem>();
+    QString uri = settings.value("currentSong").value<QString>();
+    m_current->setURI(uri);
 
 
 
@@ -657,9 +658,10 @@ void Player::writeSettings(QSettings& settings)
         settings.setValue(QString(i), m_positions[m_positions.size()-(1+i)]);
 
     }
-    QVariant var;
-    var.setValue(*m_current);
-    settings.setValue("currentSong",var);
+    if(NULL!=m_current)
+    {
+        settings.setValue("currentSong",m_current->getURI());
+    }
 #ifdef REPEAT
     settings.setValue("repeat",m_repeatState);
 #endif
