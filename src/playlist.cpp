@@ -44,16 +44,15 @@ void Playlist::append(PlaylistItem* a)
 }
 qlonglong Playlist::reckOnTime()
 {
-    bool* conv = new bool;
+    bool conv;
     foreach(PlaylistItem* a, *myPlaylist)
     {
 
-      int time = a->getKey()->getMember(TIME).toInt(conv);
+      int time = a->getKey()->getMember(TIME).toInt(&conv);
 
       if((time !=-1)&&(conv))
         m_totaltime+=time;
     }
-    //qDebug() << " fyopitd " <<m_totaltime;
     return m_totaltime;
 }
 void Playlist::removeAt(int a)
