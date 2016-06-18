@@ -132,9 +132,9 @@ SOURCES += edittagbox.cpp \
 
 
 #DEFINES += REPEAT
-
+#-L/usr/local/lib
 LIBS += -lid3 \
-    -L/usr/local/lib -ltag
+     -ltag
 
 QT += xml \
     core \
