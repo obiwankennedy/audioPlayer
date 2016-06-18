@@ -1,5 +1,7 @@
 #include "pl_oggfile.h"
 #include <QFileInfo>
+#include <QDebug>
+
 #include <QTextStream>
 /*PL_OggFile::PL_OggFile(  ) 
 	: PL_MediaFile()
@@ -18,40 +20,31 @@ PL_OggFile::PL_OggFile( QString& uri,SongFields* fields )
 }
 int PL_OggFile::getDuration()
 {
-	QTextStream out(stderr,QIODevice::WriteOnly);
   if((fields->duration==-1)||(mode))
   {
     
       if(!linked)
+      {
         link();
-
-      
-      
-      
+     }
      
       
-    QVariant tmpDuration = oggtagger->getValue(TIME);
-    
-    
+    QVariant tmpDuration = oggtagger->getValue(TIME);    
     bool ok;
-    out << tmpDuration.toInt() << endl;
-    fields->duration=tmpDuration.toInt();
+    fields->duration=tmpDuration.toInt(&ok);
     if(!ok)
     {
-     
-      fields->duration=-1;
-     
-      
-       
+      fields->duration=-1;   
       //fields->duration=(header->time*1000);
     }
-    
-    
+        
   }
+
   return  fields->duration;
 }
 QString* PL_OggFile::getTitle() 
 {
+
   if((fields->Title.isNull())||(mode))
   {
     if(!linked)
