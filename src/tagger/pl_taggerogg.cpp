@@ -79,7 +79,8 @@ QVariant PL_TaggerOgg::getValue(int i)
     }
     case TIME:
     {
-        return myTaggger->audioProperties()->length()*1000;
+       // qDebug() << myTaggger->audioProperties()->length();// << 	 //myTaggger->audioProperties()->lengthInSeconds();
+        return myTaggger->audioProperties()->length();
 
     }
     case GENRE:
@@ -182,6 +183,8 @@ void PL_TaggerOgg::setValue(dataColumn x,QVariant& data,bool /*replace*/)
         break;
     case TRACK:
         myTaggger->tag()->setTrack(data.toString().toInt());
+        break;
+    case PICTURE:
     case TIME:
     case BITRATE:
         return;
