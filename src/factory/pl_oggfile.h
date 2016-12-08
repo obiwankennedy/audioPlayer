@@ -51,5 +51,6 @@ public:
     void parseHeader();
     virtual void readering(QDataStream & in);
     virtual void writting(QDataStream & out) const;
+    void unlink();
 };
 #endif

@@ -8,16 +8,19 @@
 
 class PL_TaggerOgg : public PL_TagLibFile
 {
- TagLib::FileRef* myTaggger;
- TagLib::MPEG::File* myTagggerFileMPG;
- QString* filename;
-  static QStringList* listgenre;
 public:
-	PL_TaggerOgg();
-	PL_TaggerOgg(QString* _filename);
-   virtual ~PL_TaggerOgg();
-   virtual QVariant getValue(int i);
-   virtual void setValue(dataColumn x,QVariant& value,bool replace);
-   QStringList* getgenres();
+    void close();
+    PL_TaggerOgg();
+    PL_TaggerOgg(QString* _filename);
+    virtual ~PL_TaggerOgg();
+    virtual QVariant getValue(int i);
+    virtual void setValue(dataColumn x,QVariant& value,bool replace);
+    QStringList* getgenres();
+
+private:
+    TagLib::FileRef* myTaggger;
+    TagLib::MPEG::File* myTagggerFileMPG;
+    QString* filename;
+    static QStringList* listgenre;
 };
 #endif

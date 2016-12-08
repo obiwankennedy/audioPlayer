@@ -1,5 +1,6 @@
 #include <QtGui>
 #include <QToolBar>
+#include <random>
 
 #include <QFile>
 #include <QVariant>
@@ -28,9 +29,6 @@ Player::Player(  QWidget * parent, Qt::WindowFlags f)
     selectedReadMode = mypreference->getSelectedReadMode();
 
     setupActions();
-
-
-
 
     //readSettings();
     setupUi();
@@ -203,10 +201,8 @@ void Player::setRepeat()
 #endif
 void Player::sourceChanged(const QMediaContent & media)
 {
-qDebug() << "source changed 1";
     if(m_current!=NULL)
     {
-        qDebug() << "source changed";
         setTitle(m_current->getReadableTitle());
         m_current->setReading(true);
         QPixmap* img = new QPixmap();
@@ -307,11 +303,11 @@ void Player::setupActions()
     previousAction = new QAction(style()->standardIcon(QStyle::SP_MediaSkipBackward), tr("Previous"), this);
     previousAction->setShortcut(tr("P"));
     QList<QByteArray> list = QImageReader::supportedImageFormats();
-    foreach(QByteArray tmp, list)
+  /*  foreach(QByteArray tmp, list)
     {
         qDebug() << tmp;
     }
-
+*/
     randomly= new QPushButton(QIcon(":/resources/pixmaps/Infinite.svg"),tr(""),this);
     randomly->setFlat(true);
     randomly->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
@@ -330,7 +326,6 @@ void Player::setupActions()
 QMediaContent* Player::playSong(PlaylistItem* p)
 {
     //QFile* file = new QFile(p->getURI());
-    qDebug() << p->getURI();
     if(QFile::exists(p->getURI()))
     {
         return new QMediaContent(QUrl::fromLocalFile(p->getURI()));
@@ -370,10 +365,12 @@ void Player::next()
     }
     case RANDOM:
     {
-        int place;
+        int place=0;
         if(m_listposition == m_positions.size()-1)
         {
-            place = (int)((double)rand() / ((double)RAND_MAX + 1) * myPlaylist->size());
+            std::random_device rd;
+            std::uniform_int_distribution<int> dist(0, myPlaylist->size()-1);
+            place = dist(rd);//(int)((double)rand() / ((double)RAND_MAX + 1) * myPlaylist->size());
             m_positions << place;
             ++m_listposition;
 

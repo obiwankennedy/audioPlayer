@@ -9,7 +9,6 @@ OggDecorator::OggDecorator(  )
 //
 QVariant OggDecorator::getMember(dataColumn x) const
 {
-    qDebug() << "get member ogg";
   PL_OggFile* tmp =(PL_OggFile*) item->getMediaFile();
   
   if(item==NULL)

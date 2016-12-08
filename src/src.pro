@@ -72,13 +72,13 @@ HEADERS += edittagbox.h \
     visitormedia.h \
     thread.h \
     visitormediaseeker.h \
-    wizzardexport.h \
+    wizzardexport/wizzardexport.h \
     pl_defaultaudio.h \
     pl_itemcompare.h \
     sortdialog.h \
     importparser.h \
     plsimport.h \
-    xmlimport.h \
+    wizzardexport/xmlimport.h \
     player.h \
     pl_treeview.h \
     pl_treemodel.h \
@@ -95,7 +95,8 @@ FORMS += tageditor/tageditordialog.ui \
     wizzardexport/wizzardexport.ui \
     sortui/sortui.ui \
     preferences/preferences.ui \
-    findingassistant/findingassistant.ui
+    findingassistant/findingassistant.ui \
+    mainwindow.ui
 
 
 SOURCES += edittagbox.cpp \
@@ -110,13 +111,13 @@ SOURCES += edittagbox.cpp \
     visitormedia.cpp \
     thread.cpp \
     visitormediaseeker.cpp \
-    wizzardexport.cpp \
+    wizzardexport/wizzardexport.cpp \
     pl_defaultaudio.cpp \
     pl_itemcompare.cpp \
     sortdialog.cpp \
     importparser.cpp \
     plsimport.cpp \
-    xmlimport.cpp \
+    wizzardexport/xmlimport.cpp \
     player.cpp \
     pl_treeview.cpp \
     pl_treemodel.cpp \
@@ -152,7 +153,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 documentation.path = /usr/local/audioPlayer/documentation/
 documentation.files = ../documentation/*
-target.path = /usr/local/bin
+target.path = /opt/bin/audioPlayer/
 INSTALLS += documentation \
     target
 VERSION = 0.9.1

@@ -13,7 +13,8 @@
 #include <QDebug>
 #include <QFileInfo>
 //
-PL_TaggerOgg::PL_TaggerOgg(  ) 
+
+PL_TaggerOgg::PL_TaggerOgg(  )
     : PL_TagLibFile(),myTagggerFileMPG(NULL)
 {
     // TODO
@@ -21,11 +22,9 @@ PL_TaggerOgg::PL_TaggerOgg(  )
 //
 
 PL_TaggerOgg::PL_TaggerOgg(QString* _filename)
+: PL_TagLibFile(),myTagggerFileMPG(NULL)
 {
-
-
     filename=_filename;
-
     //myTaggger = new TagLib::FileRef(filename->toStdString().c_str());
     myTaggger = new TagLib::FileRef(filename->toLocal8Bit());
     QFileInfo info(*filename);
@@ -33,17 +32,19 @@ PL_TaggerOgg::PL_TaggerOgg(QString* _filename)
     {
         myTagggerFileMPG = new TagLib::MPEG::File(filename->toLocal8Bit());
     }
-
-
-
-
-
-
 }
 
 PL_TaggerOgg::~PL_TaggerOgg()
 {
     delete myTaggger;
+}
+void PL_TaggerOgg::close()
+{
+    if(myTaggger!=NULL)
+    {
+        delete myTaggger;
+        myTaggger=NULL;
+    }
 }
 
 QVariant PL_TaggerOgg::getValue(int i)
@@ -97,7 +98,7 @@ QVariant PL_TaggerOgg::getValue(int i)
         return QString(myTaggger->audioProperties()->bitrate());
     case PICTURE:
     {
-        qDebug() << "try to read picture";
+       // qDebug() << "try to read picture";
         QImage image;
         if(NULL!=myTagggerFileMPG)
         {
@@ -131,7 +132,7 @@ QVariant PL_TaggerOgg::getValue(int i)
 
                 if(frames.isEmpty())
                 {
-                    qDebug() << "No pictuer to read";
+                  //  qDebug() << "No pictuer to read";
                     return image;
                 }
                 TagLib::ID3v2::AttachedPictureFrame *picFrame =
@@ -139,7 +140,7 @@ QVariant PL_TaggerOgg::getValue(int i)
 
                 image.loadFromData((const uchar *) picFrame->picture().data(), picFrame->picture().size());
 
-                qDebug() << "Picture has been found.";
+              //  qDebug() << "Picture has been found.";
 
             }
         }

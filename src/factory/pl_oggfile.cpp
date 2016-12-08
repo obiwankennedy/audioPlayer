@@ -12,7 +12,7 @@
 PL_OggFile::PL_OggFile( QString& uri,SongFields* fields ) 
 	:  PL_AudioFile(uri),fields(NULL)
 {
-	  mode=NORMAL_MODE;
+  mode=NORMAL_MODE;
   linked=false;
   this->uri=&uri;
   this->fields=fields;
@@ -34,10 +34,10 @@ int PL_OggFile::getDuration()
     fields->duration=tmpDuration.toInt(&ok);
     if(!ok)
     {
-      fields->duration=-1;   
+      fields->duration=-1;
       //fields->duration=(header->time*1000);
     }
-        
+    //unlink();
   }
 
   return  fields->duration;
@@ -201,8 +201,6 @@ void PL_OggFile::setComment(QString p)
   fields->Comment = p;
 }
 
-
-
 bool PL_OggFile::is_linked()
 {
   
@@ -215,7 +213,13 @@ void PL_OggFile::link()
   oggtagger = new PL_TaggerOgg(uri);
   linked=true;
 }
-
+void PL_OggFile::unlink()
+{
+   delete oggtagger;
+    oggtagger=NULL;
+  //oggtagger->close();
+  linked=false;
+}
 void PL_OggFile::setValue(dataColumn x,QVariant& value,bool replace)
 {
   if(!linked)
@@ -282,6 +286,7 @@ void PL_OggFile::readering(QDataStream & in)
   in >> (fields->album);
   in >> (fields->Comment);
   in>> (fields->Bitrate) ;
+  fields->Bitrate = -1;
   in>> (fields->lyrics) ;
 }
 void PL_OggFile::writting(QDataStream & out) const

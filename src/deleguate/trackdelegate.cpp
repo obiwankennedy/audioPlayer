@@ -39,8 +39,13 @@ void TrackDelegate::paint(QPainter *painter,
     if (index.column() == durationColumn)
     {
         int secs = index.model()->data(index, Qt::DisplayRole).toInt();
-        qDebug() << "delegate" << secs;
-        //secs /=1000;
+       // qDebug() << "delegate" << secs;
+        int nsecs =secs/1000;
+        if(nsecs>0)
+        {
+            secs=nsecs;
+        }
+
         QString text = QString("%1:%2")
                 .arg(secs / 60, 2, 10, QChar('0'))
                 .arg(secs % 60, 2, 10, QChar('0'));

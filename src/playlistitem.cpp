@@ -193,7 +193,7 @@ void PlaylistItem::exploseExt()
                 bool ok;
                 int tmptime = a[0].toInt(&ok,10);
                 if(ok)
-                  fields->duration = (1000*tmptime);
+                  fields->duration = (tmptime);
                 
                 a = a[1].split("- ");
                 if(a.size()==2)
@@ -296,6 +296,8 @@ QDataStream& operator>>(QDataStream& is,PlaylistItem& B)
   B.uri = new QString;
   is >>(*B.ext);
   is >>(*B.uri);
+
+
 
   //qDebug() <<( *B.uri) << endl;
   B.findmedia();
