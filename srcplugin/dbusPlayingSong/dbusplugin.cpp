@@ -31,12 +31,12 @@ void DbusPlugin::SetSong(SongFields* p)
 
         }
 
-    QDBusMessage m = QDBusMessage::createMethodCall("im.pidgin.purple.PurpleService","/im/pidgin/purple/PurpleObject","im.pidgin.purple.PurpleInterface","PurpleUtilSetCurrentSong");
+   // QDBusMessage m = QDBusMessage::createMethodCall("im.pidgin.purple.PurpleService","/im/pidgin/purple/PurpleObject","im.pidgin.purple.PurpleInterface","PurpleUtilSetCurrentSong");
 
-    QList<QVariant> args;
+   /* QList<QVariant> args;
     args << m_p->Title << m_p->Artist << m_p->album;
     m.setArguments(args);
-    QDBusMessage metadatamsg = sessionbus.call(m);
+    QDBusMessage metadatamsg = sessionbus.call(m);*/
 
    /* if(metadatamsg.type() != QDBusMessage::ReplyMessage)
         qDebug() << "Error its not a message " << metadatamsg.type() <<metadatamsg.errorMessage ();*/
@@ -45,13 +45,13 @@ void DbusPlugin::SetSong(SongFields* p)
 }
 void DbusPlugin::stopped()
 {
-    QDBusConnection sessionbus = QDBusConnection::sessionBus();
+ /*   QDBusConnection sessionbus = QDBusConnection::sessionBus();
 
-    /*    if ( !sessionbus.isConnected() )
+       if ( !sessionbus.isConnected() )
         {
             fprintf(stderr,"Could not connect to session bus\n");
 
-        }*/
+        }
     QDBusMessage m = QDBusMessage::createMethodCall("im.pidgin.purple.PurpleService","/im/pidgin/purple/PurpleObject","im.pidgin.purple.PurpleInterface","PurpleUtilSetCurrentSong");
 
     QList<QVariant> args;
@@ -60,7 +60,7 @@ void DbusPlugin::stopped()
     QDBusMessage metadatamsg = sessionbus.call(m);
 
     if(metadatamsg.type() != QDBusMessage::ReplyMessage)
-        qDebug() << "Error its not a message " << metadatamsg.type() <<metadatamsg.errorMessage ();
+        qDebug() << "Error its not a message " << metadatamsg.type() <<metadatamsg.errorMessage ();*/
 
 
 }

@@ -12,8 +12,8 @@ public:
 
         bool hasCopyPasteSupport() const ;
         bool isTabVisible() const ;
-        virtual void readSettings(QSettings& settings) ;
-        virtual void writeSettings(QSettings& settings);
+        virtual void readSettings() ;
+        virtual void writeSettings();
         virtual QString tabTitle() const ;
         virtual void displayMenu(QMenu* menu);
         virtual  QList<PlaylistItem*>* getSelectedItem();

@@ -134,8 +134,6 @@ void PlayListViewer::initWidget()
     listmodel = new PL_ListModel;
     listview->setModel(listmodel);
 
-    main->updateHeader();
-
     connect(tablemodel, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
             this, SIGNAL(dataChanged()));
 }
@@ -153,17 +151,15 @@ void PlayListViewer::writeSettings(QSettings& settings)
 {
     foreach(PL_AbstractListViewer* p, *m_tabList)
     {
-        p->writeSettings(settings);
+        p->writeSettings();
     }
 }
 void PlayListViewer::readSettings(QSettings& settings)
 {
     foreach(PL_AbstractListViewer* p, *m_tabList)
     {
-        p->readSettings(settings);
+        p->readSettings();
     }
-
-   
 }
 
 Playlist* PlayListViewer::getmyPlaylist() const

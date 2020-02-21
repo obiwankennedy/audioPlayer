@@ -23,11 +23,11 @@ QString PL_treeview::tabTitle() const
 {
     return tr("Tree");
 }
-void PL_treeview::readSettings(QSettings& settings)
+void PL_treeview::readSettings()
 {
 
 }
-void PL_treeview::writeSettings(QSettings& settings)
+void PL_treeview::writeSettings()
 {
 
 }

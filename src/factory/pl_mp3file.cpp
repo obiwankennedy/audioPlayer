@@ -87,7 +87,7 @@ QString* PL_Mp3File::getTitle()
   if(fields->Title.isEmpty())
   {
     
-    QFileInfo a(*this);
+    QFileInfo a(file());
     
     
 

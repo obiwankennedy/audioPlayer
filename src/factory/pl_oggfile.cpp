@@ -25,6 +25,7 @@ int PL_OggFile::getDuration()
     
       if(!linked)
       {
+        return fields->duration;
         link();
      }
      
@@ -48,6 +49,7 @@ QString* PL_OggFile::getTitle()
   if((fields->Title.isNull())||(mode))
   {
     if(!linked)
+        return &fields->Title;
       link();
   
     fields->Title = oggtagger->getValue(TITLE).toString();
@@ -56,10 +58,7 @@ QString* PL_OggFile::getTitle()
   if(fields->Title.isEmpty())
   {
     
-    QFileInfo a(*this);
-    
-    
-
+    QFileInfo a(file());
     QStringList ab = a.fileName().split(".");
     if (ab.size() > 0) 
     {
@@ -76,6 +75,7 @@ QString* PL_OggFile::getArtist()
   if((fields->Artist.isNull())||(mode))
   {
     if(!linked)
+        return &fields->Artist;
       link();
     fields->Artist = oggtagger->getValue(ARTIST).toString();
   }
@@ -88,6 +88,7 @@ int PL_OggFile::getGenre()
   {
    
       if(!linked)
+          return fields->genre;
         link();
       
     QString genre = oggtagger->getValue(GENRE).toString();
@@ -112,6 +113,7 @@ QString* PL_OggFile::getAlbumtitle()
   if((fields->album.isNull())||(mode))
   {
     if(!linked)
+        return &fields->album;
       link();
     
     fields->album =oggtagger->getValue(ALBUM).toString();
@@ -123,6 +125,7 @@ QString* PL_OggFile::getComment()
   if((fields->Comment.isNull())||(mode))
   {
     if(!linked)
+        return &fields->Comment;
       link();
     
     fields->Comment =oggtagger->getValue(COMMENT).toString();
@@ -136,6 +139,7 @@ int PL_OggFile::getYear()
   {
    
     if(!linked)
+        return fields->Year;
       link();
       
      fields->Year = oggtagger->getValue(YEAR).toInt();
@@ -151,6 +155,7 @@ int PL_OggFile::getBitrate()
   if((fields->Bitrate==-1)||(mode))
   {
     if(!linked)
+        return fields->Bitrate;
       link();
         
     fields->Bitrate = oggtagger->getValue(BITRATE).toInt();
@@ -161,6 +166,7 @@ int PL_OggFile::getBitrate()
 }        
 QStringList* PL_OggFile::getgenres()
 {
+    return nullptr;
   return  oggtagger->getgenres();
 }
 void PL_OggFile::setTitle(QString p)
@@ -209,12 +215,12 @@ bool PL_OggFile::is_linked()
 }
 void PL_OggFile::link()
 {
-  
-  oggtagger = new PL_TaggerOgg(uri);
-  linked=true;
+  //oggtagger = new PL_TaggerOgg(uri);
+  linked=false;
 }
 void PL_OggFile::unlink()
 {
+    return;
    delete oggtagger;
     oggtagger=NULL;
   //oggtagger->close();
@@ -223,6 +229,7 @@ void PL_OggFile::unlink()
 void PL_OggFile::setValue(dataColumn x,QVariant& value,bool replace)
 {
   if(!linked)
+          return;
     link();
   oggtagger->setValue(x,value,replace);
  bool a;
@@ -263,6 +270,7 @@ QImage& PL_OggFile::getPicture()
     if((fields->Bitrate==-1)||(mode))
     {
       if(!linked)
+              return fields->m_image;
         link();
 
       fields->m_image = oggtagger->getValue(PICTURE).value<QImage>();

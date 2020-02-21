@@ -215,7 +215,6 @@ PL_MediaFile* PlaylistItem::getMediaFile()
 
 ItemDecorator* PlaylistItem::getKey() const
 {
-  
   return key;
 }
 const SongFields* PlaylistItem::getFields()

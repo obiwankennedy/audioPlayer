@@ -35,12 +35,12 @@ void  PL_ListView::aboutToShow()
 
 }
 
- void PL_ListView::readSettings(QSettings& settings)
+ void PL_ListView::readSettings()
 {
 
 
 }
- void PL_ListView::writeSettings(QSettings& settings)
+ void PL_ListView::writeSettings()
 {
 
 

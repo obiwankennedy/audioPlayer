@@ -99,7 +99,7 @@ PL_TableView::PL_TableView(QWidget * p)
     moveSelectionTo = new QAction(tr("Move the selection"), this);
     moveSelectionTo->setStatusTip(tr("Quick Move for long playlist"));
     connect(moveSelectionTo, SIGNAL(triggered()), this, SLOT(onMoveSelection()));
-    initHeaders();
+
 
     trackdelegate = new TrackDelegate(TIME,YEAR,BITRATE,GENRE);
     setItemDelegate(trackdelegate);
@@ -229,12 +229,7 @@ void PL_TableView::onClick(const QModelIndex& index)
     }
 
 }
-bool PL_TableView::event(QEvent *event)
-{
-    return  QTableView::event(event);
-    // QTableView::update(0,0,this->width(),this->height());
 
-}
 QModelIndex PL_TableView::moveCursor ( CursorAction cursorAction, Qt::KeyboardModifiers modifiers )
 {
 
@@ -306,7 +301,7 @@ void PL_TableView::setModel(PlayListModel* pmodel)
 {
     m_model = pmodel;
     QTableView::setModel(m_model);
-    SynchronizeActionAndColunm();
+    initColumns();
 }
 void PL_TableView::keyPressEvent(QKeyEvent *event)
 {
@@ -370,7 +365,7 @@ void PL_TableView::onModify()
     (*myselection)= this->selectedIndexes();
 
 
-    EditTagBox *dialog = new EditTagBox(this,myselection,m_model->columnCount());
+    EditTagBox *dialog = new EditTagBox(this,myselection, 9);
 
     if(dialog->exec())
     {
@@ -403,23 +398,6 @@ void PL_TableView::ShowandSelectRow(int row)
     selectRow(row);
 }
 
-/*void PL_TableView::showEvent ( QShowEvent * event )
-{
-    QScrollBar* a = verticalScrollBar();
-   //
-    if(pos != -1)
-    a->setValue(pos);
-QTableView::showEvent(event);
-
-
-}
- void PL_TableView::hideEvent ( QHideEvent * event )
- {
-  QScrollBar* a = verticalScrollBar();
-  pos = a->value();
-QTableView::hideEvent(event);
-
- }*/
 QList<PlaylistItem*>* PL_TableView::getSelectedItem()
 {
     if(myselection==NULL)
@@ -504,8 +482,6 @@ void PL_TableView::addinstack(PL_COMMAND* plcmd)
 {
     if(plcmd->check())
     {
-
-
         mystack->append(plcmd);
 
         connect(plcmd,SIGNAL(Maximum(int)),this,SIGNAL( Maximum(int)));
@@ -530,8 +506,6 @@ void PL_TableView::OnForceWriting()
 }
 void PL_TableView::OnRegex()
 {
-
-
     RegexWizzard* regexWizzard= new RegexWizzard;
     regexWizzard->show();
     //addinstack(new pl_regexcommand(*getSelectedItem(),start,TITLE,this));
@@ -539,7 +513,7 @@ void PL_TableView::OnRegex()
 void PL_TableView::update(const QModelIndex & a)
 {
 
-    for(int i = 0; i<m_model->columnCount();i++)
+    for(int i = 0; i<9;i++)
     {
         QTableView::update(a.sibling(a.row(),i));
     }
@@ -579,27 +553,17 @@ void PL_TableView::copy()
 }
 void PL_TableView::paste()
 {
-
-
     addinstack(new PL_MoveSelection(toPaste,toPastPosition,this,selectedIndexes().at(0).row()));
     emit isPastable(false);
     m_statePaste = false;
 }
 void PL_TableView::OnUpdate()
 {
-
-
     m_model->updateModel();
-
     emit actiondone(mystack->size());
-
     emit dataChanged();
-
-
     plcmd =NULL;
     emit done();
-
-
 }
 bool PL_TableView::hasCopyPasteSupport() const
 {
@@ -614,10 +578,9 @@ QString PL_TableView::tabTitle() const
 {
     return tr("Table");
 }
-void PL_TableView::writeSettings(QSettings& settings)
+void PL_TableView::writeSettings()
 {
-    //QSettings settings("Renaud Guezennec", "TableView");
-
+    QSettings settings("eu.renaudguezennec.www", "audioPlayer");
 
     settings.beginGroup("TableView");
     settings.setValue("viewduration", viewduration->isChecked());
@@ -630,11 +593,11 @@ void PL_TableView::writeSettings(QSettings& settings)
     settings.setValue("viewGenre", viewGenre->isChecked());
     settings.endGroup();
 }
-void PL_TableView::readSettings(QSettings& settings)
+void PL_TableView::readSettings()
 {
-    //QSettings settings("Renaud Guezennec", "TableView");
-    settings.beginGroup("TableView");
+    QSettings settings("eu.renaudguezennec.www", "audioPlayer");
 
+    settings.beginGroup("TableView");
     viewduration->setChecked(settings.value("viewduration",true).toBool ()) ;
     viewartist->setChecked(settings.value("viewartist",true).toBool ());
     viewtitle->setChecked(settings.value("viewtitle",true).toBool ());
@@ -644,14 +607,11 @@ void PL_TableView::readSettings(QSettings& settings)
     viewComment->setChecked(settings.value("viewComment",false).toBool ());
     viewGenre->setChecked(settings.value("viewGenre",false).toBool ());
 
-    SynchronizeActionAndColunm();
-
     settings.endGroup();
 
 }
 void PL_TableView::aboutToHide()
 {
-    //qDebug() << "I'm here" ;
     internalMenu->menuAction()->setVisible (false);
 }
 void PL_TableView::aboutToShow()
@@ -666,90 +626,74 @@ void PL_TableView::aboutToShow()
 void PL_TableView::displayMenu(QMenu* menu)
 {
     internalMenu = menu->addMenu(tr("Visible Columns"));
+//enum dataColumn{TITLE,ARTIST,TIME,YEAR,ALBUM,TRACK,GENRE,COMMENT,BITRATE,PICTURE};
 
     viewbitrate= new QAction(tr("Bitrate"), this);
+    viewbitrate->setData(BITRATE);
     viewbitrate->setStatusTip(tr("Add/remove the bitrate column"));
     viewbitrate->setCheckable(true);
+    viewbitrate->setChecked(false);
+
 
     viewYear= new QAction(tr("Year"), this);
+    viewYear->setData(YEAR);
     viewYear->setStatusTip(tr("Add/remove the year column"));
     viewYear->setCheckable(true);
+    viewYear->setChecked(false);
 
     viewComment= new QAction(tr("Comment"), this);
+    viewComment->setData(COMMENT);
     viewComment->setStatusTip(tr("Add/remove the comment column"));
     viewComment->setCheckable(true);
+    viewComment->setChecked(false);
 
     viewGenre= new QAction(tr("Genre"), this);
+    viewGenre->setData(GENRE);
     viewGenre->setStatusTip(tr("Add/remove the genre column"));
     viewGenre->setCheckable(true);
+    viewGenre->setChecked(false);
 
     viewtrack = new QAction(tr("Track #"), this);
+    viewtrack->setData(TRACK);
     viewtrack->setStatusTip(tr("Add/remove the track number column"));
     viewtrack->setCheckable(true);
+    viewtrack->setChecked(false);
 
     viewduration= new QAction(tr("Duration"), this);
+    viewduration->setData(TIME);
     viewduration->setStatusTip(tr("Add/remove the genre column"));
     viewduration->setCheckable(true);
+    viewduration->setChecked(true);
 
     viewartist= new QAction(tr("Artist"), this);
+    viewartist->setData(ARTIST);
     viewartist->setStatusTip(tr("Add/remove the genre column"));
     viewartist->setCheckable(true);
+    viewartist->setChecked(true);
 
 
     viewtitle= new QAction(tr("Title"), this);
+    viewtitle->setData(TITLE);
     viewtitle->setStatusTip(tr("Add/remove the genre column"));
     viewtitle->setCheckable(true);
+    viewtitle->setChecked(true);
 
     viewAlbum= new QAction(tr("Album Name"), this);
+    viewAlbum->setData(ALBUM);
     viewAlbum->setStatusTip(tr("Add/remove the Album Name column"));
     viewAlbum->setCheckable(true);
+    viewAlbum->setChecked(false);
 
-    //readSettings();
+    readSettings();
 
-    if(viewtitle->isChecked())
-        headertitle->visible = true;
-
-    if(viewartist->isChecked())
-        headerartist->visible = true;
-
-    if(viewduration->isChecked())
-        headerduration->visible = true;
-
-    if(viewAlbum->isChecked())
-        headerAlbum->visible = true;
-
-    if(viewtrack->isChecked())
-        headertrack->visible = true;
-
-    if(viewYear->isChecked())
-        headerYear->visible = true;
-
-
-
-    if(viewGenre->isChecked())
-        headerGenre->visible = true;
-
-    if(viewComment->isChecked())
-        headerComment->visible = true;
-
-    if(viewbitrate->isChecked())
-        headerbitrate->visible = true;
-
-
-
-    mapheader->append( headertitle);
-    mapheader->append( headerartist);
-    mapheader->append( headerduration);
-    mapheader->append( headerYear);
-    mapheader->append( headerAlbum);
-    mapheader->append( headertrack);
-    mapheader->append( headerGenre);
-    mapheader->append( headerComment);
-    mapheader->append( headerbitrate);
-
-
-    //model->updateModel();
-
+    m_columnList.append(viewbitrate);
+    m_columnList.append(viewtitle);
+    m_columnList.append(viewAlbum);
+    m_columnList.append(viewduration);
+    m_columnList.append(viewtrack);
+    m_columnList.append(viewGenre);
+    m_columnList.append(viewComment);
+    m_columnList.append(viewYear);
 
     internalMenu->addAction(viewtitle);
     internalMenu->addAction(viewartist);
@@ -772,276 +716,46 @@ void PL_TableView::displayMenu(QMenu* menu)
     connect(viewComment,SIGNAL(triggered()),this,SLOT(addColunm()));
     connect(viewGenre,SIGNAL(triggered()),this,SLOT(addColunm()));
     connect(viewtrack,SIGNAL(triggered()),this,SLOT(addColunm()));
-
-
 }
-void PL_TableView::SynchronizeActionAndColunm()
+
+void PL_TableView::initColumns()
 {
-    if(viewtitle->isChecked())
+
+    for(auto act : m_columnList)
     {
-        horizontalHeader()->showSection(TITLE);
-    }
-    else
-    {
-        horizontalHeader()->hideSection(TITLE);
+        if(act->isChecked())
+        {
+            showColumn(act->data().toInt());
+        }
+        else
+        {
+            hideColumn(act->data().toInt());
+        }
     }
 
-    if(viewartist->isChecked())
-    {
-        horizontalHeader()->showSection(ARTIST);
-    }
-    else
-    {
-        horizontalHeader()->hideSection(ARTIST);
-    }
+    horizontalHeader()->setSectionResizeMode(TITLE,QHeaderView::Stretch);
+    horizontalHeader()->setSectionResizeMode(ARTIST,QHeaderView::Stretch);
 
-    if(viewAlbum->isChecked())
-    {
-        horizontalHeader()->showSection(ALBUM);
-    }
-    else
-    {
-        horizontalHeader()->hideSection(ALBUM);
-    }
 
-    if(viewduration->isChecked())
-    {
-        horizontalHeader()->showSection(TIME);
-    }
-    else
-    {
-        horizontalHeader()->hideSection(TIME);
-    }
-
-    if(viewbitrate->isChecked())
-    {
-        horizontalHeader()->showSection(BITRATE);
-    }
-    else
-    {
-        horizontalHeader()->hideSection(BITRATE);
-    }
-
-    if(viewYear->isChecked())
-    {
-        horizontalHeader()->showSection(YEAR);
-    }
-    else
-    {
-        horizontalHeader()->hideSection(YEAR);
-    }
-
-    if(viewComment->isChecked())
-    {
-        horizontalHeader()->showSection(COMMENT);
-    }
-    else
-    {
-        horizontalHeader()->hideSection(COMMENT);
-    }
-
-    if(viewGenre->isChecked())
-    {
-        horizontalHeader()->showSection(GENRE);
-    }
-    else
-    {
-        horizontalHeader()->hideSection(GENRE);
-    }
-
-    if(viewtrack->isChecked())
-    {
-        horizontalHeader()->showSection(TRACK);
-    }
-    else
-    {
-        horizontalHeader()->hideSection(TRACK);
-    }
-    if(NULL!=m_model)
-    {
-        m_model->updateModel();
-    }
 }
 
 void PL_TableView::addColunm()
 {
     QAction *action = qobject_cast<QAction *>(sender());
-    if(action)
+    auto col = action->data().toInt();
+    if(action->isChecked())
     {
-        if(action->isChecked())
-        {
-
-            if(action==viewtitle)
-            {
-                horizontalHeader()->showSection(TITLE);
-                //model->addColunm(headertitle);
-            }
-            else if(action==viewartist)
-            {
-
-                horizontalHeader()->showSection(ARTIST);
-                //     model->addColunm(headerartist);
-
-            }
-            else if(action==viewAlbum)
-            {
-
-                horizontalHeader()->showSection(ALBUM);
-                // model->addColunm(headerAlbum);
-
-            }
-            else if(action==viewduration)
-            {
-
-                horizontalHeader()->showSection(TIME);
-                //     model->addColunm(headerduration);
-            }
-            else if(action==viewbitrate)
-            {
-
-                horizontalHeader()->showSection(BITRATE);
-                //    model->addColunm(headerbitrate);
-            }
-            else if(action==viewYear)
-            {
-
-                horizontalHeader()->showSection(YEAR);
-                //   model->addColunm(headerYear);
-            }
-            else if(action==viewComment)
-            {
-                horizontalHeader()->showSection(COMMENT);
-                //   model->addColunm(headerComment);
-            }
-            else if(action==viewGenre)
-            {
-                horizontalHeader()->showSection(GENRE);
-                //  model->addColunm(headerGenre);
-            }
-            else if(action==viewtrack)
-            {
-                horizontalHeader()->showSection(TRACK);
-            }
-            m_model->updateModel();
-        }
-        else
-        {
-            if(action==viewtitle)
-            {
-                horizontalHeader()->hideSection(TITLE);
-            }
-            else if(action==viewartist)
-            {
-                horizontalHeader()->hideSection(ARTIST);
-            }
-            else if(action==viewAlbum)
-            {
-
-                horizontalHeader()->hideSection(ALBUM);
-
-            }
-            else if(action==viewduration)
-            {
-                horizontalHeader()->hideSection(TIME);
-            }
-            else if(action==viewbitrate)
-            {
-                horizontalHeader()->hideSection(BITRATE);
-            }
-            else if(action==viewYear)
-            {
-                horizontalHeader()->hideSection(YEAR);
-            }
-            else if(action==viewComment)
-            {
-                horizontalHeader()->hideSection(COMMENT);
-            }
-            else if(action==viewGenre)
-            {
-                horizontalHeader()->hideSection(GENRE);
-            }
-            else if(action==viewtrack)
-            {
-                horizontalHeader()->hideSection(TRACK);
-            }
-        }
-
+        showColumn(col);
     }
-
+    else
+    {
+        hideColumn(col);
+    }
+    writeSettings();
 }
-void PL_TableView::initHeaders()
-{
-    headerbitrate= new headerlistview;
-    headerbitrate->name = tr("Bitrate");
-    headerbitrate->x = BITRATE;
-    headerbitrate->resize = QHeaderView::ResizeToContents;
-    headerbitrate->visible = false;
 
-    headerYear= new headerlistview;
-    headerYear->name = tr("Year");
-    headerYear->x = YEAR;
-    headerYear->resize = QHeaderView::ResizeToContents;
-    headerYear->visible = false;
-
-    headerComment= new headerlistview;
-    headerComment->name = tr("Comment");
-    headerComment->x = COMMENT;
-    headerComment->resize = QHeaderView::ResizeToContents;
-    headerComment->visible = false;
-
-    headerGenre= new headerlistview;
-    headerGenre->name = tr("Genre");
-    headerGenre->x = GENRE;
-    headerGenre->resize = QHeaderView::ResizeToContents;
-    headerGenre->visible = false;
-
-    headertitle = new headerlistview;
-    headertitle->x = TITLE;
-    headertitle->name = tr ( "Title" );
-    headertitle->resize = QHeaderView::Stretch;
-    headertitle->visible = false;
-
-
-    headerartist= new headerlistview;
-    headerartist->x = ARTIST;
-    headerartist->name = tr ( "Artist" );
-    headerartist->resize = QHeaderView::Stretch;
-    headerartist->visible = false;
-
-    headerduration= new headerlistview;
-    headerduration->x = TIME;
-    headerduration->name = tr( "Duration" );
-    headerduration->resize = QHeaderView::ResizeToContents;
-    headerduration->visible = false;
-
-    headerAlbum= new headerlistview;
-    headerAlbum->x = ALBUM;
-    headerAlbum->name = tr( "Album Name" );
-    headerAlbum->resize = QHeaderView::ResizeToContents;
-    headerAlbum->visible = false;
-
-    headertrack= new headerlistview;
-    headertrack->x = TRACK;
-    headertrack->name = tr( "Trach Number" );
-    headertrack->resize = QHeaderView::ResizeToContents;
-    headertrack->visible = false;
-
-}
 void PL_TableView::onPluginListGroup(QAction * action)
 {
     //pluginmanager->perform(action,selectionModel());
 }
-void PL_TableView::updateHeader()
-{
 
-    foreach(headerlistview* p,*mapheader)
-    {
-        if(p->visible)
-            horizontalHeader()->showSection(p->x);
-        else
-            horizontalHeader()->hideSection(p->x);
-
-        horizontalHeader()->setSectionResizeMode(p->x, p->resize );
-    }
-    SynchronizeActionAndColunm();
-}

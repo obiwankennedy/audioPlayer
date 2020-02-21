@@ -56,34 +56,31 @@ public:
     void setModel(PlayListModel* m_model);
 
     void ShowandSelectRow(int row);
-    void SynchronizeActionAndColunm();
 
     bool hasCopyPasteSupport() const ;
     bool isTabVisible() const ;
     void displayMenu(QMenu* menu);
     QString tabTitle() const ;
-    void readSettings(QSettings& settings);
-    void writeSettings(QSettings& settings);
-    void initHeaders();
+    void readSettings();
+    void writeSettings();
+
     QList<headerlistview*>* getMapheader();
     virtual QList<PlaylistItem*>* getSelectedItem();
     virtual QList<int>* getVisibleColumn();
     virtual void aboutToHide();
     virtual void aboutToShow();
-
-    void updateHeader();
 //    virtual void setSelection ( const QRect & rect, QItemSelectionModel::SelectionFlags flags );
 protected:
   void mousePressEvent(QMouseEvent * event);
   void mouseReleaseEvent(QMouseEvent * event);
   void mouseDoubleClickEvent(QMouseEvent * event);
   void mouseMoveEvent( QMouseEvent * event );
-  bool event(QEvent *event);
   virtual void keyPressEvent(QKeyEvent *event);
   QModelIndex moveCursor ( CursorAction cursorAction, Qt::KeyboardModifiers modifiers );
 
 
 
+  void initColumns();
 public slots:
     void moveSelection(const QModelIndex& index);
     void onClick(const QModelIndex& index);
@@ -162,17 +159,8 @@ private:
     QAction *viewartist;
     QAction *viewtitle;
     QAction *viewtrack;
+    QList<QAction*> m_columnList;
 
-
-    headerlistview *headerbitrate;
-    headerlistview *headerYear;
-    headerlistview *headerComment;
-    headerlistview *headerGenre;
-    headerlistview *headerAlbum;
-    headerlistview* headerduration;
-    headerlistview* headerartist;
-    headerlistview* headertitle;
-    headerlistview* headertrack;
 
     SongPluginManager* pluginmanager;
 };

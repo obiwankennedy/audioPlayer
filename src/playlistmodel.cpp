@@ -25,18 +25,12 @@
 PlayListModel::PlayListModel()
                 : QAbstractListModel()
 {
-    myPlaylist=NULL;
-    mapheader   = new QList<headerlistview*>;
-    this->nb_col=0;
-    this->nb_row=0;
+    m_playList=NULL;
 }
 
 PlayListModel::PlayListModel (QList<headerlistview*>* m,Playlist* _p,QObject * parent )
 {   
-        myPlaylist = _p;
-        mapheader = m;
-        this->nb_col=0;
-        this->nb_row=0;
+        m_playList = _p;
         this->parentthis=parent;
 }
 
@@ -47,17 +41,13 @@ PlayListModel::~PlayListModel()
 
 QList<PlaylistItem*> PlayListModel::getmyPlaylist() const
 {
-  return myPlaylist->getmyPlaylist();
+  return m_playList->getmyPlaylist();
 }
 
 
 QVariant PlayListModel::headerData ( int section,Qt::Orientation orientation,int role ) const
 {
-        if ( ( orientation==Qt::Horizontal ) && ( section>-1 ) && ( role == Qt::DisplayRole ) )
-        {
-           return ( *mapheader ) [section]->name;
-        }
-        else if ( ( orientation!=Qt::Horizontal ) && ( section>-1 ) && ( role == Qt::DisplayRole ) )
+        if ( ( orientation!=Qt::Horizontal ) && ( section>-1 ) && ( role == Qt::DisplayRole ) )
         {
               
                 return section+1;
@@ -66,20 +56,16 @@ QVariant PlayListModel::headerData ( int section,Qt::Orientation orientation,int
 }
 int PlayListModel::rowCount ( const QModelIndex & /*parent*/ ) const
 {
-  return myPlaylist->size();
+  return m_playList->size();
 }
 int PlayListModel::columnCount ( const QModelIndex &/* parent*/ ) const
 {
-  return mapheader->size();
+  return 9;
 }
-int PlayListModel::columnCount()
+
+QVariant PlayListModel::data ( const QModelIndex &index, int role ) const
 {
-  
-  return mapheader->size();
-}
-QVariant PlayListModel::data ( const QModelIndex &parent, int role ) const
-{
-        if ( !parent.isValid() )
+        if ( !index.isValid() )
         {
                 return QVariant();
         }
@@ -89,13 +75,11 @@ QVariant PlayListModel::data ( const QModelIndex &parent, int role ) const
         }
         else if ( role == Qt::DisplayRole )
         {
-                return getValue ( parent.row(),parent.column() );
-
-
+                return getValue ( index.row(),index.column() );
         }
         else if ( role == Qt::BackgroundColorRole)
         {
-            if(fileAvailable(parent.row()))
+            if(fileAvailable(index.row()))
             {
                 return QVariant();
             }
@@ -106,16 +90,15 @@ QVariant PlayListModel::data ( const QModelIndex &parent, int role ) const
         }
         return QVariant();
 }
-QVariant PlayListModel::getValue ( int x,int y ) const
+QVariant PlayListModel::getValue ( int row,int col ) const
 {
-    ItemDecorator* a=NULL;
-    if ( ( x>-1 ) && ( x<myPlaylist->size() ) )
+    if ( ( row>-1 ) && ( row<m_playList->size() ) )
     {
-        PlaylistItem* p = myPlaylist->value(x);
+        PlaylistItem* p = m_playList->value(row);
 
-        a = p->getKey();
+        auto itemDeco = p->getKey();
 
-        return a->getMember(( *mapheader )[y]->x);
+        return itemDeco->getMember(static_cast<dataColumn>(col));
     }
 
     return QVariant();
@@ -123,9 +106,9 @@ QVariant PlayListModel::getValue ( int x,int y ) const
 }
 bool PlayListModel::fileAvailable(int x)  const
 {
-    if ( ( x>-1 ) && ( x<myPlaylist->size() ) )
+    if ( ( x>-1 ) && ( x<m_playList->size() ) )
     {
-        PlaylistItem* p = myPlaylist->value(x);
+        PlaylistItem* p = m_playList->value(x);
         QFileInfo file(p->getURI());
 
         if(file.isReadable() && file.isFile() && file.exists())
@@ -144,50 +127,40 @@ void PlayListModel::updateModel()
       //  reset();
 
     emit layoutChanged();
-  nb_row=myPlaylist->size();
+  nb_row=m_playList->size();
 
 }
 void PlayListModel::append(QList<PlaylistItem*>* p,int pos)
 {
     if(pos==-1)
     {
-      beginInsertRows(QModelIndex(), nb_row, nb_row+p->size()-1);
-      myPlaylist->insert(p);
+      beginInsertRows(QModelIndex(), m_playList->size(), m_playList->size()+p->size()-1);
+      m_playList->insert(p);
       endInsertRows();
     }
     else
     {
-        beginInsertRows(QModelIndex(), pos, pos+p->size()-1);
-        myPlaylist->insert(pos,p);
+        beginInsertRows(QModelIndex(), m_playList->size(), m_playList->size()+p->size()-1);
+        m_playList->insert(pos,p);
         endInsertRows();
     }
 }
 void PlayListModel::append(PlaylistItem* p)
 {
-
-  myPlaylist->append(p);
-  nb_row=myPlaylist->size();
-
+  beginInsertRows(QModelIndex(), m_playList->size(),m_playList->size());
+  m_playList->append(p);
+    endInsertRows();
 }
 
 void PlayListModel::getdownItem(QModelIndex & from,QModelIndex & to)//When the selection goes to the bottom.
 {
-  myPlaylist->getdownItem(from.row(),to.row());
+  m_playList->getdownItem(from.row(),to.row());
   emit dataChanged(from,to);
   
 }
 void PlayListModel::getupItem(QModelIndex & from,QModelIndex & to)//when the selection goes to the top.
 {
-  myPlaylist->getupItem(from.row(),to.row());
+  m_playList->getupItem(from.row(),to.row());
   emit dataChanged(to,from);
 
-}
-
-void PlayListModel::addColunm(headerlistview* x)
-{
-   mapheader->append(x);
-}
-void PlayListModel::removeColunm(headerlistview* x)
-{
-  mapheader->removeAll(x);  
 }

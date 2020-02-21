@@ -32,13 +32,19 @@
  * \todo   no             
 */
 
-class File : public QFile,public Node
+class File : public Node
 {
 public:
   File(QString& uri);
 
     ~File();
     virtual void acceptVisitor(VisitorNode* visitor);
+
+  QString file() const;
+  void setFile(const QString &file);
+
+private:
+  QString m_fileName;
 };
 
 #endif

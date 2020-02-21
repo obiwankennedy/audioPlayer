@@ -15,8 +15,8 @@ public:
     virtual void displayMenu(QMenu* menu);
 
 
-    virtual void readSettings(QSettings& settings);
-    virtual void writeSettings(QSettings& settings);
+    virtual void readSettings();
+    virtual void writeSettings();
     virtual QList<PlaylistItem*>* getSelectedItem();
     virtual QList<int>* getVisibleColumn();
     virtual void aboutToHide();

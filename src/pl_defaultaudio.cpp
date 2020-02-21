@@ -67,7 +67,7 @@ QString* PL_DefaultAudio::getTitle()
     //fields->Title = metaData->value("TITLE");
      if (fields->Title == "")
      {
-     	QFileInfo a(*this);
+        QFileInfo a(file());
     
     
 

@@ -16,8 +16,8 @@ public:
     virtual void displayMenu(QMenu* menu) = 0;
 
     virtual void setClosed(bool b) {m_closed = b;}
-    virtual void readSettings(QSettings& settings) = 0;
-    virtual void writeSettings(QSettings& settings) = 0;
+    virtual void readSettings() = 0;
+    virtual void writeSettings() = 0;
     virtual QList<PlaylistItem*>* getSelectedItem() = 0;
     virtual QList<int>* getVisibleColumn() = 0;
     virtual void aboutToHide() = 0;

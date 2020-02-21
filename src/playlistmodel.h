@@ -43,10 +43,8 @@
 class PlayListModel : public QAbstractListModel
 {
    Q_OBJECT
-   Playlist* myPlaylist;
-   QList<headerlistview*>* mapheader;
+   Playlist* m_playList;
    int nb_row;
-   int nb_col;
    QObject * parentthis;
    QVariant getValue(int x,int y) const;
 
@@ -58,7 +56,6 @@ public:
     void setPlaylistItem(QList<PlaylistItem>* _myPlaylist);
     int rowCount(const QModelIndex &parent) const;
     int columnCount(const QModelIndex &parent) const;
-    int columnCount();
     QVariant data(const QModelIndex &parent, int role) const;
     QVariant headerData(int section,Qt::Orientation orientation,int role) const;
   
@@ -68,8 +65,6 @@ public:
     void getdownItem(QModelIndex & from,QModelIndex & to);//When the selection goes to the bottom.
     void getupItem(QModelIndex & from,QModelIndex & to);//when the selection goes to the top.
 
-    void addColunm(headerlistview* x);
-    void removeColunm(headerlistview* x);
     QList<PlaylistItem*> getmyPlaylist() const;
     bool fileAvailable(int x)  const;
 

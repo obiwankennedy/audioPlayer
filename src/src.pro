@@ -20,7 +20,9 @@ include(listview/listview.pri)
 #include(Style/Style.pri)
 
 RESOURCES += \
-    ../audioPlayer.qrc
+    ../audioPlayer.qrc \
+    audioPlayer.qrc \
+    playlistgenerator.qrc
 
 DEPENDPATH += directoryFacade \
     factory \
@@ -162,5 +164,8 @@ TRANSLATIONS = ../resources/translation/audioPlayer_fr_FR.ts
 UI_DIR = ../ui
 MOC_DIR = ../obj
 OBJECTS_DIR = ../obj
+
+CONFIG += c++11
+
 
 QMAKE_CXXFLAGS=-fstack-protector -W -Wall -Wextra -pedantic -Wstack-protector -Wno-long-long -Wno-overlength-strings

@@ -19,7 +19,7 @@
 #include "../directoryFacade/file.h"
 
 File::File(QString& uri)
-  : QFile( uri)
+  : m_fileName(uri)
 {
 }
 
@@ -31,4 +31,14 @@ File::~File()
 void File::acceptVisitor(VisitorNode* visitor)
 {
   visitor->visitFile(this);
+}
+
+QString File::file() const
+{
+    return m_fileName;
+}
+
+void File::setFile(const QString &file)
+{
+    m_fileName = file;
 }
