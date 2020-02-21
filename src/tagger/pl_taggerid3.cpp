@@ -18,137 +18,118 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "pl_taggerid3.h"
-#include <id3/tag.h>
-#include <id3/misc_support.h>
-#include <id3/utils.h>
-#include <id3/readers.h>
+#include <QDebug>
 #include <QTextCodec>
 #include <QTextStream>
-#include <QDebug>
+#include <id3/misc_support.h>
+#include <id3/readers.h>
+#include <id3/tag.h>
+#include <id3/utils.h>
 
 PL_TaggerID3::PL_TaggerID3()
 {
-//  initGenreList();
-  
- 
+    //  initGenreList();
 }
 PL_TaggerID3::PL_TaggerID3(QString* _filename)
 {
-  
+    filename= _filename;
 
-  filename=_filename;
+    myTaggger= new ID3_Tag;
+    myTaggger->Link(filename->toStdString().c_str());
 
-  myTaggger = new ID3_Tag;
-  myTaggger->Link(filename->toStdString().c_str());
-
-
-  m_mp3header=NULL;
-
-
+    m_mp3header= NULL;
 }
 
 PL_TaggerID3::~PL_TaggerID3()
 {
-  delete myTaggger;
+    delete myTaggger;
 }
 
 QVariant PL_TaggerID3::getValue(int i)
 {
-  
-  ID3_FrameID id =getIDFrame(i);
-  ID3_Frame* myFrame = NULL;
-  
-  myFrame=myTaggger->Find(id);
-  
+    ID3_FrameID id= getIDFrame(i);
+    ID3_Frame* myFrame= NULL;
 
-  if(myFrame!=0) 
-  {
-    char* tmp= new char[ SIZE_DATA ];
-    myFrame->Field(ID3FN_TEXT).Get(tmp,SIZE_DATA);
-    return QString(tmp);
-  }
-  
-  return QString();
+    myFrame= myTaggger->Find(id);
+
+    if(myFrame != 0)
+    {
+        char* tmp= new char[SIZE_DATA];
+        myFrame->Field(ID3FN_TEXT).Get(tmp, SIZE_DATA);
+        return QString(tmp);
+    }
+
+    return QString();
 }
-void PL_TaggerID3::setValue(dataColumn x,QVariant& data,bool replace)
+void PL_TaggerID3::setValue(dataColumn x, QVariant& data, bool replace)
 {
-  
+    bool a;
 
-  bool a;
-  
- 
-  
-  switch(x)
-  {
+    switch(x)
+    {
     case TITLE:
-      ID3_AddTitle(myTaggger,data.toString().toStdString().c_str() ,replace);
-      break;
+        ID3_AddTitle(myTaggger, data.toString().toStdString().c_str(), replace);
+        break;
     case ARTIST:
-      ID3_AddArtist(myTaggger,data.toString().toStdString().c_str() ,replace);
-      break;
+        ID3_AddArtist(myTaggger, data.toString().toStdString().c_str(), replace);
+        break;
     case YEAR:
-      ID3_AddYear(myTaggger,data.toString().toStdString().c_str() ,replace);
-      break;
+        ID3_AddYear(myTaggger, data.toString().toStdString().c_str(), replace);
+        break;
     case ALBUM:
-      ID3_AddAlbum(myTaggger,data.toString().toStdString().c_str() ,replace);
-      break;
+        ID3_AddAlbum(myTaggger, data.toString().toStdString().c_str(), replace);
+        break;
     case GENRE:
-      ID3_AddGenre(myTaggger,data.toInt(&a),replace);
-      break;
+        ID3_AddGenre(myTaggger, data.toInt(&a), replace);
+        break;
     case TRACK:
-        ID3_AddTrack(myTaggger,data.toInt(&a),0,replace);
+        ID3_AddTrack(myTaggger, data.toInt(&a), 0, replace);
         break;
     case COMMENT:
-      ID3_AddComment(myTaggger, data.toString().toStdString().c_str(), data.toString().toStdString().c_str(), replace);
-      break;
+        ID3_AddComment(
+            myTaggger, data.toString().toStdString().c_str(), data.toString().toStdString().c_str(), replace);
+        break;
     case TIME:
     case BITRATE:
-      return;
-  }
-  
-  myTaggger->Update();
+        return;
+    }
 
+    myTaggger->Update();
 }
-
 
 ID3_FrameID PL_TaggerID3::getIDFrame(int i)
 {
-
-  switch(i)
-  {
+    switch(i)
+    {
     case TITLE:
-      return ID3FID_TITLE;
+        return ID3FID_TITLE;
     case ARTIST:
-     return ID3FID_LEADARTIST;
+        return ID3FID_LEADARTIST;
     case YEAR:
-      return ID3FID_YEAR;
+        return ID3FID_YEAR;
     case TRACK:
-      return ID3FID_TRACKNUM;
+        return ID3FID_TRACKNUM;
     case ALBUM:
-      return ID3FID_ALBUM;
+        return ID3FID_ALBUM;
     case TIME:
-      return ID3FID_SONGLEN;
+        return ID3FID_SONGLEN;
     case GENRE:
-      return ID3FID_CONTENTTYPE; 
-    case COMMENT: 
-      return ID3FID_COMMENT; 
+        return ID3FID_CONTENTTYPE;
+    case COMMENT:
+        return ID3FID_COMMENT;
     default:
-      return ID3_FrameID();
-  }
+        return ID3_FrameID();
+    }
 }
 
-
-QStringList *PL_TaggerID3::listgenre = NULL;
-
-
+QStringList* PL_TaggerID3::listgenre= NULL;
 
 QStringList* PL_TaggerID3::getgenres()
 {
-  return listgenre;
+    return listgenre;
 }
 
-
- const Mp3_Headerinfo* PL_TaggerID3::GetMp3HeaderInfo()
+const Mp3_Headerinfo* PL_TaggerID3::GetMp3HeaderInfo()
 {
-  return myTaggger->GetMp3HeaderInfo();
+    return myTaggger->GetMp3HeaderInfo();
 }

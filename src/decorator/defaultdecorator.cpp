@@ -17,103 +17,95 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "defaultdecorator.h"
-#include "playlistitem.h"
 #include "pl_defaultaudio.h"
+#include "playlistitem.h"
 Defaultdecorator::Defaultdecorator()
 {
-   fi = new QFileInfo;
+    fi= new QFileInfo;
 }
 
-Defaultdecorator::Defaultdecorator(PlaylistItem* _item)
-  : ItemDecorator(_item)
+Defaultdecorator::Defaultdecorator(PlaylistItem* _item) : ItemDecorator(_item)
 {
-
-  fi = new QFileInfo;
+    fi= new QFileInfo;
 }
 
-Defaultdecorator::~Defaultdecorator()
-{
-}
+Defaultdecorator::~Defaultdecorator() {}
 
 QVariant Defaultdecorator::getMember(dataColumn x) const
 {
-  PL_DefaultAudio* tmp =(PL_DefaultAudio*) item->getMediaFile();
-  
-  if(item==NULL)
-    return QVariant();
+    PL_DefaultAudio* tmp= (PL_DefaultAudio*)item->getMediaFile();
 
-  switch(x)
-  {
+    if(item == NULL)
+        return QVariant();
+
+    switch(x)
+    {
     case TITLE:
     {
-      return (*tmp->getTitle());
+        return (*tmp->getTitle());
     }
     case ARTIST:
-      return (*tmp->getArtist());
+        return (*tmp->getArtist());
     case TIME:
-      return tmp->getDuration();
+        return tmp->getDuration();
     case ALBUM:
-      return (*tmp->getAlbumtitle());
+        return (*tmp->getAlbumtitle());
     case GENRE:
-      return tmp->getGenre();
+        return tmp->getGenre();
     case TRACK:
         return tmp->getTrack();
     case COMMENT:
     case YEAR:
     case BITRATE:
-      return QVariant();  
-  }
-  return QVariant(); 
-   
-      
-
+        return QVariant();
+    }
+    return QVariant();
 }
-void Defaultdecorator::setValue(dataColumn x,QVariant& value,bool )
+void Defaultdecorator::setValue(dataColumn x, QVariant& value, bool)
 {
-    SongFields* sf = item->getFields2();
-  switch(x)
-  {
+    SongFields* sf= item->getFields2();
+    switch(x)
+    {
     case TITLE:
-      sf->Title = value.toString();
-      break;
+        sf->Title= value.toString();
+        break;
     case ARTIST:
-      sf->Artist =  value.toString();
-      break;
+        sf->Artist= value.toString();
+        break;
     case YEAR:
-      sf->Year = value.toInt();
-      break;
+        sf->Year= value.toInt();
+        break;
     case ALBUM:
-      sf->album = value.toString();
-      break;
+        sf->album= value.toString();
+        break;
     case BITRATE:
     case TIME:
-      break;
+        break;
     case COMMENT:
-      sf->Title =  value.toString();
-      break;
+        sf->Title= value.toString();
+        break;
     case GENRE:
-      sf->genre= value.toInt();
-      break;
-  case TRACK:
-      sf->track = value.toInt();
+        sf->genre= value.toInt();
+        break;
+    case TRACK:
+        sf->track= value.toInt();
+    }
 
-  }
-
-  return;
+    return;
 }
 QStringList* Defaultdecorator::getgenres()
 {
-  return new QStringList;
+    return new QStringList;
 }
-void Defaultdecorator::setItem(PlaylistItem* _item) 
+void Defaultdecorator::setItem(PlaylistItem* _item)
 {
-  item = _item;
+    item= _item;
 }
-PlaylistItem* Defaultdecorator::getItem() 
+PlaylistItem* Defaultdecorator::getItem()
 {
-  return item;
+    return item;
 }
 void Defaultdecorator::ForceTagReading()
 {
-  return;
+    return;
 }

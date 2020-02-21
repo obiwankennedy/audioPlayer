@@ -20,132 +20,99 @@
 #include "directoryFacade/pl_directoryfacade.h"
 #include "tableheaderview.h"
 
-
 #include <QtWidgets>
 
+PlayListViewer::PlayListViewer(QWidget* p) : QTabWidget(p), m_tabList(NULL)
+{
+    tablemodel= NULL;
+    treemodel= NULL;
+    listmodel= NULL;
 
+    previousTabIndex= -1;
+    m_tabList= new QList<PL_AbstractListViewer*>;
+    m_viewerNotDisplayed= new QList<PL_AbstractListViewer*>;
+    setTabsClosable(true);
+    connect(this, SIGNAL(tabCloseRequested(int)), this, SLOT(onCloseTab(int)));
 
-PlayListViewer::PlayListViewer(QWidget *p)
- : QTabWidget(p),m_tabList(NULL)
+    visibleColumn= new QList<int>;
+    m_widgetList= new QList<QWidget*>;
+
+    myPlaylist= Playlist::getInstance();
+
+    main= new PL_TableView(this);
+    listview= new PL_ListView(this);
+    mytreeview= new PL_treeview;
+    mytreeview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    main->setHorizontalHeader(new TableHeaderView(main->getMapheader(), Qt::Horizontal, this));
+
+    m_tabList->append(main);
+    m_tabList->append(mytreeview);
+    m_tabList->append(listview);
+
+    m_widgetList->append(main);
+    m_widgetList->append(mytreeview);
+    m_widgetList->append(listview);
+
+    former_index= NULL;
+    index= NULL;
+
+    for(int i= 0; i < m_tabList->size(); i++)
     {
-
-        tablemodel=NULL;
-        treemodel=NULL;
-        listmodel=NULL;
-
-        previousTabIndex = -1;
-        m_tabList = new QList<PL_AbstractListViewer*>;
-        m_viewerNotDisplayed = new QList<PL_AbstractListViewer*>;
-        setTabsClosable(true);
-        connect(this,SIGNAL(tabCloseRequested(int)),this,SLOT(onCloseTab(int )));
-
-
-        visibleColumn = new QList<int>;
-        m_widgetList = new QList<QWidget*>;
-
-        myPlaylist = Playlist::getInstance();
-
-
-
-        main = new PL_TableView(this);
-        listview = new PL_ListView(this);
-        mytreeview = new PL_treeview;
-        mytreeview->setSizePolicy ( QSizePolicy::Expanding, QSizePolicy::Expanding );
-
-        main->setHorizontalHeader(new TableHeaderView(main->getMapheader(),Qt::Horizontal,this));
-
-
-
-        m_tabList->append(main);
-        m_tabList->append(mytreeview);
-        m_tabList->append(listview);
-
-        m_widgetList->append(main);
-        m_widgetList->append(mytreeview);
-        m_widgetList->append(listview);
-
-
-
-
-        former_index = NULL;
-        index = NULL;
-
-    for(int i = 0; i< m_tabList->size();i++)
-    {
-        PL_AbstractListViewer* p = m_tabList->at(i);
-        QWidget* wd = m_widgetList->at(i);
-        this->addTab(wd,p->tabTitle());
+        PL_AbstractListViewer* p= m_tabList->at(i);
+        QWidget* wd= m_widgetList->at(i);
+        this->addTab(wd, p->tabTitle());
     }
 
-        #ifdef HAVE_PHONON
-        
-        connect(this,SIGNAL(SetId(int)),main,SLOT(onSelect(int)));
-        
-        #endif
+#ifdef HAVE_PHONON
 
-       
+    connect(this, SIGNAL(SetId(int)), main, SLOT(onSelect(int)));
 
-        modelUpdated = true;
+#endif
 
-        connect(main, SIGNAL(dataChanged()),
-                this, SIGNAL(dataChanged()));
+    modelUpdated= true;
 
-        connect(main,SIGNAL(dataModelChanged()),this,SLOT(modelsdataChanged()));
+    connect(main, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
 
-        connect(main, SIGNAL(isPastable(bool)),
-                this, SIGNAL(isPastable(bool)));
+    connect(main, SIGNAL(dataModelChanged()), this, SLOT(modelsdataChanged()));
 
-        connect(main, SIGNAL(isCopiable(bool)),
-                this, SIGNAL(isCopiable(bool)));
+    connect(main, SIGNAL(isPastable(bool)), this, SIGNAL(isPastable(bool)));
 
+    connect(main, SIGNAL(isCopiable(bool)), this, SIGNAL(isCopiable(bool)));
 
-        connect(main, SIGNAL(isCutable(bool)),
-                this, SIGNAL(isCutable(bool)));
+    connect(main, SIGNAL(isCutable(bool)), this, SIGNAL(isCutable(bool)));
 
+    connect(main, SIGNAL(Maximum(int)), this, SIGNAL(Maximum(int)));
 
-        
-        connect(main, SIGNAL(Maximum(int)),
-                this, SIGNAL(Maximum(int)));
-                
-        connect(main, SIGNAL(Minimum(int)),
-                this, SIGNAL(Minimum(int)));
-        connect(main, SIGNAL(valueChanged(int)),
-                this, SIGNAL(valueChanged(int)));
-        connect(main, SIGNAL(CommandStart()),
-                this, SIGNAL(CommandStart()));
-                
-         connect(main, SIGNAL(done()),
-               this, SIGNAL(done()));
-                
-        connect(this, SIGNAL(currentChanged(int)),
-               this, SLOT(onChangedTab(int)));
+    connect(main, SIGNAL(Minimum(int)), this, SIGNAL(Minimum(int)));
+    connect(main, SIGNAL(valueChanged(int)), this, SIGNAL(valueChanged(int)));
+    connect(main, SIGNAL(CommandStart()), this, SIGNAL(CommandStart()));
 
-        connect(main,SIGNAL(doubleClicked(const QModelIndex &)),this,SLOT(slotdoubleClicked(const QModelIndex &)));
+    connect(main, SIGNAL(done()), this, SIGNAL(done()));
 
+    connect(this, SIGNAL(currentChanged(int)), this, SLOT(onChangedTab(int)));
+
+    connect(main, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(slotdoubleClicked(const QModelIndex&)));
 }
 void PlayListViewer::initWidget()
 {
-    tablemodel = new PlayListModel(main->getMapheader(),myPlaylist, this);
+    tablemodel= new PlayListModel(main->getMapheader(), myPlaylist, this);
     main->setModel(tablemodel);
 
-    treemodel = new PL_TreeModel;
+    treemodel= new PL_TreeModel;
     mytreeview->setModel(treemodel);
 
-    listmodel = new PL_ListModel;
+    listmodel= new PL_ListModel;
     listview->setModel(listmodel);
 
-    connect(tablemodel, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
-            this, SIGNAL(dataChanged()));
+    connect(tablemodel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(dataChanged()));
 }
 
-PlayListViewer::~PlayListViewer()
-{
-  
-}
+PlayListViewer::~PlayListViewer() {}
 
 void PlayListViewer::modelsdataChanged()
 {
-    modelUpdated = true;
+    modelUpdated= true;
 }
 void PlayListViewer::writeSettings(QSettings& settings)
 {
@@ -164,106 +131,97 @@ void PlayListViewer::readSettings(QSettings& settings)
 
 Playlist* PlayListViewer::getmyPlaylist() const
 {
-  return myPlaylist;
+    return myPlaylist;
 }
 void PlayListViewer::LinkModelwithTable()
 {
-
     onChangedTab(currentIndex());
-
 }
-void PlayListViewer::onChangedTab( int index )
+void PlayListViewer::onChangedTab(int index)
 {
-
-    QWidget* p = widget(index);
+    QWidget* p= widget(index);
 
     if(previousTabIndex != -1)
     {
         m_tabList->at(previousTabIndex)->aboutToHide();
         m_tabList->at(index)->aboutToShow();
-
     }
 
     if(modelUpdated)
     {
-        if( NULL!= tablemodel )//check the address
+        if(NULL != tablemodel) // check the address
         {
-           tablemodel->updateModel();
-           modelUpdated =false;
+            tablemodel->updateModel();
+            modelUpdated= false;
         }
-        if(NULL!= treemodel)
+        if(NULL != treemodel)
         {
             treemodel->updateModel();
-            modelUpdated =false;
+            modelUpdated= false;
         }
-        if(NULL!= listmodel)
+        if(NULL != listmodel)
         {
-            //listmodel->updateModel();
-            modelUpdated =false;
+            // listmodel->updateModel();
+            modelUpdated= false;
         }
     }
-    else  if( NULL!= tablemodel )//check the address
+    else if(NULL != tablemodel) // check the address
     {
-       tablemodel->updateModel();
-
+        tablemodel->updateModel();
     }
 
-    previousTabIndex = index;
+    previousTabIndex= index;
 }
 void PlayListViewer::openDir(QString _dir)
 {
+    QMessageBox msgBox;
+    msgBox.setText(tr("Where the insertion must be done."));
+    msgBox.setInformativeText("Would you like to insert files at the current selection.?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    int ret= msgBox.exec();
+    int pos= -1;
 
-  QMessageBox msgBox;
- msgBox.setText(tr("Where the insertion must be done."));
- msgBox.setInformativeText("Would you like to insert files at the current selection.?");
- msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
- msgBox.setDefaultButton(QMessageBox::No);
- int ret = msgBox.exec();
- int pos = -1;
-
-switch (ret) {
-   case QMessageBox::Yes:
+    switch(ret)
     {
-     PL_AbstractListViewer* current = getCurrentView();
-     if((current->getSelectedItem()->size()>0))
-     {
-         //qDebug() << "ok ok ok" ;
-        pos = myPlaylist->getmyPlaylist().indexOf(current->getSelectedItem()->at(0));
-     }
+    case QMessageBox::Yes:
+    {
+        PL_AbstractListViewer* current= getCurrentView();
+        if((current->getSelectedItem()->size() > 0))
+        {
+            // qDebug() << "ok ok ok" ;
+            pos= myPlaylist->getmyPlaylist().indexOf(current->getSelectedItem()->at(0));
+        }
     }
-       break;
-   default:
-       break;
- }
+    break;
+    default:
+        break;
+    }
 
-
-  PL_directoryFacade tmp(_dir);
-  QList<PlaylistItem*>* p = tmp.browseDir();
-  tablemodel->append(p,pos);
-
-  
+    PL_directoryFacade tmp(_dir);
+    QList<PlaylistItem*>* p= tmp.browseDir();
+    tablemodel->append(p, pos);
 }
 QList<headerlistview*>* PlayListViewer::getheaderlist()
 {
-  return main->getMapheader();
+    return main->getMapheader();
 }
 
 PL_AbstractListViewer* PlayListViewer::getCurrentView()
 {
-  return m_tabList->at(currentIndex ());
+    return m_tabList->at(currentIndex());
 }
-void  PlayListViewer::cancel()
+void PlayListViewer::cancel()
 {
     m_tabList->at(currentIndex())->cancel();
 }
 void PlayListViewer::InitViewmenu(QMenu* menu)
 {
-
     foreach(PL_AbstractListViewer* p, *m_tabList)
     {
-        //p->displayMenu(menu);
-        QAction* a = menu->addAction(QString("Show %1").arg(p->tabTitle()));
-        connect(a,SIGNAL(triggered()),this,SLOT(onShowTab()));
+        // p->displayMenu(menu);
+        QAction* a= menu->addAction(QString("Show %1").arg(p->tabTitle()));
+        connect(a, SIGNAL(triggered()), this, SLOT(onShowTab()));
         a->setCheckable(true);
         if(p->isAvailable())
             a->setChecked(true);
@@ -275,89 +233,77 @@ void PlayListViewer::InitViewmenu(QMenu* menu)
     {
         p->displayMenu(menu);
     }
-
 }
 void PlayListViewer::onShowTab()
 {
-    QObject* tmp = sender();
+    QObject* tmp= sender();
     if(tmp == NULL)
         return;
 
-
-    int pos = m_groupViewer.indexOf(static_cast<QAction*>(tmp),0);//position whatever the status of the widget.
-    int index = this->indexOf(m_widgetList->at(pos));//if index == -1  the widget is not displayed.
-    if(index >-1)
+    int pos= m_groupViewer.indexOf(static_cast<QAction*>(tmp), 0); // position whatever the status of the widget.
+    int index= this->indexOf(m_widgetList->at(pos));               // if index == -1  the widget is not displayed.
+    if(index > -1)
         this->removeTab(index);
     else
-        this->addTab(m_widgetList->at(pos),m_tabList->at(pos)->tabTitle());
-
-
+        this->addTab(m_widgetList->at(pos), m_tabList->at(pos)->tabTitle());
 }
-void  PlayListViewer::onCloseTab(int index)
+void PlayListViewer::onCloseTab(int index)
 {
-
-    //m_viewerNotDisplayed->append(m_tabList->takeAt(index));
-
-
+    // m_viewerNotDisplayed->append(m_tabList->takeAt(index));
 }
-void  PlayListViewer::onAddTab(int index)
+void PlayListViewer::onAddTab(int index)
 {
-
     m_tabList->append(m_viewerNotDisplayed->takeAt(index));
-
 }
 QList<int>* PlayListViewer::getVisibleColumn()
 {
-  return m_tabList->at(currentIndex ())->getVisibleColumn();
+    return m_tabList->at(currentIndex())->getVisibleColumn();
 }
-    
+
 void PlayListViewer::ShowandSelectRow(int row)
 {
-  main->ShowandSelectRow(row);
+    main->ShowandSelectRow(row);
 }
 void PlayListViewer::reset()
 {
-  myPlaylist->reset();
-  tablemodel->updateModel();
+    myPlaylist->reset();
+    tablemodel->updateModel();
 }
 void PlayListViewer::addfile(QString& filename)
 {
     myPlaylist->addfile(filename);
     onChangedTab(currentIndex());
-
 }
- void PlayListViewer::setImportparser(ImportParser* p)
+void PlayListViewer::setImportparser(ImportParser* p)
 {
-  if(p!=NULL)
-  {
-	  myPlaylist->insert(p->getResult());
-          onChangedTab(currentIndex());
-  }
+    if(p != NULL)
+    {
+        myPlaylist->insert(p->getResult());
+        onChangedTab(currentIndex());
+    }
 }
 
-void PlayListViewer::slotdoubleClicked(const QModelIndex & _index)
+void PlayListViewer::slotdoubleClicked(const QModelIndex& _index)
 {
+    if(former_index != NULL)
+    {
+        (*myPlaylist)[former_index->row()]->setReading(false);
+        main->update(*(former_index));
+    }
 
-	if(former_index!=NULL)
-	{
-            (*myPlaylist)[former_index->row()]->setReading(false);
-		main->update(*(former_index));
-	}
+    this->index= &_index;
 
+    if(this->index != NULL)
+    {
+        if(this->former_index == NULL)
+            this->former_index= new QModelIndex(*index);
+        else
+            *(this->former_index)= *(this->index);
+    }
 
-	this->index=&_index;
-	
-	if(this->index!=NULL)
-        {
-		if(this->former_index==NULL)
-			this->former_index = new QModelIndex(*index);
-		else
-			*(this->former_index)=*(this->index);
-	}
-		
-        emit doubleClicked(_index);
+    emit doubleClicked(_index);
 
-        (*myPlaylist)[_index.row()]->setReading(true);
+    (*myPlaylist)[_index.row()]->setReading(true);
 }
 void PlayListViewer::cut()
 {
@@ -375,25 +321,25 @@ qlonglong PlayListViewer::totalTime()
 {
     return myPlaylist->reckOnTime();
 }
-QTextStream& operator<<(QTextStream& Out, const PlayListViewer& B) 
-{ 
-  Out << (*B.myPlaylist);
-  return Out; 
-} 
-QTextStream& operator>>(QTextStream& is,PlayListViewer& B)
+QTextStream& operator<<(QTextStream& Out, const PlayListViewer& B)
 {
-  is>>(*B.myPlaylist);
-  B.LinkModelwithTable();
-  return is;
+    Out << (*B.myPlaylist);
+    return Out;
 }
-QDataStream& operator<<(QDataStream& Out, const PlayListViewer& B) 
-{ 
-  Out << (*B.myPlaylist);
-  return Out; 
-} 
-QDataStream& operator>>(QDataStream& is,PlayListViewer& B)
+QTextStream& operator>>(QTextStream& is, PlayListViewer& B)
 {
-  is>>(*B.myPlaylist);
-  B.LinkModelwithTable();
-  return is;
+    is >> (*B.myPlaylist);
+    B.LinkModelwithTable();
+    return is;
+}
+QDataStream& operator<<(QDataStream& Out, const PlayListViewer& B)
+{
+    Out << (*B.myPlaylist);
+    return Out;
+}
+QDataStream& operator>>(QDataStream& is, PlayListViewer& B)
+{
+    is >> (*B.myPlaylist);
+    B.LinkModelwithTable();
+    return is;
 }

@@ -18,70 +18,57 @@
  ***************************************************************************/
 #include "plsimport.h"
 
-PLSimport::PLSimport()
- : ImportParser()
-{
-}
+PLSimport::PLSimport() : ImportParser() {}
 
-
-PLSimport::~PLSimport()
-{
-  
-}
+PLSimport::~PLSimport() {}
 void PLSimport::readFile()
-{ 
- 
-  QFile file(filename);
-  if (!file.open(QFile::ReadOnly)) {
-   
-    return;
-  }
-
-  QTextStream is(&file);
-  
-  PlaylistItem* p;
- // QString* duration;
- // QString* title;
-  QString* uri; 
-  QRegExp rxlen("=");
-  QRegExp rxlen2("(\\d+)");
-  int pos=-1;
-  
-  is.readLine();
-
-  int i = rxlen2.indexIn(is.readLine());
-  if(i>-1)
-    i = rxlen2.cap(1).toInt();
-
-  is.readLine();
-
-for(int j = 0 ;j<i;j++)
 {
-  p= new PlaylistItem;
-
-    uri = new QString;
-
-    *uri  = is.readLine();
-
-    pos = rxlen.indexIn(*uri);
-    
-    if (pos > -1) 
+    QFile file(filename);
+    if(!file.open(QFile::ReadOnly))
     {
-      uri->remove(0, pos+1);
-
+        return;
     }
-   
-    
+
+    QTextStream is(&file);
+
+    PlaylistItem* p;
+    // QString* duration;
+    // QString* title;
+    QString* uri;
+    QRegExp rxlen("=");
+    QRegExp rxlen2("(\\d+)");
+    int pos= -1;
+
     is.readLine();
 
-    
-    
+    int i= rxlen2.indexIn(is.readLine());
+    if(i > -1)
+        i= rxlen2.cap(1).toInt();
+
     is.readLine();
 
-    
-    is.readLine();
+    for(int j= 0; j < i; j++)
+    {
+        p= new PlaylistItem;
 
-    p->setURI(*uri);
-    result->append(p);
-  }
+        uri= new QString;
+
+        *uri= is.readLine();
+
+        pos= rxlen.indexIn(*uri);
+
+        if(pos > -1)
+        {
+            uri->remove(0, pos + 1);
+        }
+
+        is.readLine();
+
+        is.readLine();
+
+        is.readLine();
+
+        p->setURI(*uri);
+        result->append(p);
+    }
 }

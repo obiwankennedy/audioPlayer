@@ -18,20 +18,13 @@
  ***************************************************************************/
 #include "itemdecorator.h"
 #include "playlistitem.h"
-ItemDecorator::ItemDecorator()
-{
-  
-}
-ItemDecorator::ItemDecorator(PlaylistItem* _item)
- : item(_item)
-{
-  
-}
+ItemDecorator::ItemDecorator() {}
+ItemDecorator::ItemDecorator(PlaylistItem* _item) : item(_item) {}
 void ItemDecorator::acceptVisitor(VisitorMedia* visitor)
 {
-  visitor->visitMedia(this);
+    visitor->visitMedia(this);
 }
 PlaylistItem* ItemDecorator::getItem()
 {
-  return item;
+    return item;
 }

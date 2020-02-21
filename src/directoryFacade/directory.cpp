@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Renaud Guezennec   
+ *   Copyright (C) 2007 by Renaud Guezennec
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,24 +18,12 @@
  ***************************************************************************/
 #include "directory.h"
 
-Directory::Directory()
-  : QDir()
-{
-  
-}
+Directory::Directory() : QDir() {}
 
-Directory::Directory(QString dir)
-  : QDir(dir)
-{
-  
-}
+Directory::Directory(QString dir) : QDir(dir) {}
 
-Directory::~Directory()
-{
-  
-}
+Directory::~Directory() {}
 void Directory::acceptVisitor(VisitorNode* visitor)
 {
-  visitor->visitDir(this);
+    visitor->visitDir(this);
 }
-

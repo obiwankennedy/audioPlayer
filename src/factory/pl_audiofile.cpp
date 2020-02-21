@@ -19,14 +19,6 @@
  ***************************************************************************/
 #include "pl_audiofile.h"
 
-PL_AudioFile::PL_AudioFile(QString& uri)
- : PL_MediaFile(uri)
-{
-}
+PL_AudioFile::PL_AudioFile(QString& uri) : PL_MediaFile(uri) {}
 
-
-PL_AudioFile::~PL_AudioFile()
-{
-}
-
-
+PL_AudioFile::~PL_AudioFile() {}

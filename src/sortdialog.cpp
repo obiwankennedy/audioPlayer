@@ -18,48 +18,43 @@
  ***************************************************************************/
 #include "sortdialog.h"
 
-SortDialog::SortDialog(QWidget *parent)
-  : QDialog(parent )
+SortDialog::SortDialog(QWidget* parent) : QDialog(parent)
 {
-  setupUi(this);
-  column->addItems(SLlistcolumn);
-  Acen->setChecked(true);
+    setupUi(this);
+    column->addItems(SLlistcolumn);
+    Acen->setChecked(true);
 }
 
-
-SortDialog::~SortDialog()
-{
-}
+SortDialog::~SortDialog() {}
 
 dataColumn SortDialog::getColunm()
 {
-  switch(column->currentIndex())
-  {
+    switch(column->currentIndex())
+    {
     case TITLE:
-      return TITLE;
+        return TITLE;
     case ARTIST:
-      return ARTIST;
+        return ARTIST;
     case TIME:
-      return TIME;
+        return TIME;
     case ALBUM:
-      return ALBUM;
+        return ALBUM;
     case GENRE:
-      return GENRE;
+        return GENRE;
     case BITRATE:
-      return BITRATE;
+        return BITRATE;
     case YEAR:
-      return YEAR;
+        return YEAR;
     case COMMENT:
-      return COMMENT;
+        return COMMENT;
     default:
-      return TITLE;
-  }
-  
+        return TITLE;
+    }
 }
 Qt::SortOrder SortDialog::getOrder()
 {
-  if(!Acen->isChecked())
-    return Qt::DescendingOrder;
-  else
-   return Qt::AscendingOrder;
+    if(!Acen->isChecked())
+        return Qt::DescendingOrder;
+    else
+        return Qt::AscendingOrder;
 }

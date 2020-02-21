@@ -20,14 +20,8 @@
 
 bool PL_ItemCompare::operator()(const PlaylistItem* s1, const PlaylistItem* s2) const
 {
-
-  if(s1->getKey()->getMember(x).toString()<s2->getKey()->getMember(x).toString())
-    return order[0];
-  else 
-    return order[1];
+    if(s1->getKey()->getMember(x).toString() < s2->getKey()->getMember(x).toString())
+        return order[0];
+    else
+        return order[1];
 }
-
-
-
-
-

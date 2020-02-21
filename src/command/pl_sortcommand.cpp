@@ -18,40 +18,33 @@
  ***************************************************************************/
 #include "pl_sortcommand.h"
 
-pl_sortcommand::pl_sortcommand(QList<PlaylistItem*> _myselection,int _start, dataColumn _criteria,PL_TableView* _tableview)
-  : PL_COMMAND(),myselection(_myselection),start(_start),criteria(_criteria),tableview(_tableview)
+pl_sortcommand::pl_sortcommand(
+    QList<PlaylistItem*> _myselection, int _start, dataColumn _criteria, PL_TableView* _tableview)
+    : PL_COMMAND(), myselection(_myselection), start(_start), criteria(_criteria), tableview(_tableview)
 {
-  myPlaylist = Playlist::getInstance();
+    myPlaylist= Playlist::getInstance();
 }
 
-
-pl_sortcommand::~pl_sortcommand()
-{
-  
-}
+pl_sortcommand::~pl_sortcommand() {}
 
 void pl_sortcommand::doCommand()
 {
-
-    myPlaylist->sort(start,&myselection,a->getColunm(),a->getOrder());
- 
+    myPlaylist->sort(start, &myselection, a->getColunm(), a->getOrder());
 }
 bool pl_sortcommand::check()
 {
-	a = new SortDialog(tableview);
-  if(a->exec())
-  {
-  	return true;
-  }
-  return false;
+    a= new SortDialog(tableview);
+    if(a->exec())
+    {
+        return true;
+    }
+    return false;
 }
 void pl_sortcommand::undo()
 {
-  foreach(PlaylistItem* a, myselection)
-  {
-    myPlaylist->removeAt(start);
-    myPlaylist->insert(start++,a);
-  }
-  
+    foreach(PlaylistItem* a, myselection)
+    {
+        myPlaylist->removeAt(start);
+        myPlaylist->insert(start++, a);
+    }
 }
-

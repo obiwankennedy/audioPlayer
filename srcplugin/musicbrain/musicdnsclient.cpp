@@ -23,86 +23,87 @@
 #include <QXmlStreamReader>
 #include <QtDebug>
 
-const char* MusicDnsClient::kClientId = "c44f70e49000dd7c0d1388bff2bf4152";
-const char* MusicDnsClient::kUrl = "http://ofa.musicdns.org/ofa/1/track";
-const int MusicDnsClient::kDefaultTimeout = 5000; // msec
+const char* MusicDnsClient::kClientId= "c44f70e49000dd7c0d1388bff2bf4152";
+const char* MusicDnsClient::kUrl= "http://ofa.musicdns.org/ofa/1/track";
+const int MusicDnsClient::kDefaultTimeout= 5000; // msec
 
 MusicDnsClient::MusicDnsClient(QObject* parent)
-  : QObject(parent),
-//    network_(new NetworkAccessManager(this)),
+    : QObject(parent)
+    ,
+    //    network_(new NetworkAccessManager(this)),
     timeouts_(new NetworkTimeouts(kDefaultTimeout, this))
 {
 }
 
-void MusicDnsClient::SetTimeout(int msec) {
-  timeouts_->SetTimeout(msec);
+void MusicDnsClient::SetTimeout(int msec)
+{
+    timeouts_->SetTimeout(msec);
 }
 
-void MusicDnsClient::Start(int id, const QString& fingerprint, int duration_msec) {
-  typedef QPair<QString, QString> Param;
+void MusicDnsClient::Start(int id, const QString& fingerprint, int duration_msec)
+{
+    typedef QPair<QString, QString> Param;
 
-  QList<Param> parameters;
-  parameters << Param("alb", "unknown")
-             << Param("art", "unknown")
-             << Param("brt", "0")
-             << Param("cid", kClientId)
-             << Param("cvr", QString("%1 %2").arg(QCoreApplication::applicationName(),
-                                                  QCoreApplication::applicationVersion()))
-             << Param("dur", QString::number(duration_msec))
-             << Param("fmt", "unknown")
-             << Param("fpt", fingerprint)
-             << Param("gnr", "unknown")
-             << Param("rmd", "1")
-             << Param("tnm", "0")
-             << Param("ttl", "unknown")
-             << Param("yrr", "0");
+    QList<Param> parameters;
+    parameters << Param("alb", "unknown") << Param("art", "unknown") << Param("brt", "0") << Param("cid", kClientId)
+               << Param("cvr",
+                      QString("%1 %2").arg(QCoreApplication::applicationName(), QCoreApplication::applicationVersion()))
+               << Param("dur", QString::number(duration_msec)) << Param("fmt", "unknown") << Param("fpt", fingerprint)
+               << Param("gnr", "unknown") << Param("rmd", "1") << Param("tnm", "0") << Param("ttl", "unknown")
+               << Param("yrr", "0");
 
-  QUrl url(kUrl);
-  url.setQueryItems(parameters);
-  QNetworkRequest req(url);
+    QUrl url(kUrl);
+    url.setQueryItems(parameters);
+    QNetworkRequest req(url);
 
-  /*QNetworkReply* reply = network_->get(req);
-  connect(reply, SIGNAL(finished()), SLOT(RequestFinished()));
-  requests_[reply] = id;*/
+    /*QNetworkReply* reply = network_->get(req);
+    connect(reply, SIGNAL(finished()), SLOT(RequestFinished()));
+    requests_[reply] = id;*/
 
-  //timeouts_->AddReply(reply);
+    // timeouts_->AddReply(reply);
 }
 
-void MusicDnsClient::Cancel(int id) {
-  QNetworkReply* reply = requests_.key(id);
-  requests_.remove(reply);
-  delete reply;
+void MusicDnsClient::Cancel(int id)
+{
+    QNetworkReply* reply= requests_.key(id);
+    requests_.remove(reply);
+    delete reply;
 }
 
-void MusicDnsClient::CancelAll() {
-  qDeleteAll(requests_.keys());
-  requests_.clear();
+void MusicDnsClient::CancelAll()
+{
+    qDeleteAll(requests_.keys());
+    requests_.clear();
 }
 
-void MusicDnsClient::RequestFinished() {
-  QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
-  if (!reply)
-    return;
+void MusicDnsClient::RequestFinished()
+{
+    QNetworkReply* reply= qobject_cast<QNetworkReply*>(sender());
+    if(!reply)
+        return;
 
-  reply->deleteLater();
-  if (!requests_.contains(reply))
-    return;
+    reply->deleteLater();
+    if(!requests_.contains(reply))
+        return;
 
-  int id = requests_.take(reply);
+    int id= requests_.take(reply);
 
-  if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
-    emit Finished(id, QString());
-    return;
-  }
-
-  QXmlStreamReader reader(reply);
-  while (!reader.atEnd()) {
-    if (reader.readNext() == QXmlStreamReader::StartElement && reader.name() == "puid") {
-      QString puid = reader.attributes().value("id").toString();
-      emit Finished(id, puid);
-      return;
+    if(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
+    {
+        emit Finished(id, QString());
+        return;
     }
-  }
 
-  emit Finished(id, QString());
+    QXmlStreamReader reader(reply);
+    while(!reader.atEnd())
+    {
+        if(reader.readNext() == QXmlStreamReader::StartElement && reader.name() == "puid")
+        {
+            QString puid= reader.attributes().value("id").toString();
+            emit Finished(id, puid);
+            return;
+        }
+    }
+
+    emit Finished(id, QString());
 }

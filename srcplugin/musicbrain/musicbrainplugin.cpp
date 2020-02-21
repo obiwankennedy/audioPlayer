@@ -1,9 +1,9 @@
 #include "musicbrainplugin.h"
-#include <QtGui>
+#include "fingerprinter.h"
+#include "musicdnsclient.h"
 #include <QDebug>
 #include <QString>
-#include "musicdnsclient.h"
-#include "fingerprinter.h"
+#include <QtGui>
 
 bool MusicBrainPlugin::hasUI()
 {
@@ -11,17 +11,18 @@ bool MusicBrainPlugin::hasUI()
 }
 QString MusicBrainPlugin::GetFingerprint(const QString& song)
 {
-  return Fingerprinter(song).CreateFingerprint();
+    return Fingerprinter(song).CreateFingerprint();
 }
 
-void MusicBrainPlugin::SetSong(SongFields* p,QString& uri)
+void MusicBrainPlugin::SetSong(SongFields* p, QString& uri)
 {
-    //m_proc = new QProcess;
+    // m_proc = new QProcess;
 
-    m_musicdns_client=new MusicDnsClient(this);
+    m_musicdns_client= new MusicDnsClient(this);
 
-    connect(m_musicdns_client, SIGNAL(Finished(int,QString)), SLOT(PuidFound(int,QString)));
-     connect(musicbrainz_client_, SIGNAL(Finished(int,MusicBrainzClient::ResultList)), SLOT(TagsFetched(int,MusicBrainzClient::ResultList)));
+    connect(m_musicdns_client, SIGNAL(Finished(int, QString)), SLOT(PuidFound(int, QString)));
+    connect(musicbrainz_client_, SIGNAL(Finished(int, MusicBrainzClient::ResultList)),
+        SLOT(TagsFetched(int, MusicBrainzClient::ResultList)));
 
     if(!m_action->isChecked())
     {
@@ -29,51 +30,42 @@ void MusicBrainPlugin::SetSong(SongFields* p,QString& uri)
         return;
     }
 
-    m_p = p;
+    m_p= p;
 
     QStringList list;
     list << uri;
-    QFuture<QString> future = QtConcurrent::mapped(list, GetFingerprint);
-    fingerprint_watcher_ = new QFutureWatcher<QString>(this);
+    QFuture<QString> future= QtConcurrent::mapped(list, GetFingerprint);
+    fingerprint_watcher_= new QFutureWatcher<QString>(this);
     fingerprint_watcher_->setFuture(future);
     connect(fingerprint_watcher_, SIGNAL(resultReadyAt(int)), SLOT(FingerprintFound(int)));
-
-
 }
-void MusicBrainPlugin::stopped()
-{
-
-
-
-}
+void MusicBrainPlugin::stopped() {}
 
 QString MusicBrainPlugin::getName()
 {
-
-    m_action = new QAction("Fill out Tags",this);
-
+    m_action= new QAction("Fill out Tags", this);
 
     m_action->setShortcut(tr("Ctrl+T"));
     m_action->setStatusTip(tr("Send informations about the played song to MusicBrain"));
-
 
     return tr("MusicBrain");
 }
 void MusicBrainPlugin::FingerprintFound(int print)
 {
-    QFutureWatcher<QString>* watcher = reinterpret_cast<QFutureWatcher<QString>*>(sender());
-      if (!watcher /* || index >= songs_.count()*/) {
+    QFutureWatcher<QString>* watcher= reinterpret_cast<QFutureWatcher<QString>*>(sender());
+    if(!watcher /* || index >= songs_.count()*/)
+    {
         return;
-      }
+    }
 
-      const QString fingerprint = watcher->resultAt(print);
+    const QString fingerprint= watcher->resultAt(print);
 
-      if (fingerprint.isEmpty()) {
-        //emit ResultAvailable(song, SongList());
+    if(fingerprint.isEmpty())
+    {
+        // emit ResultAvailable(song, SongList());
         return;
-      }
-      m_musicdns_client->Start(print, fingerprint, m_p->duration);
-
+    }
+    m_musicdns_client->Start(print, fingerprint, m_p->duration);
 }
 
 QAction* MusicBrainPlugin::getAction()
@@ -83,7 +75,6 @@ QAction* MusicBrainPlugin::getAction()
 
 QDockWidget* MusicBrainPlugin::getWidget()
 {
-
     return NULL;
 }
 bool MusicBrainPlugin::isVisible()
@@ -96,7 +87,6 @@ Qt::DockWidgetArea MusicBrainPlugin::orientation()
     return Qt::BottomDockWidgetArea;
 }
 
-
 void MusicBrainPlugin::readSetting()
 {
     return;
@@ -108,7 +98,7 @@ void MusicBrainPlugin::writeSetting()
 }
 void MusicBrainPlugin::show()
 {
-return;
+    return;
 }
 
 void MusicBrainPlugin::refresh()

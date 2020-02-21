@@ -2,13 +2,13 @@
 #include "itemdecorator.h"
 PL_ListModel::PL_ListModel()
 {
-    m_playList = Playlist::getInstance();
+    m_playList= Playlist::getInstance();
 }
-int PL_ListModel::rowCount ( const QModelIndex & /*parent*/ ) const
+int PL_ListModel::rowCount(const QModelIndex& /*parent*/) const
 {
-        return m_playList->size();
+    return m_playList->size();
 }
-QVariant PL_ListModel::data ( const QModelIndex &parent, int role ) const
+QVariant PL_ListModel::data(const QModelIndex& parent, int role) const
 {
     /*    if ( !parent.isValid() )
         {
@@ -25,9 +25,9 @@ QVariant PL_ListModel::data ( const QModelIndex &parent, int role ) const
 
     if(role == Qt::DisplayRole)
     {
-            //ItemDecorator* a=NULL;
-            m_playList->value(parent.row())->buildExt();
-           return m_playList->value(parent.row())->getExt();
-       }
-        return QVariant();
+        // ItemDecorator* a=NULL;
+        m_playList->value(parent.row())->buildExt();
+        return m_playList->value(parent.row())->getExt();
+    }
+    return QVariant();
 }

@@ -20,23 +20,15 @@
 
 VisitorMediaSeeker::VisitorMediaSeeker(QString regex)
 {
-  this->regex=regex;
-  currentIndex =0;
-
-   
+    this->regex= regex;
+    currentIndex= 0;
 }
 void VisitorMediaSeeker::visitMedia(ItemDecorator* media)
 {
-
-  if((media->getMember(TITLE).toString().contains(regex,Qt::CaseInsensitive))||
-    ((media->getMember(ARTIST).toString().contains(regex,Qt::CaseInsensitive))))
-  {
-    
-    emit FindItem(currentIndex);
-  }
-  currentIndex++; 
-  
+    if((media->getMember(TITLE).toString().contains(regex, Qt::CaseInsensitive))
+        || ((media->getMember(ARTIST).toString().contains(regex, Qt::CaseInsensitive))))
+    {
+        emit FindItem(currentIndex);
+    }
+    currentIndex++;
 }
-
-
-

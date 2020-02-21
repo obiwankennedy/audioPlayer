@@ -1,10 +1,6 @@
 #include "dbusadaptor.h"
 
-DbusAdaptor::DbusAdaptor(DbusPlugin* plugin,const SongFields* p)
-    : QDBusAbstractAdaptor(plugin),m_p(p)
-{
-
-}
+DbusAdaptor::DbusAdaptor(DbusPlugin* plugin, const SongFields* p) : QDBusAbstractAdaptor(plugin), m_p(p) {}
 QString DbusAdaptor::title()
 {
     return m_p->Title;
@@ -19,6 +15,5 @@ QString DbusAdaptor::album()
 }
 void DbusAdaptor::setSong(const SongFields* p)
 {
-    m_p = p;
-
+    m_p= p;
 }

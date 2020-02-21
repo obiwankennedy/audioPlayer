@@ -20,26 +20,25 @@
 
 PL_directoryFacade::PL_directoryFacade()
 {
-  dirpath = NULL;
-  p = new VisitorFinder;
+    dirpath= NULL;
+    p= new VisitorFinder;
 }
 
-PL_directoryFacade::PL_directoryFacade(QString _dirpath)
-  : dirpath(NULL)
+PL_directoryFacade::PL_directoryFacade(QString _dirpath) : dirpath(NULL)
 {
-  dirpath=&_dirpath;
-  p = new VisitorFinder;
+    dirpath= &_dirpath;
+    p= new VisitorFinder;
 }
 
 PL_directoryFacade::~PL_directoryFacade()
 {
-  delete p;
+    delete p;
 }
 
 QList<PlaylistItem*>* PL_directoryFacade::browseDir()
 {
-  Directory mydir(*dirpath);
-  mydir.acceptVisitor(p);
-  
-  return p->getItemlist();
+    Directory mydir(*dirpath);
+    mydir.acceptVisitor(p);
+
+    return p->getItemlist();
 }

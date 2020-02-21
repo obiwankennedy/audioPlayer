@@ -19,89 +19,54 @@
 #include "../document/pl_xmldoc.h"
 #include <QDomDocument>
 #include <QDomElement>
-#include <QTextStream>
 #include <QDomText>
 #include <QMessageBox>
+#include <QTextStream>
 
+PL_XmlDoc::PL_XmlDoc() : PL_Document() {}
 
-PL_XmlDoc::PL_XmlDoc()
- : PL_Document()
-{
-}
-
-
-PL_XmlDoc::~PL_XmlDoc()
-{
-}
+PL_XmlDoc::~PL_XmlDoc() {}
 
 void PL_XmlDoc::write()
 {
-  QDomDocument doc;
-  QDomElement root = doc.createElement("playlist");
-  
-  
-  
-  
-  
-  
-  QFile xmlfile(*filename);
-  if (!xmlfile.open(QFile::WriteOnly | QFile::Text)) {
-    QMessageBox::warning(NULL, QObject::tr("PlaylistGenerator"),
-                         QObject::tr("Cannot write file %1:\n%2.")
-                             .arg(*filename)
-                             .arg(xmlfile.errorString()));
-    return;
-  }
+    QDomDocument doc;
+    QDomElement root= doc.createElement("playlist");
 
-
-
-  
-  
-  
-  
-  
-  
-  
-  if(model!=NULL)
-  {
-
-   
-
-  
-   
-   
-   
-    QDomElement file; 
-   QDomElement field;
-   QDomText data;
-    for(int i = 0; i<model->rowCount();i++)
+    QFile xmlfile(*filename);
+    if(!xmlfile.open(QFile::WriteOnly | QFile::Text))
     {
-      file = doc.createElement("file");
-      for(int j = 0;j<map->size();j++)
-      {
+        QMessageBox::warning(NULL, QObject::tr("PlaylistGenerator"),
+            QObject::tr("Cannot write file %1:\n%2.").arg(*filename).arg(xmlfile.errorString()));
+        return;
+    }
 
-            field =  doc.createElement(model->getHeaderData(map->at(j)).toString().remove(QChar(' '))) ;
-        
-        
-        field.appendChild(doc.createTextNode(model->getData(i,map->at(j)).toString()));
-        
-        file.appendChild(field);
-      }
-      field =  doc.createElement("URI") ;
-        
-        
-      field.appendChild(doc.createTextNode(model->getUri(i)));
-        
-      file.appendChild(field);
-      
-        root.appendChild(file);
-    }  
-    doc.appendChild(root);
-    QTextStream xml(&xmlfile);
-    
-    doc.save(xml,INDENT);
-    
-    
-  }
+    if(model != NULL)
+    {
+        QDomElement file;
+        QDomElement field;
+        QDomText data;
+        for(int i= 0; i < model->rowCount(); i++)
+        {
+            file= doc.createElement("file");
+            for(int j= 0; j < map->size(); j++)
+            {
+                field= doc.createElement(model->getHeaderData(map->at(j)).toString().remove(QChar(' ')));
 
+                field.appendChild(doc.createTextNode(model->getData(i, map->at(j)).toString()));
+
+                file.appendChild(field);
+            }
+            field= doc.createElement("URI");
+
+            field.appendChild(doc.createTextNode(model->getUri(i)));
+
+            file.appendChild(field);
+
+            root.appendChild(file);
+        }
+        doc.appendChild(root);
+        QTextStream xml(&xmlfile);
+
+        doc.save(xml, INDENT);
+    }
 }

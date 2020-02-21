@@ -19,30 +19,20 @@
  ***************************************************************************/
 #include "../factory/factoryother.h"
 #include "../pl_defaultaudio.h"
-factoryOTHER::factoryOTHER()
-  : FactoryMedia()
-{
-}
+factoryOTHER::factoryOTHER() : FactoryMedia() {}
 
-
-factoryOTHER::~factoryOTHER()
-{
-}
-factoryOTHER *factoryOTHER::singleton = NULL;
+factoryOTHER::~factoryOTHER() {}
+factoryOTHER* factoryOTHER::singleton= NULL;
 factoryOTHER* factoryOTHER::getInstance()
 {
-  if(singleton == NULL)
-    singleton = new factoryOTHER;
-  
-  
-  
-  return singleton;
+    if(singleton == NULL)
+        singleton= new factoryOTHER;
+
+    return singleton;
 }
-PL_MediaFile* factoryOTHER::buildMedia(QString& uri,SongFields* fields)
+PL_MediaFile* factoryOTHER::buildMedia(QString& uri, SongFields* fields)
 {
-  PL_DefaultAudio* tmp = new PL_DefaultAudio(uri,fields);
-  
-  
-  
-  return tmp;
+    PL_DefaultAudio* tmp= new PL_DefaultAudio(uri, fields);
+
+    return tmp;
 }

@@ -17,45 +17,42 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-static const uint qt_meta_data_TrackDelegate[] = {
+static const uint qt_meta_data_TrackDelegate[]= {
 
- // content:
-       1,       // revision
-       0,       // classname
-       0,    0, // classinfo
-       0,    0, // methods
-       0,    0, // properties
-       0,    0, // enums/sets
+    // content:
+    1,    // revision
+    0,    // classname
+    0, 0, // classinfo
+    0, 0, // methods
+    0, 0, // properties
+    0, 0, // enums/sets
 
-       0        // eod
+    0 // eod
 };
 
-static const char qt_meta_stringdata_TrackDelegate[] = {
-    "TrackDelegate\0"
-};
+static const char qt_meta_stringdata_TrackDelegate[]= {"TrackDelegate\0"};
 
-const QMetaObject TrackDelegate::staticMetaObject = {
-    { &QItemDelegate::staticMetaObject, qt_meta_stringdata_TrackDelegate,
-      qt_meta_data_TrackDelegate, 0 }
-};
+const QMetaObject TrackDelegate::staticMetaObject
+    = {{&QItemDelegate::staticMetaObject, qt_meta_stringdata_TrackDelegate, qt_meta_data_TrackDelegate, 0}};
 
-const QMetaObject *TrackDelegate::metaObject() const
+const QMetaObject* TrackDelegate::metaObject() const
 {
     return &staticMetaObject;
 }
 
-void *TrackDelegate::qt_metacast(const char *_clname)
+void* TrackDelegate::qt_metacast(const char* _clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_TrackDelegate))
-	return static_cast<void*>(const_cast< TrackDelegate*>(this));
+    if(!_clname)
+        return 0;
+    if(!strcmp(_clname, qt_meta_stringdata_TrackDelegate))
+        return static_cast<void*>(const_cast<TrackDelegate*>(this));
     return QItemDelegate::qt_metacast(_clname);
 }
 
-int TrackDelegate::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int TrackDelegate::qt_metacall(QMetaObject::Call _c, int _id, void** _a)
 {
-    _id = QItemDelegate::qt_metacall(_c, _id, _a);
-    if (_id < 0)
+    _id= QItemDelegate::qt_metacall(_c, _id, _a);
+    if(_id < 0)
         return _id;
     return _id;
 }

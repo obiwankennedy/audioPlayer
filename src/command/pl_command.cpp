@@ -18,18 +18,11 @@
  ***************************************************************************/
 #include "pl_command.h"
 
-PL_COMMAND::PL_COMMAND()
-{
-}
+PL_COMMAND::PL_COMMAND() {}
 
-
-PL_COMMAND::~PL_COMMAND()
-{
-}
+PL_COMMAND::~PL_COMMAND() {}
 
 bool PL_COMMAND::check()
 {
-	return true;
-	
-	
+    return true;
 }

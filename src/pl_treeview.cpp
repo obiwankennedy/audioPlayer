@@ -1,13 +1,12 @@
-#include <QDebug>
 #include "pl_treeview.h"
 #include "pl_texteditordelegate.h"
+#include <QDebug>
 //
-PL_treeview::PL_treeview(  ) 
-	: QTreeView()
+PL_treeview::PL_treeview() : QTreeView()
 {
-	this->setItemsExpandable ( true);
-	this->setItemDelegate(new pl_texteditordelegate(this));
-        m_behaviour = ALWAYSSHOWN;
+    this->setItemsExpandable(true);
+    this->setItemDelegate(new pl_texteditordelegate(this));
+    m_behaviour= ALWAYSSHOWN;
 }
 //
 bool PL_treeview::hasCopyPasteSupport() const
@@ -23,38 +22,20 @@ QString PL_treeview::tabTitle() const
 {
     return tr("Tree");
 }
-void PL_treeview::readSettings()
-{
-
-}
-void PL_treeview::writeSettings()
-{
-
-}
+void PL_treeview::readSettings() {}
+void PL_treeview::writeSettings() {}
 void PL_treeview::displayMenu(QMenu* menu)
 {
     Q_UNUSED(menu);
 }
 QList<PlaylistItem*>* PL_treeview::getSelectedItem()
 {
-return new QList<PlaylistItem*>;
-
+    return new QList<PlaylistItem*>;
 }
 QList<int>* PL_treeview::getVisibleColumn()
 {
-
-
-return new QList<int>;
-
+    return new QList<int>;
 }
-void PL_treeview::cancel()
-{
-}
-void PL_treeview::aboutToHide()
-{
-
-}
-void PL_treeview::aboutToShow()
-{
-
-}
+void PL_treeview::cancel() {}
+void PL_treeview::aboutToHide() {}
+void PL_treeview::aboutToShow() {}

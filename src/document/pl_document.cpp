@@ -18,26 +18,18 @@
  ***************************************************************************/
 #include "../document/pl_document.h"
 
-PL_Document::PL_Document()
-{
-  
-}
+PL_Document::PL_Document() {}
 
-
-PL_Document::~PL_Document()
-{
-}
+PL_Document::~PL_Document() {}
 void PL_Document::setModel(Pl_DocumentModel* _model)
 {
-  model = _model;
+    model= _model;
 }
-void PL_Document::setFilename(QString * p)
+void PL_Document::setFilename(QString* p)
 {
-  
-  filename=p;
- 
+    filename= p;
 }
 void PL_Document::setMap(QList<int>* _map)
 {
-  map= _map;
+    map= _map;
 }

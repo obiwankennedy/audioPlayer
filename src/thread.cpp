@@ -18,41 +18,30 @@
  ***************************************************************************/
 #include "thread.h"
 
-Thread::Thread(QList<PlaylistItem*>* list)
- : QThread()
+Thread::Thread(QList<PlaylistItem*>* list) : QThread()
 {
-  this->list=list;
-  stopped=false;
+    this->list= list;
+    stopped= false;
 }
 
-
-Thread::~Thread()
-{
-}
-
+Thread::~Thread() {}
 
 void Thread::run()
 {
-
-
-
-
-  mutex.lock();
-  for (int i = 0; ((i < list->size())&&(!stopped)); ++i) 
-  {
-    list->at(i)->getKey()->acceptVisitor(visit); 
-     
-  }
-  mutex.unlock();
-  
+    mutex.lock();
+    for(int i= 0; ((i < list->size()) && (!stopped)); ++i)
+    {
+        list->at(i)->getKey()->acceptVisitor(visit);
+    }
+    mutex.unlock();
 }
 void Thread::setVisitor(VisitorMedia* visit)
 {
- this->visit=visit; 
+    this->visit= visit;
 }
 void Thread::stop()
 {
-  mutex.lock();
-  stopped=true;
-  mutex.unlock();
+    mutex.lock();
+    stopped= true;
+    mutex.unlock();
 }

@@ -18,39 +18,33 @@
  ***************************************************************************/
 #include "pl_titlewritingcommand.h"
 
-pl_titlewritingcommand::pl_titlewritingcommand(QList<PlaylistItem*> _myselection,int _start, dataColumn _criteria,PL_TableView* _tableview)
-  : PL_COMMAND(),myselection(_myselection),start(_start),criteria(_criteria),tableview(_tableview)
+pl_titlewritingcommand::pl_titlewritingcommand(
+    QList<PlaylistItem*> _myselection, int _start, dataColumn _criteria, PL_TableView* _tableview)
+    : PL_COMMAND(), myselection(_myselection), start(_start), criteria(_criteria), tableview(_tableview)
 {
-  myPlaylist = Playlist::getInstance();
+    myPlaylist= Playlist::getInstance();
 }
 
-
-pl_titlewritingcommand::~pl_titlewritingcommand()
-{
-}
-
+pl_titlewritingcommand::~pl_titlewritingcommand() {}
 
 void pl_titlewritingcommand::doCommand()
 {
- 	int step = myselection.size()/100;
-  	emit Maximum(100);
-  	int i = 0;
-  	int k = 0;
-  	emit Minimum(i);
-  foreach(PlaylistItem* a, myselection)
-  {
-  	    	if(i>=step)
-    	{
-		  	emit valueChanged(++k);
-		  	i = 0;
-	  	}
-		    QVariant ab = a->getKey()->getMember(TITLE);
-		    a->getKey()->setValue(TITLE,ab,true);
-		    i++;
-  }
-  emit done();
+    int step= myselection.size() / 100;
+    emit Maximum(100);
+    int i= 0;
+    int k= 0;
+    emit Minimum(i);
+    foreach(PlaylistItem* a, myselection)
+    {
+        if(i >= step)
+        {
+            emit valueChanged(++k);
+            i= 0;
+        }
+        QVariant ab= a->getKey()->getMember(TITLE);
+        a->getKey()->setValue(TITLE, ab, true);
+        i++;
+    }
+    emit done();
 }
-void pl_titlewritingcommand::undo()
-{
-  
-}
+void pl_titlewritingcommand::undo() {}

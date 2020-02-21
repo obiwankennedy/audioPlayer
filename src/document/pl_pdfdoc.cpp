@@ -17,92 +17,66 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "pl_pdfdoc.h"
+#include <QPainter>
+#include <QPrintDialog>
 #include <QPrinter>
 #include <QTextDocument>
 #include <QTextStream>
-#include <QPainter>
-#include <QPrintDialog>
 
-PL_PdfDoc::PL_PdfDoc()
- : PL_Document()
-{
-}
+PL_PdfDoc::PL_PdfDoc() : PL_Document() {}
 
-
-PL_PdfDoc::~PL_PdfDoc()
-{
-}
-
+PL_PdfDoc::~PL_PdfDoc() {}
 
 void PL_PdfDoc::write()
 {
+    QString html;
 
-  
-  
-  QString html;
-  
-  
-  
-  
-  
-  if(model!=NULL)
-  {
-    html +="<table>";
-   
-    html += "<tr>";
-    for(int k = 0;k<map->size();k++)
+    if(model != NULL)
     {
-     
-      html += "<td>" + model->getHeaderData(map->at(k)).toString() + "</td>";
-     
+        html+= "<table>";
+
+        html+= "<tr>";
+        for(int k= 0; k < map->size(); k++)
+        {
+            html+= "<td>" + model->getHeaderData(map->at(k)).toString() + "</td>";
+        }
+        html+= "</tr>";
+
+        for(int i= 0; i < model->rowCount(); i++)
+        {
+            html+= "<tr>";
+            for(int j= 0; j < map->size(); j++)
+            {
+                html+= "<td>" + model->getData(i, map->at(j)).toString() + "</td>";
+            }
+            html+= "</tr>";
+        }
+        html+= "</table>";
     }
-    html += "</tr>";
-   
-   
-   
-   
-   
-    for(int i = 0; i<model->rowCount();i++)
-    {
-      html += "<tr>";
-      for(int j = 0;j<map->size();j++)
-      {
-        html += "<td>" + model->getData(i,map->at(j)).toString() + "</td>";
-      }
-      html += "</tr>";
-    }  
-    html += "</table>";
-  }
 
-  
-  QPrinter printer;
-  printer.setOutputFileName(*filename);
-  printer.setOutputFormat(QPrinter::PdfFormat);
+    QPrinter printer;
+    printer.setOutputFileName(*filename);
+    printer.setOutputFormat(QPrinter::PdfFormat);
 
+    printer.setColorMode(QPrinter::GrayScale);
+    printer.setCreator(QObject::tr("Play list Generator."));
+    printer.setDocName(QObject::tr("Play list PDF File."));
+    printer.setDoubleSidedPrinting(false);
+    printer.setFontEmbeddingEnabled(true);
+    printer.setFromTo(0, 0);
+    printer.setFullPage(true);
+    printer.setNumCopies(1);
+    printer.setOrientation(QPrinter::Portrait);
 
-      printer.setColorMode (QPrinter::GrayScale );
-      printer.setCreator (QObject::tr("Play list Generator."));
-      printer.setDocName (QObject::tr("Play list PDF File.") );
-      printer.setDoubleSidedPrinting ( false );
-      printer.setFontEmbeddingEnabled (true );
-      printer.setFromTo ( 0, 0 );
-      printer.setFullPage ( true );
-      printer.setNumCopies ( 1);
-      printer.setOrientation ( QPrinter::Portrait  );
+    printer.setPageOrder(QPrinter::FirstPageFirst);
+    printer.setPageSize(QPrinter::A4);
+    printer.setPaperSource(QPrinter::Auto);
 
-      printer.setPageOrder (QPrinter::FirstPageFirst  );
-      printer.setPageSize ( QPrinter::A4 );
-      printer.setPaperSource (QPrinter::Auto );
+    printer.setPrintRange(QPrinter::AllPages);
 
-      printer.setPrintRange ( QPrinter::AllPages );
-   
-      printer.setResolution ( 100);
+    printer.setResolution(100);
 
-      
-
-                
-                QTextDocument doc;
-                doc.setHtml(html);
-                doc.print(&printer);
-
+    QTextDocument doc;
+    doc.setHtml(html);
+    doc.print(&printer);
 }

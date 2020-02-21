@@ -20,25 +20,16 @@
 
 ImportParser::ImportParser()
 {
-  result = new QList<PlaylistItem*>;
-
+    result= new QList<PlaylistItem*>;
 }
 
-
-ImportParser::~ImportParser()
-{
-}
-
-
-
-
+ImportParser::~ImportParser() {}
 
 void ImportParser::setFilename(QString filename)
 {
-  this->filename=filename;
+    this->filename= filename;
 }
 QList<PlaylistItem*>* ImportParser::getResult()
 {
-  return result;
-  
+    return result;
 }

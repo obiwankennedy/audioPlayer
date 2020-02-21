@@ -19,57 +19,35 @@
 #include "../document/pl_plsdoc.h"
 #include <QMessageBox>
 #include <QTextStream>
-PL_PlsDoc::PL_PlsDoc()
- : PL_Document()
-{
-}
+PL_PlsDoc::PL_PlsDoc() : PL_Document() {}
 
-
-PL_PlsDoc::~PL_PlsDoc()
-{
-}
+PL_PlsDoc::~PL_PlsDoc() {}
 
 void PL_PlsDoc::write()
 {
-  
-  QFile file(*filename);
-  if (!file.open(QFile::WriteOnly | QFile::Text)) {
-    QMessageBox::warning(NULL, QObject::tr("PlaylistGenerator"),
-                         QObject::tr("Cannot write file %1:\n%2.")
-                             .arg(*filename)
-                             .arg(file.errorString()));
-    return;
-  }
-
-  QTextStream pls(&file);
-  
-  pls <<"[playlist]\nNumberOfEntries="<<model->rowCount()<< "\n\n";
-  
-  
-  //map->clear()
-  
-  
-  
-  
-
-   
-   
-   
-   
-   
-    for(int i = 0; i<model->rowCount();i++)
+    QFile file(*filename);
+    if(!file.open(QFile::WriteOnly | QFile::Text))
     {
-      
-      
-      pls << "File"<<i+1<<"="<< model->getUri(i) << "\n";
-      pls << "Title"<<i+1<<"="<< model->getData(i,TITLE).toString() << "\n";
-      pls << "Length"<<i+1<<"="<< model->getData(i,TIME).toString() << "\n\n";
-      /*File1=http://streamexample.com:80
-          Title1=My Favorite Online Radio
-          Length1=-1
-      */
-    }  
-    pls << "Version=2"<< endl;
-  
-  
+        QMessageBox::warning(NULL, QObject::tr("PlaylistGenerator"),
+            QObject::tr("Cannot write file %1:\n%2.").arg(*filename).arg(file.errorString()));
+        return;
+    }
+
+    QTextStream pls(&file);
+
+    pls << "[playlist]\nNumberOfEntries=" << model->rowCount() << "\n\n";
+
+    // map->clear()
+
+    for(int i= 0; i < model->rowCount(); i++)
+    {
+        pls << "File" << i + 1 << "=" << model->getUri(i) << "\n";
+        pls << "Title" << i + 1 << "=" << model->getData(i, TITLE).toString() << "\n";
+        pls << "Length" << i + 1 << "=" << model->getData(i, TIME).toString() << "\n\n";
+        /*File1=http://streamexample.com:80
+            Title1=My Favorite Online Radio
+            Length1=-1
+        */
+    }
+    pls << "Version=2" << endl;
 }

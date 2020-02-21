@@ -19,38 +19,29 @@
  ***************************************************************************/
 #include "pl_mediafile.h"
 #include <QTextStream>
-PL_MediaFile::PL_MediaFile(QString& uri)
-  : File(uri)
+PL_MediaFile::PL_MediaFile(QString& uri) : File(uri) {}
+
+PL_MediaFile::~PL_MediaFile() {}
+
+QDataStream& operator<<(QDataStream& os, const PL_MediaFile& c)
 {
-  
+    c.writting(os);
+
+    return os;
 }
-
-PL_MediaFile::~PL_MediaFile()
+QDataStream& operator>>(QDataStream& is, PL_MediaFile& c)
 {
-}
-
-QDataStream& operator<<(QDataStream& os,const PL_MediaFile& c)
-{
-
-  c.writting(os);
-
-  return os;
-}
-QDataStream& operator>>(QDataStream& is,PL_MediaFile& c)
-{
-  c.readering(is);
-  return is;
+    c.readering(is);
+    return is;
 }
 void PL_MediaFile::PreReading()
-{    
-  
+{
     getDuration();
     getTitle();
     getArtist();
     getGenre();
     getAlbumtitle();
-    getComment();    
-    getYear();   
+    getComment();
+    getYear();
     getBitrate();
-  
 }

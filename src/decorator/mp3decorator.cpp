@@ -17,83 +17,67 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "mp3decorator.h"
-#include "playlistitem.h"
 #include "factory/pl_mp3file.h"
-Mp3Decorator::Mp3Decorator()
- : ItemDecorator()
-{
-  
-}
-Mp3Decorator::Mp3Decorator(PlaylistItem* _item)
-  : ItemDecorator(_item)
-{
-  
-}
-Mp3Decorator::~Mp3Decorator()
-{
-  
-}
+#include "playlistitem.h"
+Mp3Decorator::Mp3Decorator() : ItemDecorator() {}
+Mp3Decorator::Mp3Decorator(PlaylistItem* _item) : ItemDecorator(_item) {}
+Mp3Decorator::~Mp3Decorator() {}
 QVariant Mp3Decorator::getMember(dataColumn x) const
 {
+    PL_Mp3File* tmp= (PL_Mp3File*)item->getMediaFile();
 
-  PL_Mp3File* tmp =(PL_Mp3File*) item->getMediaFile();
-  
-  if(tmp==NULL)
-    return QVariant();
-  
+    if(tmp == NULL)
+        return QVariant();
 
-
-  switch(x)
-  {
+    switch(x)
+    {
     case TITLE:
     {
-      return (*tmp->getTitle());
+        return (*tmp->getTitle());
     }
     case ARTIST:
-      return (*tmp->getArtist());
+        return (*tmp->getArtist());
     case TIME:
-      return tmp->getDuration();
+        return tmp->getDuration();
     case ALBUM:
-      return (*tmp->getAlbumtitle());
+        return (*tmp->getAlbumtitle());
     case GENRE:
-      return tmp->getGenre();
+        return tmp->getGenre();
     case COMMENT:
-      return (*tmp->getComment());
+        return (*tmp->getComment());
     case YEAR:
-      return tmp->getYear();
+        return tmp->getYear();
     case BITRATE:
-      return tmp->getBitrate();
+        return tmp->getBitrate();
     case TRACK:
-     return tmp->getTrack();
+        return tmp->getTrack();
     case PICTURE:
-      return tmp->getPicture();
-        
-  }
-  return QVariant();  
+        return tmp->getPicture();
+    }
+    return QVariant();
 }
 
-void Mp3Decorator::setValue(dataColumn x,QVariant& value,bool replace)
+void Mp3Decorator::setValue(dataColumn x, QVariant& value, bool replace)
 {
-  PL_Mp3File* tmp =(PL_Mp3File*) item->getMediaFile();
-  tmp->setValue(x,value,replace);
+    PL_Mp3File* tmp= (PL_Mp3File*)item->getMediaFile();
+    tmp->setValue(x, value, replace);
 }
-
 
 QStringList* Mp3Decorator::getgenres()
 {
-  PL_Mp3File* tmp =(PL_Mp3File*) item->getMediaFile();
-  return tmp->getgenres();
+    PL_Mp3File* tmp= (PL_Mp3File*)item->getMediaFile();
+    return tmp->getgenres();
 }
-void Mp3Decorator::setItem(PlaylistItem* _item) 
+void Mp3Decorator::setItem(PlaylistItem* _item)
 {
-  item=_item;
+    item= _item;
 }
 PlaylistItem* Mp3Decorator::getItem() const
 {
-  return item;
+    return item;
 }
 void Mp3Decorator::ForceTagReading()
 {
-  PL_Mp3File* tmp =(PL_Mp3File*) item->getMediaFile();
-  tmp->ForceTagReading();
+    PL_Mp3File* tmp= (PL_Mp3File*)item->getMediaFile();
+    tmp->ForceTagReading();
 }

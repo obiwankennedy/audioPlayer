@@ -17,72 +17,59 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "xmlimport.h"
-#include <QDomText>
 #include <QDomDocument>
 #include <QDomElement>
+#include <QDomText>
 
-XmlImport::XmlImport()
- : ImportParser()
-{
-}
+XmlImport::XmlImport() : ImportParser() {}
 
-
-XmlImport::~XmlImport()
-{
-}
+XmlImport::~XmlImport() {}
 void XmlImport::readFile()
 {
-  
-  QFile file(filename);
-  /*if (!file.open(QFile::ReadOnly)) 
-  {
-   
-    return;
-  }*/
-
-  QDomDocument doc;
-  QString errorstr;
-  int errorline;
-  int errorcolumn;
-  
-  if(!doc.setContent(&file,true,&errorstr,&errorline,&errorcolumn))
-  {
-
-    
-    return;
-    
-  }
-  QDomElement root = doc.documentElement();
-  if(root.tagName()!="playlist")
-    return ;
-  PlaylistItem* p;
-  QDomNode node = root.firstChild();
-  QDomNode mediatag;
-  QString*  uri;
-  
-  while(!node.isNull())
-  {
-    if(node.toElement().tagName()=="file")
+    QFile file(filename);
+    /*if (!file.open(QFile::ReadOnly))
     {
-      mediatag=node.firstChild();
-      while(!mediatag.isNull())
-      {
-        
-        if(mediatag.toElement().tagName()=="URI")
-        {
-          p= new PlaylistItem;
-          uri = new QString;
 
-          *uri= mediatag.toElement().text();
-          p->setURI(*uri);
-          
-          result->append(p);
-        }
-        mediatag = mediatag.nextSibling();
-      }
-      
+      return;
+    }*/
+
+    QDomDocument doc;
+    QString errorstr;
+    int errorline;
+    int errorcolumn;
+
+    if(!doc.setContent(&file, true, &errorstr, &errorline, &errorcolumn))
+    {
+        return;
     }
-    node = node.nextSibling();
-  }
-}
+    QDomElement root= doc.documentElement();
+    if(root.tagName() != "playlist")
+        return;
+    PlaylistItem* p;
+    QDomNode node= root.firstChild();
+    QDomNode mediatag;
+    QString* uri;
 
+    while(!node.isNull())
+    {
+        if(node.toElement().tagName() == "file")
+        {
+            mediatag= node.firstChild();
+            while(!mediatag.isNull())
+            {
+                if(mediatag.toElement().tagName() == "URI")
+                {
+                    p= new PlaylistItem;
+                    uri= new QString;
+
+                    *uri= mediatag.toElement().text();
+                    p->setURI(*uri);
+
+                    result->append(p);
+                }
+                mediatag= mediatag.nextSibling();
+            }
+        }
+        node= node.nextSibling();
+    }
+}

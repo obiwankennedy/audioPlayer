@@ -19,32 +19,21 @@
  ***************************************************************************/
 #include "factorymp3.h"
 #include "pl_mp3file.h"
-FactoryMP3::FactoryMP3()
-{
-  
-}
+FactoryMP3::FactoryMP3() {}
 
-
-FactoryMP3::~FactoryMP3()
-{
-  
-}
-FactoryMP3 *FactoryMP3::singleton = NULL;
+FactoryMP3::~FactoryMP3() {}
+FactoryMP3* FactoryMP3::singleton= NULL;
 
 FactoryMP3* FactoryMP3::getInstance()
 {
-  if(singleton == NULL)
-    singleton = new FactoryMP3;
-  
-  
-  
-  return singleton;
+    if(singleton == NULL)
+        singleton= new FactoryMP3;
+
+    return singleton;
 }
-PL_MediaFile* FactoryMP3::buildMedia(QString& uri,SongFields* fields)
+PL_MediaFile* FactoryMP3::buildMedia(QString& uri, SongFields* fields)
 {
-  PL_Mp3File* tmp = new PL_Mp3File(uri,fields);
-  
-  
-  
-  return tmp;
+    PL_Mp3File* tmp= new PL_Mp3File(uri, fields);
+
+    return tmp;
 }

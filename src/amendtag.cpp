@@ -19,115 +19,94 @@
  ***************************************************************************/
 #include "amendtag.h"
 
-AmendTag::AmendTag(QString artist,bool bartist,QString title,bool btitre,QString album,bool balbum,int genre,bool bgenre,QString uri,bool buri,QString comment,bool bcom,QString year,bool byear,bool replace)
-: VisitorMedia()
+AmendTag::AmendTag(QString artist, bool bartist, QString title, bool btitre, QString album, bool balbum, int genre,
+    bool bgenre, QString uri, bool buri, QString comment, bool bcom, QString year, bool byear, bool replace)
+    : VisitorMedia()
 {
-  myPlaylist = Playlist::getInstance();
-  
-  if(btitre)
-  newtitle=&title;
-  else
-    newtitle=NULL;
-  
-  if(bartist)
-  newartist=&artist;
-  else
-    newartist=NULL;
-    
-  if(balbum)
-    newalbum=&album;
-  else
-    newalbum=NULL;
-  
-  if(bgenre)
-    newgenre=genre;
-  else
-    newgenre=-1;
-  
-  
-  if(bcom)
-    newcomment=&comment;
-  else
-    newcomment=NULL;
-  
+    myPlaylist= Playlist::getInstance();
 
-  
-  if(buri)
-  {
-    newuri = new QString;
-  (*newuri)=uri;
+    if(btitre)
+        newtitle= &title;
+    else
+        newtitle= NULL;
 
-  }
-  else
-  (newuri)=NULL;
-  
- 
-  
-  
-  if(byear)
-       newyear =&year;
-  else
-    newyear=NULL;
-  
-  this->replace=replace;
-  
-  
+    if(bartist)
+        newartist= &artist;
+    else
+        newartist= NULL;
+
+    if(balbum)
+        newalbum= &album;
+    else
+        newalbum= NULL;
+
+    if(bgenre)
+        newgenre= genre;
+    else
+        newgenre= -1;
+
+    if(bcom)
+        newcomment= &comment;
+    else
+        newcomment= NULL;
+
+    if(buri)
+    {
+        newuri= new QString;
+        (*newuri)= uri;
+    }
+    else
+        (newuri)= NULL;
+
+    if(byear)
+        newyear= &year;
+    else
+        newyear= NULL;
+
+    this->replace= replace;
 }
 
-
-AmendTag::~AmendTag()
-{
-  
-}
-
-
+AmendTag::~AmendTag() {}
 
 void AmendTag::visitMedia(ItemDecorator* media)
 {
-  
-  
+    if(newuri != NULL)
+    {
+        media->getItem()->setURI(*newuri);
+        media->ForceTagReading();
+    }
 
-  if(newuri!=NULL)
-  {
+    if(newtitle != NULL)
+    {
+        QVariant title(*newtitle);
+        media->setValue(TITLE, title, true);
+    }
 
-    media->getItem()->setURI(*newuri);
-    media->ForceTagReading();
-    
-  }
-  
-  if(newtitle!=NULL)
-  {
-  QVariant title(*newtitle);
-  media->setValue(TITLE,title,true);
-  }
-  
-  if(newartist!=NULL)
-  {
-  QVariant artist(*newartist);
-  media->setValue(ARTIST,artist,true);
-  }
-  
-  if(newalbum!=NULL)
-  {
-  QVariant album(*newalbum);
-  media->setValue(ALBUM,album,true);
-  }
-  
-  if(newcomment!=NULL)
-  {
-    QVariant comment(*newcomment);
-    media->setValue(COMMENT,comment,true);
-  }
-  if(newyear!=NULL)
-  {
-    QVariant vyear(*newyear);
-    media->setValue(YEAR,vyear,true);
-  }
-  if(newgenre!=-1)
-  {
-  QVariant genre(newgenre);
-  media->setValue(GENRE,genre,true);
-  }
+    if(newartist != NULL)
+    {
+        QVariant artist(*newartist);
+        media->setValue(ARTIST, artist, true);
+    }
 
+    if(newalbum != NULL)
+    {
+        QVariant album(*newalbum);
+        media->setValue(ALBUM, album, true);
+    }
+
+    if(newcomment != NULL)
+    {
+        QVariant comment(*newcomment);
+        media->setValue(COMMENT, comment, true);
+    }
+    if(newyear != NULL)
+    {
+        QVariant vyear(*newyear);
+        media->setValue(YEAR, vyear, true);
+    }
+    if(newgenre != -1)
+    {
+        QVariant genre(newgenre);
+        media->setValue(GENRE, genre, true);
+    }
 }
-

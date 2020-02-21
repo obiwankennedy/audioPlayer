@@ -19,8 +19,4 @@
  ***************************************************************************/
 #include "../factory/factorymedia.h"
 
-FactoryMedia::~FactoryMedia()
-{
-}
-
-
+FactoryMedia::~FactoryMedia() {}

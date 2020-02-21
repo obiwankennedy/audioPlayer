@@ -21,160 +21,135 @@
 
 #include <QtGui>
 
-#include "songpluginmanager.h"
 #include "songplugin.h"
+#include "songpluginmanager.h"
 
 #include "songlistplugin.h"
 
-
-SongPluginManager::SongPluginManager(QMainWindow* mainwindow)
-        : m_mainwindow(mainwindow)
+SongPluginManager::SongPluginManager(QMainWindow* mainwindow) : m_mainwindow(mainwindow)
 {
-    QDir pluginsDir = QDir(qApp->applicationDirPath());
+    QDir pluginsDir= QDir(qApp->applicationDirPath());
 
     pluginsDir.cd("plugins");
 
-
-
-    foreach (QString fileName, pluginsDir.entryList(QDir::Files))
+    foreach(QString fileName, pluginsDir.entryList(QDir::Files))
     {
-
         QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 
-        QObject *plugin = loader.instance();
+        QObject* plugin= loader.instance();
 
-
-        if (plugin)
+        if(plugin)
         {
-
-            SongInterface * op = qobject_cast<SongInterface *>(plugin);
-            if (op)
+            SongInterface* op= qobject_cast<SongInterface*>(plugin);
+            if(op)
             {
-               m_actionList << op;
+                m_actionList << op;
 
-               op->getName();
-
+                op->getName();
             }
         }
     }
 }
 void SongPluginManager::displayPreviousState()
 {
-    foreach(SongInterface * op, m_actionList)
+    foreach(SongInterface* op, m_actionList)
     {
         if(op->isVisible())
         {
-            m_mainwindow->addDockWidget(op->orientation(),op->getWidget());
+            m_mainwindow->addDockWidget(op->orientation(), op->getWidget());
         }
     }
 }
 
-SongPluginManager * SongPluginManager::m_instance = 0;
+SongPluginManager* SongPluginManager::m_instance= 0;
 
-
-SongPluginManager::~SongPluginManager()
-{
-
-}
+SongPluginManager::~SongPluginManager() {}
 void SongPluginManager::playingSongChanged(SongFields* a)
 {
-
-
-
-    foreach(SongInterface * op, m_actionList)
+    foreach(SongInterface* op, m_actionList)
     {
-            op->SetSong(a);
+        op->SetSong(a);
     }
-
-
-
 }
-void SongPluginManager::setPopupMenu(QMenu* menu,QActionGroup* group)
+void SongPluginManager::setPopupMenu(QMenu* menu, QActionGroup* group)
 {
-    int i=0;
-   /* foreach(SongListInterface * op, m_songlistpluginList)
-    {
-            if(op->getAction())
-            {
-                QAction* tmp=op->getAction();
-                group->addAction(tmp);
-                tmp->setData(i);
-                menu->addAction(op->getAction());
-            }
-            i++;
-    }*/
+    int i= 0;
+    /* foreach(SongListInterface * op, m_songlistpluginList)
+     {
+             if(op->getAction())
+             {
+                 QAction* tmp=op->getAction();
+                 group->addAction(tmp);
+                 tmp->setData(i);
+                 menu->addAction(op->getAction());
+             }
+             i++;
+     }*/
 }
 
 void SongPluginManager::playingStopped()
 {
-    foreach(SongInterface * op, m_actionList)
+    foreach(SongInterface* op, m_actionList)
     {
-            op->stopped();
+        op->stopped();
     }
-
 }
-void SongPluginManager::selectionURI(QStringList list)
-{
-
-}
+void SongPluginManager::selectionURI(QStringList list) {}
 
 void SongPluginManager::setmenu(QMenu* menu)
 {
-
-    foreach(SongInterface * op, m_actionList)
+    foreach(SongInterface* op, m_actionList)
     {
-            if(op->getAction())
-                menu->addAction(op->getAction());
-
+        if(op->getAction())
+            menu->addAction(op->getAction());
     }
-  /*  foreach(SongListInterface * op, m_songlistpluginList)
-    {
-            if(op->getAction())
-                menu->addAction(op->getAction());
+    /*  foreach(SongListInterface * op, m_songlistpluginList)
+      {
+              if(op->getAction())
+                  menu->addAction(op->getAction());
 
-    }*/
+      }*/
 }
 void SongPluginManager::setDock()
 {
-    foreach(SongInterface * op, m_actionList)
+    foreach(SongInterface* op, m_actionList)
     {
         if(op->hasUI())
         {
-           m_mainwindow->addDockWidget(op->orientation(),op->getWidget());
+            m_mainwindow->addDockWidget(op->orientation(), op->getWidget());
         }
     }
-
 }
 void SongPluginManager::writeSettings(QSettings& settings)
 {
-    foreach(SongInterface * op, m_actionList)
+    foreach(SongInterface* op, m_actionList)
     {
-
-           op->writeSetting(settings);
+        op->writeSetting(settings);
     }
 }
 void SongPluginManager::readSettings(QSettings& settings)
 {
-    foreach(SongInterface * op, m_actionList)
+    foreach(SongInterface* op, m_actionList)
     {
-
-           op->readSetting(settings);
+        op->readSetting(settings);
     }
 }
 
-SongPluginManager * SongPluginManager::instance(QMainWindow* mainwindow)
+SongPluginManager* SongPluginManager::instance(QMainWindow* mainwindow)
 {
-    if (m_instance==0)
+    if(m_instance == 0)
     {
-        m_instance = new SongPluginManager(mainwindow);
+        m_instance= new SongPluginManager(mainwindow);
     }
     return m_instance;
 }
 
-SongInterface * SongPluginManager::m_action( QString opName )
+SongInterface* SongPluginManager::m_action(QString opName)
 {
-    foreach(SongInterface * op, m_actionList) {
-        if (op->getName()==opName) {
+    foreach(SongInterface* op, m_actionList)
+    {
+        if(op->getName() == opName)
+        {
             return op;
         }
     }

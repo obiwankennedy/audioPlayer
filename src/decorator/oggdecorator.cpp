@@ -1,67 +1,61 @@
 #include "oggdecorator.h"
 #include <QDebug>
 //
-OggDecorator::OggDecorator(  ) 
-	: ItemDecorator()
+OggDecorator::OggDecorator() : ItemDecorator()
 {
-	// TODO
+    // TODO
 }
 //
 QVariant OggDecorator::getMember(dataColumn x) const
 {
-  PL_OggFile* tmp =(PL_OggFile*) item->getMediaFile();
-  
-  if(item==NULL)
-    return QVariant();
+    PL_OggFile* tmp= (PL_OggFile*)item->getMediaFile();
 
-  switch(x)
-  {
+    if(item == NULL)
+        return QVariant();
+
+    switch(x)
+    {
     case TITLE:
     {
-      return (*tmp->getTitle());
+        return (*tmp->getTitle());
     }
     case ARTIST:
-      return (*tmp->getArtist());
+        return (*tmp->getArtist());
     case TIME:
-      return tmp->getDuration();
+        return tmp->getDuration();
     case ALBUM:
-      return (*tmp->getAlbumtitle());
+        return (*tmp->getAlbumtitle());
     case GENRE:
-      return tmp->getGenre();
+        return tmp->getGenre();
     case TRACK:
-      return tmp->getTrack();
-  case PICTURE:
-      return tmp->getPicture();
+        return tmp->getTrack();
+    case PICTURE:
+        return tmp->getPicture();
     case COMMENT:
     case YEAR:
     case BITRATE:
-      return QVariant();  
-  }
-  return QVariant(); 
-   
-      
-
+        return QVariant();
+    }
+    return QVariant();
 }
-void OggDecorator::setValue(dataColumn x,QVariant& value,bool replace)
+void OggDecorator::setValue(dataColumn x, QVariant& value, bool replace)
 {
-
-  PL_OggFile* tmp =(PL_OggFile*) item->getMediaFile();
-  tmp->setValue(x,value,replace);
-
+    PL_OggFile* tmp= (PL_OggFile*)item->getMediaFile();
+    tmp->setValue(x, value, replace);
 }
 QStringList* OggDecorator::getgenres()
 {
-  return new QStringList;
+    return new QStringList;
 }
-void OggDecorator::setItem(PlaylistItem* _item) 
+void OggDecorator::setItem(PlaylistItem* _item)
 {
-  item = _item;
+    item= _item;
 }
-PlaylistItem* OggDecorator::getItem() 
+PlaylistItem* OggDecorator::getItem()
 {
-  return item;
+    return item;
 }
 void OggDecorator::ForceTagReading()
 {
-  return;
+    return;
 }

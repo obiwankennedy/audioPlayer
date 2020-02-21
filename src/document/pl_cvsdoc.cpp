@@ -20,53 +20,31 @@
 #include <QMessageBox>
 #include <QTextStream>
 
-PL_CvsDoc::PL_CvsDoc()
- : PL_Document()
-{
-}
+PL_CvsDoc::PL_CvsDoc() : PL_Document() {}
 
-
-PL_CvsDoc::~PL_CvsDoc()
-{
-}
+PL_CvsDoc::~PL_CvsDoc() {}
 
 void PL_CvsDoc::write()
 {
-  
-  QFile file(*filename);
-  if (!file.open(QFile::WriteOnly | QFile::Text)) 
-  {
-    QMessageBox::warning(NULL, QObject::tr("PlaylistGenerator"),
-                         QObject::tr("Cannot write file %1:\n%2.")
-                             .arg(*filename)
-                             .arg(file.errorString()));
-    return;
-  }
-
-  QTextStream cvs(&file);
-  
-
-  
-  
-  
-  
-  if(model!=NULL)
-  {
-   
-   
-   
-   
-   
-    for(int i = 0; i<model->rowCount();i++)
+    QFile file(*filename);
+    if(!file.open(QFile::WriteOnly | QFile::Text))
     {
-      
-      for(int j = 0;j<map->size();j++)
-      {
-        cvs << model->getData(i,map->at(j)).toString() << ";";
-      }
-      cvs<< "\n";
-     }
-     
-  }
+        QMessageBox::warning(NULL, QObject::tr("PlaylistGenerator"),
+            QObject::tr("Cannot write file %1:\n%2.").arg(*filename).arg(file.errorString()));
+        return;
+    }
 
+    QTextStream cvs(&file);
+
+    if(model != NULL)
+    {
+        for(int i= 0; i < model->rowCount(); i++)
+        {
+            for(int j= 0; j < map->size(); j++)
+            {
+                cvs << model->getData(i, map->at(j)).toString() << ";";
+            }
+            cvs << "\n";
+        }
+    }
 }

@@ -15,106 +15,120 @@
    along with Clementine.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "tagfetcher.h"
 #include "fingerprinter.h"
 #include "musicbrainzclient.h"
 #include "musicdnsclient.h"
-#include "tagfetcher.h"
 
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QtConcurrentMap>
 
 TagFetcher::TagFetcher(QObject* parent)
-  : QObject(parent),
-    fingerprint_watcher_(NULL),
-    musicdns_client_(new MusicDnsClient(this)),
-    musicbrainz_client_(new MusicBrainzClient(this))
+    : QObject(parent)
+    , fingerprint_watcher_(NULL)
+    , musicdns_client_(new MusicDnsClient(this))
+    , musicbrainz_client_(new MusicBrainzClient(this))
 {
-  connect(musicdns_client_, SIGNAL(Finished(int,QString)), SLOT(PuidFound(int,QString)));
-  connect(musicbrainz_client_, SIGNAL(Finished(int,MusicBrainzClient::ResultList)), SLOT(TagsFetched(int,MusicBrainzClient::ResultList)));
+    connect(musicdns_client_, SIGNAL(Finished(int, QString)), SLOT(PuidFound(int, QString)));
+    connect(musicbrainz_client_, SIGNAL(Finished(int, MusicBrainzClient::ResultList)),
+        SLOT(TagsFetched(int, MusicBrainzClient::ResultList)));
 }
 
-QString TagFetcher::GetFingerprint(const Song& song) {
-  return Fingerprinter(song.filename()).CreateFingerprint();
+QString TagFetcher::GetFingerprint(const Song& song)
+{
+    return Fingerprinter(song.filename()).CreateFingerprint();
 }
 
-void TagFetcher::StartFetch(const SongList& songs) {
-  Cancel();
+void TagFetcher::StartFetch(const SongList& songs)
+{
+    Cancel();
 
-  songs_ = songs;
+    songs_= songs;
 
-  QFuture<QString> future = QtConcurrent::mapped(songs_, GetFingerprint);
-  fingerprint_watcher_ = new QFutureWatcher<QString>(this);
-  fingerprint_watcher_->setFuture(future);
-  connect(fingerprint_watcher_, SIGNAL(resultReadyAt(int)), SLOT(FingerprintFound(int)));
+    QFuture<QString> future= QtConcurrent::mapped(songs_, GetFingerprint);
+    fingerprint_watcher_= new QFutureWatcher<QString>(this);
+    fingerprint_watcher_->setFuture(future);
+    connect(fingerprint_watcher_, SIGNAL(resultReadyAt(int)), SLOT(FingerprintFound(int)));
 
-  foreach (const Song& song, songs) {
-    emit Progress(song, tr("Fingerprinting song"));
-  }
+    foreach(const Song& song, songs)
+    {
+        emit Progress(song, tr("Fingerprinting song"));
+    }
 }
 
-void TagFetcher::Cancel() {
-  if (fingerprint_watcher_) {
-    fingerprint_watcher_->cancel();
+void TagFetcher::Cancel()
+{
+    if(fingerprint_watcher_)
+    {
+        fingerprint_watcher_->cancel();
 
-    delete fingerprint_watcher_;
-    fingerprint_watcher_ = NULL;
-  }
+        delete fingerprint_watcher_;
+        fingerprint_watcher_= NULL;
+    }
 
-  musicdns_client_->CancelAll();
-  musicbrainz_client_->CancelAll();
-  songs_.clear();
+    musicdns_client_->CancelAll();
+    musicbrainz_client_->CancelAll();
+    songs_.clear();
 }
 
-void TagFetcher::FingerprintFound(int index) {
-  QFutureWatcher<QString>* watcher = reinterpret_cast<QFutureWatcher<QString>*>(sender());
-  if (!watcher || index >= songs_.count()) {
-    return;
-  }
+void TagFetcher::FingerprintFound(int index)
+{
+    QFutureWatcher<QString>* watcher= reinterpret_cast<QFutureWatcher<QString>*>(sender());
+    if(!watcher || index >= songs_.count())
+    {
+        return;
+    }
 
-  const QString fingerprint = watcher->resultAt(index);
-  const Song& song = songs_[index];
+    const QString fingerprint= watcher->resultAt(index);
+    const Song& song= songs_[index];
 
-  if (fingerprint.isEmpty()) {
-    emit ResultAvailable(song, SongList());
-    return;
-  }
+    if(fingerprint.isEmpty())
+    {
+        emit ResultAvailable(song, SongList());
+        return;
+    }
 
-  emit Progress(song, tr("Identifying song"));
-  musicdns_client_->Start(index, fingerprint, song.length_nanosec() / kNsecPerMsec);
+    emit Progress(song, tr("Identifying song"));
+    musicdns_client_->Start(index, fingerprint, song.length_nanosec() / kNsecPerMsec);
 }
 
-void TagFetcher::PuidFound(int index, const QString& puid) {
-  if (index >= songs_.count()) {
-    return;
-  }
+void TagFetcher::PuidFound(int index, const QString& puid)
+{
+    if(index >= songs_.count())
+    {
+        return;
+    }
 
-  const Song& song = songs_[index];
+    const Song& song= songs_[index];
 
-  if (puid.isEmpty()) {
-    emit ResultAvailable(song, SongList());
-    return;
-  }
+    if(puid.isEmpty())
+    {
+        emit ResultAvailable(song, SongList());
+        return;
+    }
 
-  emit Progress(song, tr("Downloading metadata"));
-  musicbrainz_client_->Start(index, puid);
+    emit Progress(song, tr("Downloading metadata"));
+    musicbrainz_client_->Start(index, puid);
 }
 
-void TagFetcher::TagsFetched(int index, const MusicBrainzClient::ResultList& results) {
-  if (index >= songs_.count()) {
-    return;
-  }
+void TagFetcher::TagsFetched(int index, const MusicBrainzClient::ResultList& results)
+{
+    if(index >= songs_.count())
+    {
+        return;
+    }
 
-  const Song& original_song = songs_[index];
-  SongList songs_guessed;
+    const Song& original_song= songs_[index];
+    SongList songs_guessed;
 
-  foreach (const MusicBrainzClient::Result& result, results) {
-    Song song;
-    song.Init(result.title_, result.artist_, result.album_,
-              result.duration_msec_ * kNsecPerMsec);
-    song.set_track(result.track_);
-    songs_guessed << song;
-  }
+    foreach(const MusicBrainzClient::Result& result, results)
+    {
+        Song song;
+        song.Init(result.title_, result.artist_, result.album_, result.duration_msec_ * kNsecPerMsec);
+        song.set_track(result.track_);
+        songs_guessed << song;
+    }
 
-  emit ResultAvailable(original_song, songs_guessed);
+    emit ResultAvailable(original_song, songs_guessed);
 }

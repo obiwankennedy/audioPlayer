@@ -1,27 +1,22 @@
 #include "factoryogg.h"
 //
-FactoryOgg::FactoryOgg(  ) 
-	: FactoryMedia()
+FactoryOgg::FactoryOgg() : FactoryMedia()
 {
-	// TODO
+    // TODO
 }
 //
-FactoryOgg* FactoryOgg::singleton = NULL;
+FactoryOgg* FactoryOgg::singleton= NULL;
 
 FactoryOgg* FactoryOgg::getInstance()
 {
-  if(singleton == NULL)
-    singleton = new  FactoryOgg;
-  
-  
-  
-  return singleton;
+    if(singleton == NULL)
+        singleton= new FactoryOgg;
+
+    return singleton;
 }
-PL_MediaFile* FactoryOgg::buildMedia(QString& uri,SongFields* fields)
+PL_MediaFile* FactoryOgg::buildMedia(QString& uri, SongFields* fields)
 {
-  PL_OggFile* tmp = new PL_OggFile(uri,fields);
-  
-  
-  
-  return tmp;
+    PL_OggFile* tmp= new PL_OggFile(uri, fields);
+
+    return tmp;
 }

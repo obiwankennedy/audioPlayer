@@ -18,13 +18,6 @@
  ***************************************************************************/
 #include "../document/pl_documentmodel.h"
 
-Pl_DocumentModel::Pl_DocumentModel()
-{
-}
+Pl_DocumentModel::Pl_DocumentModel() {}
 
-
-Pl_DocumentModel::~Pl_DocumentModel()
-{
-}
-
-
+Pl_DocumentModel::~Pl_DocumentModel() {}

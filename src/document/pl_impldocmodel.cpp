@@ -18,54 +18,44 @@
  ***************************************************************************/
 #include "../document/pl_impldocmodel.h"
 
-PL_ImplDocModel::PL_ImplDocModel()
-  :listheader(NULL),dataList(NULL)
-{
-  
-}
+PL_ImplDocModel::PL_ImplDocModel() : listheader(NULL), dataList(NULL) {}
 
-
-PL_ImplDocModel::~PL_ImplDocModel()
-{
-  
-}
+PL_ImplDocModel::~PL_ImplDocModel() {}
 int PL_ImplDocModel::getColumnCount()
 {
-  return listheader->size();
+    return listheader->size();
 }
 int PL_ImplDocModel::rowCount()
 {
-  return dataList->size();
+    return dataList->size();
 }
 QVariant PL_ImplDocModel::getHeaderData(int i)
 {
-  return listheader->at(i)->name;
+    return listheader->at(i)->name;
 }
-QVariant PL_ImplDocModel::getData(int x,int y)
+QVariant PL_ImplDocModel::getData(int x, int y)
 {
-  if ( ( x>-1 ) && ( x<dataList->size() ) )
-  {
-    PlaylistItem* p = dataList->value(x);
-                
-    
-               
-    return p->getKey()->getMember(( *listheader )[y]->x);
-  }
-  return QVariant();
+    if((x > -1) && (x < dataList->size()))
+    {
+        PlaylistItem* p= dataList->value(x);
+
+        return p->getKey()->getMember((*listheader)[y]->x);
+    }
+    return QVariant();
 }
 void PL_ImplDocModel::setList(const QList<PlaylistItem*>* a)
 {
-  dataList=a;
+    dataList= a;
 }
 void PL_ImplDocModel::setHeaderList(const QList<headerlistview*>* a)
 {
-  listheader=a;
+    listheader= a;
 }
 const QString PL_ImplDocModel::getUri(int x)
 {
-  if ( ( x>-1 ) && ( x<dataList->size() ) )
-  {
-    return dataList->value(x)->getURI();
-  }
-  return QString();
+    if((x > -1) && (x < dataList->size()))
+    {
+        return dataList->value(x)->getURI();
+    }
+    return QString();
 }

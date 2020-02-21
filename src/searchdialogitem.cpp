@@ -1,31 +1,25 @@
 #include "searchdialogitem.h"
 //
-SearchDialogItem::SearchDialogItem(  ) 
+SearchDialogItem::SearchDialogItem()
 {
-	// TODO
+    // TODO
 }
 //
-SearchDialogItem::SearchDialogItem(  QString _text,int id)
-: text(_text),id(id) 
+SearchDialogItem::SearchDialogItem(QString _text, int id) : text(_text), id(id) {}
+void SearchDialogItem::setText(QString value)
 {
-	
-}
-void SearchDialogItem::setText( QString value) 
-{ 
-	text = value; 
+    text= value;
 }
 QString SearchDialogItem::getText()
-{ 
-	return text;
+{
+    return text;
 }
 int SearchDialogItem::getId()
 {
-	return id;
+    return id;
 }
-
 
 void SearchDialogItem::setId(int value)
 {
-	id = value;
+    id= value;
 }
-

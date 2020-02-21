@@ -17,68 +17,61 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <QtGui>
 #include "lyricsplugin.h"
-#include <QTextStream>
 #include <QAction>
 #include <QDebug>
 #include <QNetworkReply>
 #include <QNetworkRequest>
-
+#include <QTextStream>
+#include <QtGui>
 
 #include "lyricsfinder.h"
-#include "wikiflyfinder.h"
 #include "wikifinder.h"
+#include "wikiflyfinder.h"
 
 void LyricsPlugin::SetSong(SongFields* p)
 {
-    if(p==NULL)
+    if(p == NULL)
         return;
 
-    m_proc = new QProcess;
+    m_proc= new QProcess;
 
-    m_p = p;
+    m_p= p;
     if(m_p->lyrics.isEmpty())
     {
-
         finderleos->setfields(m_p);
         finiderwikifly->setfields(m_p);
         finderwiki->setfields(m_p);
         if((viewer->isVisible()))
-         {
+        {
             finderleos->search();
             finiderwikifly->search();
             finderwiki->search();
-         }
+        }
     }
     else
     {
-
         viewer->setLyrics(m_p->lyrics);
     }
-    connect(m_proc, SIGNAL(error(QProcess::ProcessError)),this,SLOT(onError(QProcess::ProcessError)));
+    connect(m_proc, SIGNAL(error(QProcess::ProcessError)), this, SLOT(onError(QProcess::ProcessError)));
 }
 QString LyricsPlugin::getName()
 {
-    viewer = new LyricsViewerDock();
-    finderleos = new LyricsFinder();
-    finderwiki = new WikiFinder();
-    finiderwikifly = new WikiFlyFinder();
-    connect(finderleos,SIGNAL(lyricsready()),this,SLOT(refresh()));
-    connect(finiderwikifly,SIGNAL(lyricsready()),this,SLOT(refresh()));
-    connect(finderwiki,SIGNAL(lyricsready()),this,SLOT(refresh()));
-    m_p = NULL;
-    connect(viewer,SIGNAL(clickOnOnline()),this,SLOT(onlineResearch()));
-    connect(viewer,SIGNAL(clickOneditable()),this,SLOT(startEditing()));
-    connect(viewer,SIGNAL(clickOnSave()),this,SLOT(saveLyrics()));
+    viewer= new LyricsViewerDock();
+    finderleos= new LyricsFinder();
+    finderwiki= new WikiFinder();
+    finiderwikifly= new WikiFlyFinder();
+    connect(finderleos, SIGNAL(lyricsready()), this, SLOT(refresh()));
+    connect(finiderwikifly, SIGNAL(lyricsready()), this, SLOT(refresh()));
+    connect(finderwiki, SIGNAL(lyricsready()), this, SLOT(refresh()));
+    m_p= NULL;
+    connect(viewer, SIGNAL(clickOnOnline()), this, SLOT(onlineResearch()));
+    connect(viewer, SIGNAL(clickOneditable()), this, SLOT(startEditing()));
+    connect(viewer, SIGNAL(clickOnSave()), this, SLOT(saveLyrics()));
 
-    //readSetting();
-
+    // readSetting();
 
     return QString("Lyrics");
-
-
-
 }
 bool LyricsPlugin::hasUI()
 {
@@ -86,7 +79,7 @@ bool LyricsPlugin::hasUI()
 }
 void LyricsPlugin::show()
 {
-    if(NULL!=m_p)
+    if(NULL != m_p)
     {
         finderleos->setfields(m_p);
         finderleos->search();
@@ -101,57 +94,56 @@ void LyricsPlugin::show()
 }
 void LyricsPlugin::refresh()
 {
-    QString* tmp = NULL;
-    QString founder="";
+    QString* tmp= NULL;
+    QString founder= "";
     if(finderleos->foundLyrics())
     {
-        QString* tmpleos = finderleos->GetLyrics();
-        founder="finderleos";
-        if((NULL!=tmpleos)&&(!tmpleos->isEmpty()))
+        QString* tmpleos= finderleos->GetLyrics();
+        founder= "finderleos";
+        if((NULL != tmpleos) && (!tmpleos->isEmpty()))
         {
-            tmp = tmpleos;
+            tmp= tmpleos;
         }
     }
 
     if(finderwiki->foundLyrics())
     {
-        QString* tmpfinderwiki = finderwiki->GetLyrics();
-        founder="fenderwiki";
-        if((NULL!=tmpfinderwiki)&&(!tmpfinderwiki->isEmpty()))
+        QString* tmpfinderwiki= finderwiki->GetLyrics();
+        founder= "fenderwiki";
+        if((NULL != tmpfinderwiki) && (!tmpfinderwiki->isEmpty()))
         {
-            tmp = tmpfinderwiki;
+            tmp= tmpfinderwiki;
         }
     }
 
     if(finiderwikifly->foundLyrics())
     {
-        QString* tmpfiniderwikifly = finiderwikifly->GetLyrics();
-        founder="finiderwikifly";
-        if((NULL!=tmpfiniderwikifly)&&(!tmpfiniderwikifly->isEmpty()))
+        QString* tmpfiniderwikifly= finiderwikifly->GetLyrics();
+        founder= "finiderwikifly";
+        if((NULL != tmpfiniderwikifly) && (!tmpfiniderwikifly->isEmpty()))
         {
-            tmp = tmpfiniderwikifly;
+            tmp= tmpfiniderwikifly;
         }
     }
-    //qDebug() << "Lyrics" <<  tmp << founder;
-    if((tmp!=NULL)&&(!tmp->isEmpty()))
-     {
-       // qDebug() << "Lyrics 2" <<  *tmp;
+    // qDebug() << "Lyrics" <<  tmp << founder;
+    if((tmp != NULL) && (!tmp->isEmpty()))
+    {
+        // qDebug() << "Lyrics 2" <<  *tmp;
         viewer->setLyrics(*tmp);
     }
 }
 QDockWidget* LyricsPlugin::getWidget()
 {
-
     return viewer;
 }
 QAction* LyricsPlugin::getAction()
 {
-      m_menuAct = new QAction("Show me the lyrics",this);
+    m_menuAct= new QAction("Show me the lyrics", this);
 
-      m_menuAct->setShortcut(tr("Ctrl+L"));
-      m_menuAct->setStatusTip(tr("Try to find and display the lyrics"));
-      connect(m_menuAct, SIGNAL(triggered()), this, SLOT(show()));
-      return m_menuAct;
+    m_menuAct->setShortcut(tr("Ctrl+L"));
+    m_menuAct->setStatusTip(tr("Try to find and display the lyrics"));
+    connect(m_menuAct, SIGNAL(triggered()), this, SLOT(show()));
+    return m_menuAct;
 }
 bool LyricsPlugin::isVisible()
 {
@@ -159,7 +151,7 @@ bool LyricsPlugin::isVisible()
 }
 void LyricsPlugin::locationChanged(Qt::DockWidgetArea area)
 {
-    m_currentArea = area;
+    m_currentArea= area;
 }
 
 Qt::DockWidgetArea LyricsPlugin::orientation()
@@ -168,20 +160,16 @@ Qt::DockWidgetArea LyricsPlugin::orientation()
 }
 void LyricsPlugin::readSetting(QSettings& settings)
 {
-
-    //QSettings settings("Renaud Guezennec", "lyricsplugin");
+    // QSettings settings("Renaud Guezennec", "lyricsplugin");
     settings.beginGroup("lyricsplugin");
     viewer->setVisible(settings.value("lyricsplugin/visible", viewer->isVisible()).toBool());
 
-
-    m_currentArea = (Qt::DockWidgetArea)settings.value("lyricsplugin/orientation", Qt::LeftDockWidgetArea).toInt();
-     settings.endGroup();
-
+    m_currentArea= (Qt::DockWidgetArea)settings.value("lyricsplugin/orientation", Qt::LeftDockWidgetArea).toInt();
+    settings.endGroup();
 }
 void LyricsPlugin::writeSetting(QSettings& settings)
 {
-
-   // QSettings settings("Renaud Guezennec", "lyricsplugin");
+    // QSettings settings("Renaud Guezennec", "lyricsplugin");
     settings.beginGroup("lyricsplugin");
     settings.setValue("lyricsplugin/visible", viewer->isVisible());
     settings.setValue("lyricsplugin/orientation", m_currentArea);
@@ -194,28 +182,23 @@ void LyricsPlugin::startEditing()
 void LyricsPlugin::saveLyrics()
 {
     viewer->setEditatble(false);
-    m_p->lyrics = viewer->getLyrics();
-
-
+    m_p->lyrics= viewer->getLyrics();
 }
 void LyricsPlugin::onlineResearch()
 {
-    QString url = QString("http://www.google.fr/#q=%1+%2+lyrics").arg(m_p->Artist).arg(m_p->Title);
+    QString url= QString("http://www.google.fr/#q=%1+%2+lyrics").arg(m_p->Artist).arg(m_p->Title);
 
     QStringList list;
     list << QString(QUrl(url).toEncoded());
-    m_proc->start("/usr/bin/firefox",list);
+    m_proc->start("/usr/bin/firefox", list);
 }
 
-void LyricsPlugin::onError( QProcess::ProcessError error)
+void LyricsPlugin::onError(QProcess::ProcessError error)
 {
     qDebug() << error;
-
 }
 void LyricsPlugin::stopped()
 {
-
     viewer->clearData();
-
 }
-//Q_EXPORT_PLUGIN2(PLG_lyrics, LyricsPlugin);
+// Q_EXPORT_PLUGIN2(PLG_lyrics, LyricsPlugin);

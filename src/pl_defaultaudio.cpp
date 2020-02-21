@@ -17,27 +17,26 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "pl_defaultaudio.h"
+#include <QDebug>
 #include <QFileInfo>
 #include <QStringList>
-#include <QDebug>
 
-PL_DefaultAudio::PL_DefaultAudio(QString& uri,SongFields* fields)
-  : PL_AudioFile(uri),fields(NULL)
+PL_DefaultAudio::PL_DefaultAudio(QString& uri, SongFields* fields) : PL_AudioFile(uri), fields(NULL)
 {
-  this->uri=&uri;
-  this->fields=fields;
-    #ifdef HAVE_PHONON
- /* metaInformationResolver = NULL;
-   metaData =NULL;*/
- /* if(uri.endsWith("wma"))
-  {
-      qDebug()  << uri <<endl;
-    metaInformationResolver = new Phonon::MediaObject();
-        metaInformationResolver->setCurrentSource(Phonon::MediaSource(uri));
-        QObject::connect(metaInformationResolver,SIGNAL(metaDataChanged()),this,SLOT(setMetaData()));
-        metaData =NULL;
-    }*/
-  	#endif
+    this->uri= &uri;
+    this->fields= fields;
+#ifdef HAVE_PHONON
+    /* metaInformationResolver = NULL;
+      metaData =NULL;*/
+    /* if(uri.endsWith("wma"))
+     {
+         qDebug()  << uri <<endl;
+       metaInformationResolver = new Phonon::MediaObject();
+           metaInformationResolver->setCurrentSource(Phonon::MediaSource(uri));
+           QObject::connect(metaInformationResolver,SIGNAL(metaDataChanged()),this,SLOT(setMetaData()));
+           metaData =NULL;
+       }*/
+#endif
 }
 /*#ifdef HAVE_PHONON
 void PL_DefaultAudio::setMetaData()
@@ -48,74 +47,64 @@ void PL_DefaultAudio::setMetaData()
 }
 
 #endif*/
-PL_DefaultAudio::~PL_DefaultAudio() 
+PL_DefaultAudio::~PL_DefaultAudio() {}
+
+int PL_DefaultAudio::getDuration()
 {
+    fields->duration= -1;
+    return fields->duration;
 }
-
-int PL_DefaultAudio::getDuration() 
+QString* PL_DefaultAudio::getTitle()
 {
-  fields->duration = -1;
-  return fields->duration;
-}
-QString* PL_DefaultAudio::getTitle() 
-{
+#ifdef HAVE_PHONON
+    if((fields->Title.isEmpty()) /*&&(metaData!=NULL)*/)
+    {
+        // fields->Title = metaData->value("TITLE");
+        if(fields->Title == "")
+        {
+            QFileInfo a(file());
 
-  #ifdef HAVE_PHONON
-  if((fields->Title.isEmpty())/*&&(metaData!=NULL)*/)
-  {
+            QStringList ab= a.fileName().split(".");
+            if(ab.size() > 0)
+            {
+                fields->Title= ab[0];
+            }
+        }
 
-    //fields->Title = metaData->value("TITLE");
-     if (fields->Title == "")
-     {
-        QFileInfo a(file());
-    
-    
-
-    	QStringList ab = a.fileName().split(".");
-    	if (ab.size() > 0) 
-    	{
-    	  fields->Title = ab[0]; 
-      
-    	}
+        /* setMetaArtist (media->metaData("ARTIST"     ));
+     setMetaAlbum  (media->metaData("ALBUM"      ));
+     setMetaTitle  (media->metaData("TITLE"      ));
+     setMetaDate   (media->metaData("DATE"       ));
+     setMetaGenre  (media->metaData("GENRE"      ));
+     setMetaTrack  (media->metaData("TRACKNUMBER"));
+     setMetaComment(media->metaData("DESCRIPTION"));*/
     }
+#endif
+    return &fields->Title;
+}
 
-    
-    
-    /* setMetaArtist (media->metaData("ARTIST"     ));
- setMetaAlbum  (media->metaData("ALBUM"      ));
- setMetaTitle  (media->metaData("TITLE"      ));
- setMetaDate   (media->metaData("DATE"       ));
- setMetaGenre  (media->metaData("GENRE"      ));
- setMetaTrack  (media->metaData("TRACKNUMBER"));
- setMetaComment(media->metaData("DESCRIPTION"));*/
-    
-  }
-  #endif
-  return &fields->Title;
-}
-    
-QString* PL_DefaultAudio::getArtist() 
+QString* PL_DefaultAudio::getArtist()
 {
-/*#ifdef HAVE_PHONON
-         if((fields->Artist.isEmpty())&&(metaData!=NULL))
-         {
+    /*#ifdef HAVE_PHONON
+             if((fields->Artist.isEmpty())&&(metaData!=NULL))
+             {
 
-            fields->Artist = metaData->value("ARTIST");
-           }
-  #endif*/
-  return &fields->Artist;
+                fields->Artist = metaData->value("ARTIST");
+               }
+      #endif*/
+    return &fields->Artist;
 }
-int PL_DefaultAudio::getGenre() 
+int PL_DefaultAudio::getGenre()
 {
-   /* if((fields->genre)&&(metaData!=NULL))
-  {
-   // fields->genre = metaData->value("GENRE");
-   }*/
-  return fields->genre;
+    /* if((fields->genre)&&(metaData!=NULL))
+   {
+    // fields->genre = metaData->value("GENRE");
+    }*/
+    return fields->genre;
 }
-int PL_DefaultAudio::getYear() 
+int PL_DefaultAudio::getYear()
 {
-  return fields->Year;
+    return fields->Year;
 }
 QString* PL_DefaultAudio::getAlbumtitle()
 {
@@ -125,19 +114,17 @@ QString* PL_DefaultAudio::getAlbumtitle()
     fields->album = metaData->value("ALBUM");
     }
   #endif*/
-  return &fields->album;
+    return &fields->album;
 }
-QString* PL_DefaultAudio::getComment() 
+QString* PL_DefaultAudio::getComment()
 {
-
-/*#ifdef HAVE_PHONON
-        if((fields->Comment.isEmpty())&&(metaData!=NULL))
-        {
-        fields->Comment = metaData->value("DESCRIPTION");
-       }
-        #endif*/
-  return &fields->Comment;
-
+    /*#ifdef HAVE_PHONON
+            if((fields->Comment.isEmpty())&&(metaData!=NULL))
+            {
+            fields->Comment = metaData->value("DESCRIPTION");
+           }
+            #endif*/
+    return &fields->Comment;
 }
 
 QImage& PL_DefaultAudio::getPicture()
@@ -147,41 +134,41 @@ QImage& PL_DefaultAudio::getPicture()
 
 int PL_DefaultAudio::getBitrate()
 {
- return -1;         
+    return -1;
 }
 
 void PL_DefaultAudio::setTitle(QString /*p*/)
 {
-  return;
+    return;
 }
-    void PL_DefaultAudio::setArtist(QString /*p*/)
+void PL_DefaultAudio::setArtist(QString /*p*/)
 {
-  return;
+    return;
 }
-    void PL_DefaultAudio::setGenre(int /*p*/)
+void PL_DefaultAudio::setGenre(int /*p*/)
 {
-  return;
+    return;
 }
 void PL_DefaultAudio::setAlbumtitle(QString /*p*/)
 {
-  return;
+    return;
 }
 void PL_DefaultAudio::setComment(QString /*p*/)
 {
-  return;
+    return;
 }
-void PL_DefaultAudio::setValue(dataColumn/* x*/,QVariant& /*value*/,bool /*replace*/)
+void PL_DefaultAudio::setValue(dataColumn /* x*/, QVariant& /*value*/, bool /*replace*/)
 {
-  return;
+    return;
 }
 
 void PL_DefaultAudio::setYear(int /*p*/)
 {
-  return;
+    return;
 }
 void PL_DefaultAudio::ForceTagReading()
 {
-  return;
+    return;
 }
 int PL_DefaultAudio::getTrack()
 {
@@ -189,29 +176,28 @@ int PL_DefaultAudio::getTrack()
 }
 void PL_DefaultAudio::setTrack(int p)
 {
-    fields->track = p;
+    fields->track= p;
 }
 
-void PL_DefaultAudio::readering(QDataStream & in)
+void PL_DefaultAudio::readering(QDataStream& in)
 {
-  in >> (fields->Title) ;
-  in >> (fields->Artist) ;
-  in >> (fields->duration) ;
-  in >> (fields->Year) ;
-  in >> (fields->genre) ;
-  in >> (fields->album);
-  in >> (fields->Comment);
-  in>> (fields->Bitrate) ;
+    in >> (fields->Title);
+    in >> (fields->Artist);
+    in >> (fields->duration);
+    in >> (fields->Year);
+    in >> (fields->genre);
+    in >> (fields->album);
+    in >> (fields->Comment);
+    in >> (fields->Bitrate);
 }
-void PL_DefaultAudio::writting(QDataStream & out) const
+void PL_DefaultAudio::writting(QDataStream& out) const
 {
- 
-  out << (fields->Title.simplified()) ;
-  out << (fields->Artist.simplified()) ;
-  out << (fields->duration) ;
-  out << (fields->Year) ;
-  out << (fields->genre) ;
-  out << (fields->album.simplified());
-  out << (fields->Comment.simplified());
-  out << (fields->Bitrate) ;
+    out << (fields->Title.simplified());
+    out << (fields->Artist.simplified());
+    out << (fields->duration);
+    out << (fields->Year);
+    out << (fields->genre);
+    out << (fields->album.simplified());
+    out << (fields->Comment.simplified());
+    out << (fields->Bitrate);
 }

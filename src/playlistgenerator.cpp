@@ -17,81 +17,69 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
-
 #include "playlistgenerator.h"
-#include <QTextEdit>
-#include <QTextStream>
 #include <QCloseEvent>
-#include <QFileDialog>
 #include <QDebug>
 #include <QDockWidget>
-#include <QMutableStringListIterator>
+#include <QFileDialog>
 #include <QMenuBar>
-#include <QToolBar>
 #include <QMessageBox>
+#include <QMutableStringListIterator>
+#include <QTextEdit>
+#include <QTextStream>
+#include <QToolBar>
 
 #include <QtWidgets>
 
 #include "document/pl_impldocmodel.h"
+#include "pl_databasemanager.h"
 #include "plsimport.h"
 #include "xmlimport.h"
-#include "pl_databasemanager.h"
 
 #include "dbus/dbusServer.h"
 
 PlayListGenerator::PlayListGenerator()
 {
+    mysearch= NULL;
+    m_database= new PL_DataBaseManager;
+    tree= new QTreeView(this);
 
+    model= new QDirModel;
 
-
-    mysearch = NULL;
-    m_database = new PL_DataBaseManager;
-    tree = new QTreeView(this);
-
-    model = new QDirModel;
-
-    tree->setModel(model);//tree of directory
+    tree->setModel(model); // tree of directory
     QIcon a(":/resources/pixmaps/icon2.png");
-    setWindowIcon ( a );
+    setWindowIcon(a);
 
     setStatusBar(NULL);
-    mytabs = new PlayListViewer(this);
+    mytabs= new PlayListViewer(this);
     mywizzard= NULL;
 
-    tree->setContextMenuPolicy (Qt::CustomContextMenu);
-    setContextMenuPolicy (Qt::CustomContextMenu);
+    tree->setContextMenuPolicy(Qt::CustomContextMenu);
+    setContextMenuPolicy(Qt::CustomContextMenu);
 
-    pluginmanager = SongPluginManager::instance(this);
+    pluginmanager= SongPluginManager::instance(this);
 
-    m_treedock = new QDockWidget(tr("tree"),this);
-    //out  << "test constructor 0" << endl;
+    m_treedock= new QDockWidget(tr("tree"), this);
+    // out  << "test constructor 0" << endl;
     m_treedock->setWidget(tree);
 
-    m_treedock->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
-    addDockWidget(Qt::LeftDockWidgetArea,m_treedock);
+    m_treedock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    addDockWidget(Qt::LeftDockWidgetArea, m_treedock);
 
-    workinprogress = new QProgressBar;
-    Progressdock = new QDockWidget(tr("Progress bar"));
+    workinprogress= new QProgressBar;
+    Progressdock= new QDockWidget(tr("Progress bar"));
     Progressdock->setWidget(workinprogress);
     Progressdock->setAllowedAreas(Qt::BottomDockWidgetArea);
 
-    connect(mytabs, SIGNAL(Maximum(int)),workinprogress, SLOT(setMaximum(int)));
+    connect(mytabs, SIGNAL(Maximum(int)), workinprogress, SLOT(setMaximum(int)));
 
-    connect(mytabs, SIGNAL(Minimum(int)),workinprogress, SLOT(setMinimum(int)));
-    connect(mytabs, SIGNAL(valueChanged(int)),workinprogress, SLOT(setValue(int)));
-    connect(mytabs,SIGNAL(CommandStart()),this,SLOT(addDockProgressbar()));
-    connect(mytabs,SIGNAL(done()),this,SLOT(removeDockProgress()));
-
-
-
-
-
-
+    connect(mytabs, SIGNAL(Minimum(int)), workinprogress, SLOT(setMinimum(int)));
+    connect(mytabs, SIGNAL(valueChanged(int)), workinprogress, SLOT(setValue(int)));
+    connect(mytabs, SIGNAL(CommandStart()), this, SLOT(addDockProgressbar()));
+    connect(mytabs, SIGNAL(done()), this, SLOT(removeDockProgress()));
 
     setCurrentFile("");
     setCentralWidget(mytabs);
-
 
     createActions();
 
@@ -101,66 +89,64 @@ PlayListGenerator::PlayListGenerator()
 
     createStatusBar();
 
-
-    //After the preference reading************************************************
+    // After the preference reading************************************************
 #ifdef HAVE_PHONON
 
-    myplayer = new Player();
+    myplayer= new Player();
     new DbusAdaptorServer(myplayer);
-    QDBusConnection connection = QDBusConnection::sessionBus();
-    bool rel = connection.registerService("eu.renaudguezennec");
-    rel = connection.registerObject("/",myplayer);
+    QDBusConnection connection= QDBusConnection::sessionBus();
+    bool rel= connection.registerService("eu.renaudguezennec");
+    rel= connection.registerObject("/", myplayer);
 
-    playerdock = new QDockWidget(tr("Music Player"));
+    playerdock= new QDockWidget(tr("Music Player"));
     playerdock->setWidget(myplayer);
     playerdock->setAllowedAreas(Qt::TopDockWidgetArea);
-    connect(myplayer,SIGNAL(SetId(int)),mytabs,SIGNAL(SetId(int)));
-    addDockWidget(Qt::TopDockWidgetArea,playerdock);
-    connect(myplayer,SIGNAL(playingSongChanged(SongFields*)),pluginmanager,SLOT(playingSongChanged(SongFields*)));
-    connect(myplayer,SIGNAL(playingStop()),pluginmanager,SLOT(playingStopped()));
+    connect(myplayer, SIGNAL(SetId(int)), mytabs, SIGNAL(SetId(int)));
+    addDockWidget(Qt::TopDockWidgetArea, playerdock);
+    connect(myplayer, SIGNAL(playingSongChanged(SongFields*)), pluginmanager, SLOT(playingSongChanged(SongFields*)));
+    connect(myplayer, SIGNAL(playingStop()), pluginmanager, SLOT(playingStopped()));
 #endif
 
-
-    //m_database->readList();
-    //setCurrentFile("/home/renaud/playlist4.qpl");
-    mypreferences =  Preference_data::getInstance();
+    // m_database->readList();
+    // setCurrentFile("/home/renaud/playlist4.qpl");
+    mypreferences= Preference_data::getInstance();
 
     readSettings();
     pluginmanager->setDock();
     mytabs->initWidget();
 
-
 #ifdef HAVE_PHONON
-    connect(mytabs,SIGNAL(doubleClicked(const QModelIndex &)),this,SLOT(addDockplayer(const QModelIndex &)));
+    connect(mytabs, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(addDockplayer(const QModelIndex&)));
 #endif
     tree->setRootIndex(model->index(mypreferences->getUri_default()));
     initializeAssistant();
 
-
-    connect(mytabs, SIGNAL(dataChanged()),this, SLOT(documentWasModified()));
-    connect(tree, SIGNAL(customContextMenuRequested(QPoint)),this, SLOT(PopupMenurequested(QPoint)));
-    addDockWidget(Qt::BottomDockWidgetArea,Progressdock);
+    connect(mytabs, SIGNAL(dataChanged()), this, SLOT(documentWasModified()));
+    connect(tree, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(PopupMenurequested(QPoint)));
+    addDockWidget(Qt::BottomDockWidgetArea, Progressdock);
     Progressdock->hide();
 #ifdef HAVE_PHONON
 
-    mySearchFilter = new Search_DialogImpl(this);
-    connect(mySearchFilter,SIGNAL(doubleClicked(const QModelIndex &)),mytabs,SIGNAL(doubleClicked(const QModelIndex &)));
-    connect(mySearchFilter,SIGNAL(doubleClicked(const QModelIndex &)),this,SLOT(hideFindingAssist()));
+    mySearchFilter= new Search_DialogImpl(this);
+    connect(
+        mySearchFilter, SIGNAL(doubleClicked(const QModelIndex&)), mytabs, SIGNAL(doubleClicked(const QModelIndex&)));
+    connect(mySearchFilter, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(hideFindingAssist()));
 #endif
 
     refreshPlugin();
-
 }
 
-void PlayListGenerator::closeEvent(QCloseEvent *event)
+void PlayListGenerator::closeEvent(QCloseEvent* event)
 {
-    if (maybeSave()) {
+    if(maybeSave())
+    {
         closeApplication();
         writeSettings();
         event->accept();
         QApplication::exit();
-
-    } else {
+    }
+    else
+    {
         event->ignore();
     }
 }
@@ -168,15 +154,13 @@ void PlayListGenerator::closeApplication()
 {
 #ifdef HAVE_PHONON
 
-    if(NULL!=myplayer)
+    if(NULL != myplayer)
     {
         myplayer->stopAndClear();
     }
 
 #endif
-
 }
-
 
 void PlayListGenerator::refreshPlugin()
 {
@@ -185,7 +169,8 @@ void PlayListGenerator::refreshPlugin()
 
 void PlayListGenerator::newFile()
 {
-    if (maybeSave()) {
+    if(maybeSave())
+    {
         mytabs->reset();
         setCurrentFile("");
     }
@@ -193,34 +178,31 @@ void PlayListGenerator::newFile()
 
 void PlayListGenerator::open()
 {
-    if (maybeSave())
+    if(maybeSave())
     {
         mytabs->reset();
         setCurrentFile("");
-        QString fileName = QFileDialog::getOpenFileName(this,tr("Audio Player"),".",tr(
-                                                            "Supported files (*.m3u *.qpl)\nM3U playList files (*.m3u)\nBinary playList files (*.qpl)"));
-        if (!fileName.isEmpty())
+        QString fileName= QFileDialog::getOpenFileName(this, tr("Audio Player"), ".",
+            tr("Supported files (*.m3u *.qpl)\nM3U playList files (*.m3u)\nBinary playList files (*.qpl)"));
+        if(!fileName.isEmpty())
             loadFile(fileName);
     }
 }
 void PlayListGenerator::open2()
 {
-
     loadFile(curDir);
-
 }
 void PlayListGenerator::addDir()
 {
-    //curDir = QFileDialog::getExistingDirectory(this);
-
+    // curDir = QFileDialog::getExistingDirectory(this);
 
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::Directory);
-    dialog.setOptions ( QFileDialog::ShowDirsOnly);
+    dialog.setOptions(QFileDialog::ShowDirsOnly);
 
     if(dialog.exec())
     {
-        curDir =  dialog.selectedFiles().first();
+        curDir= dialog.selectedFiles().first();
         openDir();
     }
 }
@@ -228,116 +210,109 @@ bool PlayListGenerator::save()
 {
     // if(m_database->isConnected())
     //     m_database->WriteList();
-    if ((curFile.isEmpty())||(!QFile::exists(curFile)))
+    if((curFile.isEmpty()) || (!QFile::exists(curFile)))
     {
         return saveAs();
-    } else {
+    }
+    else
+    {
         return saveFile(curFile);
     }
 }
 
 bool PlayListGenerator::saveAs()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,tr("Audio Player"),".",tr("Supported files (*.m3u *.qpl)\nM3U playList files (*.m3u)\nBinary playList files (*.qpl)"));
-    if (fileName.isEmpty())
+    QString fileName= QFileDialog::getSaveFileName(this, tr("Audio Player"), ".",
+        tr("Supported files (*.m3u *.qpl)\nM3U playList files (*.m3u)\nBinary playList files (*.qpl)"));
+    if(fileName.isEmpty())
         return false;
 
     return saveFile(fileName);
 }
 
-
 void PlayListGenerator::about()
 {
     QMessageBox::about(this, tr("About Audio Player"),
-                       tr(" <b>PlaylistGenerator</b> is an application to create and to manage "
-                          "a MP3 playlist, writen by Renaud GUEZENNEC in C++ using Qt4 and Design Patterns  "
-                          "This application is the main year project of the author for "
-                          "Dundalk Institute of Technology, 2007-2008, Ireland."));
-
-
+        tr(" <b>PlaylistGenerator</b> is an application to create and to manage "
+           "a MP3 playlist, writen by Renaud GUEZENNEC in C++ using Qt4 and Design Patterns  "
+           "This application is the main year project of the author for "
+           "Dundalk Institute of Technology, 2007-2008, Ireland."));
 }
 
 void PlayListGenerator::documentWasModified()
 {
     setWindowModified(true);
-    //modified=true;
+    // modified=true;
 }
 
 void PlayListGenerator::createActions()
 {
-    newAct = new QAction(QIcon(":/resources/pixmaps/filenew.xpm"), tr("&New"), this);
+    newAct= new QAction(QIcon(":/resources/pixmaps/filenew.xpm"), tr("&New"), this);
     newAct->setShortcut(tr("Ctrl+N"));
     newAct->setStatusTip(tr("Create a new file"));
     connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));
 
-
-    openAct2 = new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"), tr("&Open..."), this);
+    openAct2= new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"), tr("&Open..."), this);
     openAct2->setShortcut(tr("Ctrl+O"));
     openAct2->setStatusTip(tr("Open an existing file"));
     connect(openAct2, SIGNAL(triggered()), this, SLOT(open2()));
 
-    openAct = new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"), tr("&Open..."), this);
+    openAct= new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"), tr("&Open..."), this);
     openAct->setShortcut(tr("Ctrl+O"));
     openAct->setStatusTip(tr("Open an existing file"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
-    saveAct = new QAction(QIcon(":/resources/pixmaps/filesave.xpm"), tr("&Save"), this);
+    saveAct= new QAction(QIcon(":/resources/pixmaps/filesave.xpm"), tr("&Save"), this);
     saveAct->setShortcut(tr("Ctrl+S"));
     saveAct->setStatusTip(tr("Save the document to disk"));
     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 
-    saveAsAct = new QAction(tr("Save &As..."), this);
+    saveAsAct= new QAction(tr("Save &As..."), this);
     saveAsAct->setStatusTip(tr("Save the document under a new name"));
     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-    exitAct = new QAction(tr("E&xit"), this);
+    exitAct= new QAction(tr("E&xit"), this);
     exitAct->setShortcut(tr("Ctrl+Q"));
     exitAct->setStatusTip(tr("Exit the application"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-    cutAct = new QAction(QIcon(":/resources/pixmaps/editcut.xpm"), tr("Cu&t"), this);
+    cutAct= new QAction(QIcon(":/resources/pixmaps/editcut.xpm"), tr("Cu&t"), this);
     cutAct->setShortcut(tr("Ctrl+X"));
     cutAct->setStatusTip(tr("Cut the current selection's contents to the "
                             "clipboard"));
     connect(cutAct, SIGNAL(triggered()), mytabs, SLOT(cut()));
 
-    copyAct = new QAction(QIcon(":/resources/pixmaps/editcopy.xpm"), tr("&Copy"), this);
+    copyAct= new QAction(QIcon(":/resources/pixmaps/editcopy.xpm"), tr("&Copy"), this);
     copyAct->setShortcut(tr("Ctrl+C"));
     copyAct->setStatusTip(tr("Copy the current selection's contents to the "
                              "clipboard"));
     connect(copyAct, SIGNAL(triggered()), mytabs, SLOT(copy()));
 
-    pasteAct = new QAction(QIcon(":/resources/pixmaps/editpaste.xpm"), tr("&Paste"), this);
+    pasteAct= new QAction(QIcon(":/resources/pixmaps/editpaste.xpm"), tr("&Paste"), this);
     pasteAct->setShortcut(tr("Ctrl+V"));
     pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "
                               "selection"));
     connect(pasteAct, SIGNAL(triggered()), mytabs, SLOT(paste()));
 
-    connect(mytabs, SIGNAL(isPastable(bool)),
-            pasteAct, SLOT(setEnabled(bool)));
+    connect(mytabs, SIGNAL(isPastable(bool)), pasteAct, SLOT(setEnabled(bool)));
 
-    connect(mytabs, SIGNAL(isCopiable(bool)),
-            copyAct, SLOT(setEnabled(bool)));
+    connect(mytabs, SIGNAL(isCopiable(bool)), copyAct, SLOT(setEnabled(bool)));
 
+    connect(mytabs, SIGNAL(isCutable(bool)), cutAct, SLOT(setEnabled(bool)));
 
-    connect(mytabs, SIGNAL(isCutable(bool)),
-            cutAct, SLOT(setEnabled(bool)));
-
-
-
-    m_displayPreferencesDialog = new QAction(QIcon(":/resources/pixmaps/gnome_settings.png"), tr("&Preferences"), this);
+    m_displayPreferencesDialog= new QAction(QIcon(":/resources/pixmaps/gnome_settings.png"), tr("&Preferences"), this);
     m_displayPreferencesDialog->setShortcut(tr("Ctrl+P"));
     m_displayPreferencesDialog->setStatusTip(tr("Display preferences dialog box"));
     connect(m_displayPreferencesDialog, SIGNAL(triggered()), this, SLOT(show_preferences()));
 
-    for (int i = 0; i < MaxRecentFiles; ++i) {
-        recentFileActions[i] = new QAction(this);
+    for(int i= 0; i < MaxRecentFiles; ++i)
+    {
+        recentFileActions[i]= new QAction(this);
         recentFileActions[i]->setVisible(false);
-        connect(recentFileActions[i], SIGNAL(triggered()),
-                this, SLOT(openRecentFile()));
+        connect(recentFileActions[i], SIGNAL(triggered()), this, SLOT(openRecentFile()));
     }
 
-    showhidePlayer = new QAction(tr("Show/hide &AudioPlayer"), this);
+    showhidePlayer= new QAction(tr("Show/hide &AudioPlayer"), this);
     showhidePlayer->setStatusTip(tr("Show/hide Audio Player"));
     connect(showhidePlayer, SIGNAL(triggered()), this, SLOT(showhideaudioplayer()));
 
@@ -345,68 +320,60 @@ void PlayListGenerator::createActions()
     showhideExplorer->setStatusTip(tr("Show/hide file explorer"));
     connect(showhideExplorer, SIGNAL(triggered()), this, SLOT(showhideexplorer()));
 
-    aboutAct = new QAction(tr("&About"), this);
+    aboutAct= new QAction(tr("&About"), this);
     aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-    aboutQtAct = new QAction(tr("About &Qt"), this);
+    aboutQtAct= new QAction(tr("About &Qt"), this);
     aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
     cutAct->setEnabled(false);
     copyAct->setEnabled(false);
     pasteAct->setEnabled(false);
-    parseDirAct = new QAction(tr("Parse Directory"), this);
+    parseDirAct= new QAction(tr("Parse Directory"), this);
     parseDirAct->setStatusTip(tr("Find every Mp3 files in a directory tree"));
     connect(parseDirAct, SIGNAL(triggered()), this, SLOT(openDir()));
 
-
-    parentDirAct = new QAction(QIcon(":/resources/pixmaps/arrow-up.xpm"),tr("Up"), this);
+    parentDirAct= new QAction(QIcon(":/resources/pixmaps/arrow-up.xpm"), tr("Up"), this);
     parentDirAct->setStatusTip(tr("Use the parent directory as root directory"));
     connect(parentDirAct, SIGNAL(triggered()), this, SLOT(gotoparentDir()));
 
-    useDirAct = new QAction(tr("Define as root"), this);
+    useDirAct= new QAction(tr("Define as root"), this);
     useDirAct->setStatusTip(tr("Use this directory as root directory"));
     connect(useDirAct, SIGNAL(triggered()), this, SLOT(useDirasRoot()));
 
-
-    addfileAct= new QAction(QIcon(":/resources/pixmaps/filenew.xpm"),tr("Add one file..."), this);
+    addfileAct= new QAction(QIcon(":/resources/pixmaps/filenew.xpm"), tr("Add one file..."), this);
     addfileAct->setStatusTip(tr("Add to the playlist one file"));
     connect(addfileAct, SIGNAL(triggered()), this, SLOT(openMusicFile()));
 
-
-
-    adddirAct = new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"),tr("Explore a directory..."), this);
+    adddirAct= new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"), tr("Explore a directory..."), this);
     adddirAct->setStatusTip(tr("Find every Mp3 files in a directory tree"));
     connect(adddirAct, SIGNAL(triggered()), this, SLOT(addDir()));
 
-
-
-    selectBoxAct = new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"),tr("Choose a dir..."), this);
+    selectBoxAct= new QAction(QIcon(":/resources/pixmaps/fileopen.xpm"), tr("Choose a dir..."), this);
     selectBoxAct->setStatusTip(tr("Select a root directory"));
     connect(selectBoxAct, SIGNAL(triggered()), this, SLOT(selectRootDir()));
 
-    startsearch= new QAction(QIcon(":/resources/pixmaps/viewmag.png"),tr("Find"), this);
+    startsearch= new QAction(QIcon(":/resources/pixmaps/viewmag.png"), tr("Find"), this);
     startsearch->setShortcut(tr("Ctrl+F"));
     startsearch->setStatusTip(tr("Find a song"));
     connect(startsearch, SIGNAL(triggered()), this, SLOT(Seekfile()));
 
-    nextsearch= new QAction(QIcon(":/resources/pixmaps/next.png"),tr("Find Next"), this);
+    nextsearch= new QAction(QIcon(":/resources/pixmaps/next.png"), tr("Find Next"), this);
     nextsearch->setShortcut(tr("F3"));
     nextsearch->setStatusTip(tr("Find the next song"));
     connect(nextsearch, SIGNAL(triggered()), this, SLOT(nextfile()));
 
-    prevsearch= new QAction(QIcon(":/resources/pixmaps/previous.png"),tr("Find Previous"), this);
+    prevsearch= new QAction(QIcon(":/resources/pixmaps/previous.png"), tr("Find Previous"), this);
     prevsearch->setShortcut(tr("Shift+F3"));
     prevsearch->setStatusTip(tr("Find the previous song"));
     connect(prevsearch, SIGNAL(triggered()), this, SLOT(previousfile()));
-
 
     importPLS= new QAction(tr("PLS"), this);
     importXML= new QAction(tr("XML"), this);
     connect(importPLS, SIGNAL(triggered()), this, SLOT(OnImport()));
     connect(importXML, SIGNAL(triggered()), this, SLOT(OnImport()));
-
 
     exportXML= new QAction(tr("XML"), this);
     connect(exportXML, SIGNAL(triggered()), this, SLOT(onExport()));
@@ -419,15 +386,12 @@ void PlayListGenerator::createActions()
     exportcsv= new QAction(tr("CSV"), this);
     connect(exportcsv, SIGNAL(triggered()), this, SLOT(onExport()));
 
-
-
-    AddList  = new QAction(tr("Add PlayList..."), this);
+    AddList= new QAction(tr("Add PlayList..."), this);
     AddList->setStatusTip(tr("Add a PlayList at the end of this one"));
     connect(AddList, SIGNAL(triggered()), this, SLOT(OnAddList()));
 
-    rmRedondance  = new QAction(tr("Find/Remove redondance..."), this);
+    rmRedondance= new QAction(tr("Find/Remove redondance..."), this);
     rmRedondance->setStatusTip(tr("Add a PlayList at the end of this one"));
-
 
     doAction= new QAction(tr("Redo"), this);
 
@@ -435,42 +399,35 @@ void PlayListGenerator::createActions()
     undoaction->setShortcut(tr("Ctrl+z"));
     undoaction->setEnabled(false);
     connect(undoaction, SIGNAL(triggered()), mytabs, SLOT(cancel()));
-    connect(mytabs, SIGNAL(actiondone(int )), this, SLOT(enabledUndo(int )));
+    connect(mytabs, SIGNAL(actiondone(int)), this, SLOT(enabledUndo(int)));
 
-
-
-    assistantAct = new QAction(tr("Help Contents"), this);
+    assistantAct= new QAction(tr("Help Contents"), this);
     assistantAct->setShortcut(tr("F1"));
     connect(assistantAct, SIGNAL(triggered()), this, SLOT(assistant()));
 
-    FindingAct = new QAction(tr("Seeking assistant"), this);
+    FindingAct= new QAction(tr("Seeking assistant"), this);
     FindingAct->setShortcut(tr("j"));
     connect(FindingAct, SIGNAL(triggered()), this, SLOT(FindingAssis()));
-
-
 }
 
 void PlayListGenerator::createMenus()
 {
-    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu= menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(newAct);
     fileMenu->addAction(openAct);
     fileMenu->addAction(saveAct);
     fileMenu->addAction(saveAsAct);
     fileMenu->addSeparator();
 
-
-    QMenu * import=fileMenu->addMenu (tr("Import"));
+    QMenu* import= fileMenu->addMenu(tr("Import"));
 
     import->setStatusTip(tr("Load a playlist from different file types."));
 
-
     import->addAction(importPLS);
     import->addAction(importXML);
-    QMenu * exportmenu=fileMenu->addMenu (tr("Export"));
+    QMenu* exportmenu= fileMenu->addMenu(tr("Export"));
 
     exportmenu->setStatusTip(tr("Export the playlist in different file formats."));
-
 
     exportmenu->addAction(exportPLS);
     exportmenu->addAction(exportXML);
@@ -478,14 +435,14 @@ void PlayListGenerator::createMenus()
     exportmenu->addAction(exportHTML);
     exportmenu->addAction(exportcsv);
 
-    separatorAction = fileMenu->addSeparator();
-    for (int i = 0; i < MaxRecentFiles; ++i)
+    separatorAction= fileMenu->addSeparator();
+    for(int i= 0; i < MaxRecentFiles; ++i)
         fileMenu->addAction(recentFileActions[i]);
 
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
 
-    editMenu = menuBar()->addMenu(tr("&Edit"));
+    editMenu= menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(undoaction);
     editMenu->addSeparator();
     editMenu->addAction(cutAct);
@@ -504,8 +461,7 @@ void PlayListGenerator::createMenus()
     editMenu->addSeparator();
     editMenu->addAction(m_displayPreferencesDialog);
 
-
-    viewMenu = menuBar()->addMenu(tr("&View"));
+    viewMenu= menuBar()->addMenu(tr("&View"));
     mytabs->InitViewmenu(viewMenu);
     viewMenu->addAction(showhidePlayer);
     viewMenu->addAction(showhideExplorer);
@@ -517,71 +473,59 @@ void PlayListGenerator::createMenus()
     addMenu->addAction(AddList);
     addMenu->addAction(rmRedondance);
 
-    pluginMenu = menuBar()->addMenu(tr("&Plugin"));
+    pluginMenu= menuBar()->addMenu(tr("&Plugin"));
     pluginmanager->setmenu(pluginMenu);
 
-    helpMenu = menuBar()->addMenu(tr("&Help"));
+    helpMenu= menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(assistantAct);
     helpMenu->addSeparator();
     helpMenu->addAction(aboutAct);
     helpMenu->addAction(aboutQtAct);
-    
-
-
-
-
 }
 void PlayListGenerator::assistant()
 {
-
     // assistantClient->showPage("/home/renaud/applications/PlayListGenerator/documentation/"+QLocale::system().name()+"/index.html");
 }
 void PlayListGenerator::createToolBars()
 {
-    fileToolBar = addToolBar(tr("File"));
+    fileToolBar= addToolBar(tr("File"));
     fileToolBar->addAction(newAct);
     fileToolBar->addAction(openAct);
     fileToolBar->addAction(saveAct);
 
-    editToolBar = addToolBar(tr("Edit"));
+    editToolBar= addToolBar(tr("Edit"));
     editToolBar->addAction(cutAct);
     editToolBar->addAction(copyAct);
     editToolBar->addAction(pasteAct);
 
-
-    searchToolbar = new QToolBar(tr("search"),this);
-    searchEdit = new QLineEdit;
-    //searchEdit->setEditable(true);
+    searchToolbar= new QToolBar(tr("search"), this);
+    searchEdit= new QLineEdit;
+    // searchEdit->setEditable(true);
     searchEdit->setFixedWidth(SIZE_DISPLAY_EDITLINE);
 
-    m_completer = new QCompleter(m_searchList, this);
+    m_completer= new QCompleter(m_searchList, this);
     searchEdit->setCompleter(m_completer);
 
-    QSizePolicy a(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    searchEdit->setSizePolicy (a);
-
-
-
+    QSizePolicy a(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    searchEdit->setSizePolicy(a);
 
     searchToolbar->addWidget(searchEdit);
-    connect(searchEdit,SIGNAL(returnPressed()),this, SLOT(Seekfile()));
+    connect(searchEdit, SIGNAL(returnPressed()), this, SLOT(Seekfile()));
     searchToolbar->addAction(startsearch);
     searchToolbar->addAction(prevsearch);
     searchToolbar->addAction(nextsearch);
     addToolBar(searchToolbar);
-
-
 }
 void PlayListGenerator::OnAddList()
 {
     //
-    QString save = curFile;
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Play List Generator"),".",tr(
-                                                        "Supported files (*.m3u *.qpl)\nM3U playList files (*.m3u)\nBinary playList files (*.qpl)"));
-    if (!fileName.isEmpty())
+    QString save= curFile;
+    QString fileName= QFileDialog::getOpenFileName(this, tr("Play List Generator"), ".",
+        tr("Supported files (*.m3u *.qpl)\nM3U playList files (*.m3u)\nBinary playList files (*.qpl)"));
+    if(!fileName.isEmpty())
         loadFile(fileName);
 
-    //save = curFile;
+    // save = curFile;
     setCurrentFile(save);
 }
 void PlayListGenerator::createStatusBar()
@@ -590,41 +534,37 @@ void PlayListGenerator::createStatusBar()
 }
 
 void PlayListGenerator::readSettings()
-{	 
+{
     QSettings settings("Renaud Guezennec", "PlayListGenerato");
 
-    QPoint pos = settings.value("pos", QPoint(200, 200)).toPoint();
+    QPoint pos= settings.value("pos", QPoint(200, 200)).toPoint();
 
-    QSize size = settings.value("size", QSize(400, 400)).toSize();
+    QSize size= settings.value("size", QSize(400, 400)).toSize();
 
-    bool statut = settings.value("dockplayerstatut", false).toBool();
+    bool statut= settings.value("dockplayerstatut", false).toBool();
     if(statut)
         playerdock->show();
     else
         playerdock->hide();
 
-
     resize(size);
     move(pos);
 
-    m_searchList = settings.value("recentSearch",m_searchList).toStringList();
+    m_searchList= settings.value("recentSearch", m_searchList).toStringList();
 
-    recentfiles = settings.value("recentFiles").toStringList();
-    QString currentSong = settings.value("currentSong").toString();
+    recentfiles= settings.value("recentFiles").toStringList();
+    QString currentSong= settings.value("currentSong").toString();
     mytabs->readSettings(settings);
     mypreferences->readSettings(settings);
     pluginmanager->readSettings(settings);
 
     updateRecentFileActions();
-    if((recentfiles.size()>0)&&(mypreferences->getLoadlastfile())&&(curFile.isEmpty()))
+    if((recentfiles.size() > 0) && (mypreferences->getLoadlastfile()) && (curFile.isEmpty()))
     {
         loadFile(recentfiles[0]);
     }
 
     myplayer->readSettings(settings);
-
-
-
 }
 
 void PlayListGenerator::writeSettings()
@@ -634,69 +574,62 @@ void PlayListGenerator::writeSettings()
     settings.setValue("size", size());
     settings.setValue("recentFiles", recentfiles);
 
-    settings.setValue("recentSearch",m_searchList);
-
+    settings.setValue("recentSearch", m_searchList);
 
     settings.setValue("dockplayerstatut", playerdock->isVisible());
-    //settings.setValue("currentSong", myplayer->pl->isVisible());
+    // settings.setValue("currentSong", myplayer->pl->isVisible());
 
     mytabs->writeSettings(settings);
     mypreferences->writeSettings(settings);
     pluginmanager->writeSettings(settings);
 
     myplayer->writeSettings(settings);
-
 }
 
 bool PlayListGenerator::maybeSave()
 {
-    if (isWindowModified()) {
-        int ret = QMessageBox::warning(this, tr("AudioPlayer"),
-                                       tr("The document has been modified.\n"
-                                          "Do you want to save your changes?"),
-                                       QMessageBox::Yes | QMessageBox::Default,
-                                       QMessageBox::No,
-                                       QMessageBox::Cancel | QMessageBox::Escape);
-        if (ret == QMessageBox::Yes)
+    if(isWindowModified())
+    {
+        int ret= QMessageBox::warning(this, tr("AudioPlayer"),
+            tr("The document has been modified.\n"
+               "Do you want to save your changes?"),
+            QMessageBox::Yes | QMessageBox::Default, QMessageBox::No, QMessageBox::Cancel | QMessageBox::Escape);
+        if(ret == QMessageBox::Yes)
             return save();
-        else if (ret == QMessageBox::Cancel)
+        else if(ret == QMessageBox::Cancel)
             return false;
     }
     return true;
 }
 
-void PlayListGenerator::loadFile(const QString &fileName)
+void PlayListGenerator::loadFile(const QString& fileName)
 {
     QFile file(fileName);
 
     if(fileName.endsWith(".qpl"))
     {
-        if (!file.open(QFile::ReadOnly)) {
-            QMessageBox::warning(this, tr("PlaylistGenerator"),
-                                 tr("Cannot read file %1:\n%2.")
-                                 .arg(fileName)
-                                 .arg(file.errorString()));
+        if(!file.open(QFile::ReadOnly))
+        {
+            QMessageBox::warning(
+                this, tr("PlaylistGenerator"), tr("Cannot read file %1:\n%2.").arg(fileName).arg(file.errorString()));
             return;
         }
-        
+
         QDataStream in(&file);
         in.setVersion(QDataStream::Qt_4_4);
         QApplication::setOverrideCursor(Qt::WaitCursor);
         in >> (*mytabs);
         QApplication::restoreOverrideCursor();
-        
 
         setCurrentFile(fileName);
         statusBar()->showMessage(tr("File loaded"), 2000);
     }
     else
     {
-        if (!file.open(QFile::ReadOnly | QFile::Text))
+        if(!file.open(QFile::ReadOnly | QFile::Text))
         {
-            QMessageBox::warning(this, tr("PlayListGenerator"),
-                                 tr("Cannot read file %1:\n%2.")
-                                 .arg(fileName)
-                                 .arg(file.errorString()));
+            QMessageBox::warning(
+                this, tr("PlayListGenerator"), tr("Cannot read file %1:\n%2.").arg(fileName).arg(file.errorString()));
             return;
         }
 
@@ -704,34 +637,26 @@ void PlayListGenerator::loadFile(const QString &fileName)
 
         QApplication::setOverrideCursor(Qt::WaitCursor);
 
-
         in >> (*mytabs);
 
-
         QApplication::restoreOverrideCursor();
-
 
         setCurrentFile(fileName);
         statusBar()->showMessage(tr("File loaded"), 2000);
         statusBar()->showMessage(tr("Time: %1 seconds").arg(mytabs->totalTime()));
-
     }
-
-
 }
 
-bool PlayListGenerator::saveFile(const QString &fileName)
+bool PlayListGenerator::saveFile(const QString& fileName)
 {
     QFile file(fileName);
 
     if(fileName.endsWith(".qpl"))
     {
-
-        if (!file.open(QFile::WriteOnly)) {
-            QMessageBox::warning(this, tr("PlayListGenerator"),
-                                 tr("Cannot write file %1:\n%2.")
-                                 .arg(fileName)
-                                 .arg(file.errorString()));
+        if(!file.open(QFile::WriteOnly))
+        {
+            QMessageBox::warning(
+                this, tr("PlayListGenerator"), tr("Cannot write file %1:\n%2.").arg(fileName).arg(file.errorString()));
             return false;
         }
 
@@ -739,27 +664,21 @@ bool PlayListGenerator::saveFile(const QString &fileName)
 
         QApplication::setOverrideCursor(Qt::WaitCursor);
         out << (*mytabs);
-        
+
         // file.flush();
         QApplication::restoreOverrideCursor();
-
     }
     else
     {
-        
-
-
-
-        if (!file.open(QFile::WriteOnly | QFile::Text)) {
-            QMessageBox::warning(this, tr("PlaylistGenerator"),
-                                 tr("Cannot write file %1:\n%2.")
-                                 .arg(fileName)
-                                 .arg(file.errorString()));
+        if(!file.open(QFile::WriteOnly | QFile::Text))
+        {
+            QMessageBox::warning(
+                this, tr("PlaylistGenerator"), tr("Cannot write file %1:\n%2.").arg(fileName).arg(file.errorString()));
             return false;
         }
 
         QTextStream out(&file);
-        
+
         QApplication::setOverrideCursor(Qt::WaitCursor);
         out << (*mytabs);
         QApplication::restoreOverrideCursor();
@@ -770,55 +689,42 @@ bool PlayListGenerator::saveFile(const QString &fileName)
     return true;
 }
 
-void PlayListGenerator::setCurrentFile(const QString &fileName)
+void PlayListGenerator::setCurrentFile(const QString& fileName)
 {
-
-
-    curFile = fileName;
+    curFile= fileName;
 
     setWindowModified(false);
 
     QString shownName;
-    if (curFile.isEmpty())
-        shownName = tr("untitled.qpl");
+    if(curFile.isEmpty())
+        shownName= tr("untitled.qpl");
     else
     {
-
-        shownName = strippedName(curFile);
+        shownName= strippedName(curFile);
         recentfiles.removeAll(curFile);
         recentfiles.prepend(curFile);
         updateRecentFileActions();
-
-        
     }
     setWindowTitle(tr("%1[*] - %2").arg(shownName).arg(tr("Audio Player - V1.0.0")));
 }
 
-QString PlayListGenerator::strippedName(const QString &fullFileName)
+QString PlayListGenerator::strippedName(const QString& fullFileName)
 {
     return QFileInfo(fullFileName).fileName();
 }
 void PlayListGenerator::openMusicFile()
 {
-    QString *fileName = new QString(QFileDialog::getOpenFileName(this,tr("Audio Player"),".",FileSupported));
+    QString* fileName= new QString(QFileDialog::getOpenFileName(this, tr("Audio Player"), ".", FileSupported));
 
     if(!fileName->isEmpty())
     {
         mytabs->addfile(*fileName);
     }
-
 }
 
-void PlayListGenerator::PopupMenurequested(const QPoint & pos)
+void PlayListGenerator::PopupMenurequested(const QPoint& pos)
 {
-
-    curDir = model->filePath(tree->indexAt(pos));
-
-
-
-
-
-
+    curDir= model->filePath(tree->indexAt(pos));
 
     QMenu menu(tree);
 
@@ -830,20 +736,18 @@ void PlayListGenerator::PopupMenurequested(const QPoint & pos)
     menu.addSeparator();
 
     menu.addAction(openAct2);
-    if (curDir.isEmpty())
+    if(curDir.isEmpty())
     {
         parseDirAct->setEnabled(false);
         useDirAct->setEnabled(false);
         parentDirAct->setEnabled(true);
 
         openAct2->setEnabled(false);
-
     }
     else
     {
-
         QFileInfo a(curDir);
-        if((a.isFile())&&((a.suffix().toLower()=="m3u")||(a.suffix().toLower()=="qpl")))
+        if((a.isFile()) && ((a.suffix().toLower() == "m3u") || (a.suffix().toLower() == "qpl")))
         {
             parseDirAct->setEnabled(false);
             useDirAct->setEnabled(false);
@@ -861,9 +765,6 @@ void PlayListGenerator::PopupMenurequested(const QPoint & pos)
     menu.exec(QCursor::pos());
 }
 
-
-
-
 void PlayListGenerator::openDir()
 {
     mytabs->openDir(curDir);
@@ -871,40 +772,39 @@ void PlayListGenerator::openDir()
 }
 void PlayListGenerator::gotoparentDir()
 {
-    QDir* a = new QDir(model->filePath(tree->rootIndex()));
+    QDir* a= new QDir(model->filePath(tree->rootIndex()));
     a->cdUp();
     tree->setRootIndex(model->index(a->path()));
-}   
+}
 void PlayListGenerator::useDirasRoot()
 {
     tree->setRootIndex(model->index(curDir));
 }
 void PlayListGenerator::selectRootDir()
 {
-    QString fileName = QFileDialog::getExistingDirectory(this);
-    if (!fileName.isEmpty())
+    QString fileName= QFileDialog::getExistingDirectory(this);
+    if(!fileName.isEmpty())
         tree->setRootIndex(model->index(fileName));
 }
 void PlayListGenerator::Seekfile()
 {
-    if(mysearch!=NULL)
+    if(mysearch != NULL)
     {
         delete mysearch;
     }
 
-
     if(!searchEdit->text().isEmpty())
     {
-        mysearch=new Search;
-        mysearch->current=-1;
-        mysearch->regex = searchEdit->text();
+        mysearch= new Search;
+        mysearch->current= -1;
+        mysearch->regex= searchEdit->text();
         m_searchList.append(searchEdit->text());
-        mysearch->myseeker =new VisitorMediaSeeker(mysearch->regex);
-        mysearch->list = new QList<int>;
-        
+        mysearch->myseeker= new VisitorMediaSeeker(mysearch->regex);
+        mysearch->list= new QList<int>;
+
         connect(mysearch->myseeker, SIGNAL(FindItem(int)), this, SLOT(additemfound(int)));
-        
-        mysearch->mythread = new Thread(mytabs->getmyPlaylist()->getP_myPlaylist());
+
+        mysearch->mythread= new Thread(mytabs->getmyPlaylist()->getP_myPlaylist());
         mysearch->mythread->setVisitor(mysearch->myseeker);
         mysearch->mythread->start();
     }
@@ -916,56 +816,55 @@ void PlayListGenerator::Seekfile()
 
 void PlayListGenerator::nextfile()
 {
-    if((mysearch!=NULL)&&(mysearch->list->size()>0))
+    if((mysearch != NULL) && (mysearch->list->size() > 0))
     {
         mysearch->current++;
-        if(mysearch->list->size()<=mysearch->current)
+        if(mysearch->list->size() <= mysearch->current)
         {
-            mysearch->current=0;
+            mysearch->current= 0;
         }
-        mytabs->ShowandSelectRow( mysearch->list->at(mysearch->current));
+        mytabs->ShowandSelectRow(mysearch->list->at(mysearch->current));
     }
-}   
+}
 void PlayListGenerator::previousfile()
 {
-    if((mysearch!=NULL)&&(mysearch->list->size()>0))
+    if((mysearch != NULL) && (mysearch->list->size() > 0))
     {
         mysearch->current--;
-        if(0>mysearch->current)
+        if(0 > mysearch->current)
         {
-            mysearch->current = mysearch->list->size()-1;
+            mysearch->current= mysearch->list->size() - 1;
         }
-        mytabs->ShowandSelectRow( mysearch->list->at(mysearch->current));
+        mytabs->ShowandSelectRow(mysearch->list->at(mysearch->current));
     }
 }
 void PlayListGenerator::additemfound(int index)
 {
-    if(mysearch!=NULL)
+    if(mysearch != NULL)
     {
         mysearch->list->append(index);
-        if(mysearch->current==-1)
+        if(mysearch->current == -1)
             nextfile();
     }
 }
 void PlayListGenerator::updateRecentFileActions()
 {
-    //qDebug() << "Size of recentfiles:"<< recentfiles.size() ;
+    // qDebug() << "Size of recentfiles:"<< recentfiles.size() ;
 
     QMutableStringListIterator i(recentfiles);
     while(i.hasNext())
     {
-        QString path = i.next();
+        QString path= i.next();
         if(!QFile::exists(path))
         {
             i.remove();
         }
 
-        for(int j = 0; j<mypreferences->getNb_recentfiles();++j)
+        for(int j= 0; j < mypreferences->getNb_recentfiles(); ++j)
         {
-
-            if(j<recentfiles.count())
+            if(j < recentfiles.count())
             {
-                QString Text = tr("&%1 %2").arg(j+1).arg(strippedName(recentfiles[j]));
+                QString Text= tr("&%1 %2").arg(j + 1).arg(strippedName(recentfiles[j]));
 
                 recentFileActions[j]->setText(Text);
                 recentFileActions[j]->setData(recentfiles[j]);
@@ -978,81 +877,75 @@ void PlayListGenerator::updateRecentFileActions()
 
         }*/
             }
-
         }
         separatorAction->setVisible(!recentfiles.isEmpty());
-
     }
 }
 void PlayListGenerator::openRecentFile()
 {
-    if (maybeSave()) {
+    if(maybeSave())
+    {
         mytabs->reset();
-        QAction *action = qobject_cast<QAction *>(sender());
-        if (action)
+        QAction* action= qobject_cast<QAction*>(sender());
+        if(action)
             loadFile(action->data().toString());
     }
 }
 void PlayListGenerator::OnImport()
 {
-    QAction *action = qobject_cast<QAction *>(sender());
-    ImportParser* p=NULL;
+    QAction* action= qobject_cast<QAction*>(sender());
+    ImportParser* p= NULL;
     QString fileName;
-    if(action==importPLS)
+    if(action == importPLS)
     {
-        fileName = QFileDialog::getOpenFileName(this,tr("Play List Generator"),".",tr("pls playList files (*.PLS)"));
-        p = new PLSimport;
+        fileName= QFileDialog::getOpenFileName(this, tr("Play List Generator"), ".", tr("pls playList files (*.PLS)"));
+        p= new PLSimport;
     }
-    else if(importXML==action)
+    else if(importXML == action)
     {
-        fileName = QFileDialog::getOpenFileName(this,tr("Play List Generator"),".",tr("Xml playList files (*.xml)"));
-        p = new XmlImport;
+        fileName= QFileDialog::getOpenFileName(this, tr("Play List Generator"), ".", tr("Xml playList files (*.xml)"));
+        p= new XmlImport;
     }
 
-    if(p!=NULL)
+    if(p != NULL)
     {
-
         p->setFilename(fileName);
         p->readFile();
         mytabs->setImportparser(p);
     }
-
 }
 void PlayListGenerator::show_preferences()
 {
-    mypreferences_dialog = new Preferences_Impl_Dialog(mytabs,this);
+    mypreferences_dialog= new Preferences_Impl_Dialog(mytabs, this);
     mypreferences_dialog->exec();
-
-
 }
 void PlayListGenerator::onExport()
 {
-    mywizzard = new Wizzardexport(mytabs);
-    QAction *action = qobject_cast<QAction *>(sender());
-    if (action)
+    mywizzard= new Wizzardexport(mytabs);
+    QAction* action= qobject_cast<QAction*>(sender());
+    if(action)
     {
-        if(exportXML==action)
+        if(exportXML == action)
             mywizzard->setExportType(XML);
-        else if(exportPLS==action)
+        else if(exportPLS == action)
             mywizzard->setExportType(PLS);
-        else if(exportPDF==action)
+        else if(exportPDF == action)
             mywizzard->setExportType(PDF);
-        else if(exportHTML==action)
+        else if(exportHTML == action)
             mywizzard->setExportType(HTML);
-        else if(exportcsv==action)
+        else if(exportcsv == action)
             mywizzard->setExportType(CVS);
     }
 
-
     if(mywizzard->exec())
     {
-        QString* exportfileName = new QString;
-        *exportfileName = QFileDialog::getSaveFileName(this,tr("Play List Generator"),".",mywizzard->getFilter());
+        QString* exportfileName= new QString;
+        *exportfileName= QFileDialog::getSaveFileName(this, tr("Play List Generator"), ".", mywizzard->getFilter());
         if(!exportfileName->isEmpty())
         {
-            PL_Document* docview = mywizzard->getView();
+            PL_Document* docview= mywizzard->getView();
             docview->setFilename(exportfileName);
-            PL_ImplDocModel* p =(PL_ImplDocModel*) mywizzard->getModel();
+            PL_ImplDocModel* p= (PL_ImplDocModel*)mywizzard->getModel();
             p->setHeaderList(mytabs->getheaderlist());
             docview->setModel(p);
             docview->setMap(mywizzard->getMap());
@@ -1064,7 +957,7 @@ void PlayListGenerator::onExport()
 
 void PlayListGenerator::enabledUndo(int a)
 {
-    if(a>0)
+    if(a > 0)
     {
         undoaction->setEnabled(true);
     }
@@ -1080,30 +973,25 @@ void PlayListGenerator::initializeAssistant()
   assistantClient->setArguments(arguments);*/
 }
 void PlayListGenerator::addDockProgressbar()
-{   
+{
     Progressdock->show();
 }
 void PlayListGenerator::removeDockProgress()
 {
-
     Progressdock->hide();
 }
-
 
 void PlayListGenerator::valueProgressBarChanged(int x)
 {
     workinprogress->setValue(x);
 }
 
-void PlayListGenerator::addDockplayer(const QModelIndex & index)
+void PlayListGenerator::addDockplayer(const QModelIndex& index)
 {
     if(!mypreferences->getShowPlayerOnStartReading())
         showDockplayer();
 
-
-
     myplayer->setFile(index);
-
 }
 void PlayListGenerator::showDockplayer()
 {
@@ -1127,10 +1015,7 @@ void PlayListGenerator::FindingAssis()
 void PlayListGenerator::hideFindingAssist(/*const QModelIndex & index*/)
 {
     mySearchFilter->hide();
-
-
 }
-
 
 void PlayListGenerator::showhideexplorer()
 {
@@ -1142,17 +1027,14 @@ void PlayListGenerator::showhideexplorer()
 
 PlayListGenerator::~PlayListGenerator()
 {
-
-    if(NULL!=mywizzard)
+    if(NULL != mywizzard)
         delete mywizzard;
-    if(NULL!=model)
+    if(NULL != model)
         delete model;
-    if(NULL!=tree)
+    if(NULL != tree)
         delete tree;
-    if(NULL!=mytabs)
+    if(NULL != mytabs)
         delete mytabs;
 
-    //delete mainSplitter;
-
+    // delete mainSplitter;
 }
-

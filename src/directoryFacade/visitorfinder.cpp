@@ -19,62 +19,55 @@
 #include "../directoryFacade/visitorfinder.h"
 #include <QDebug>
 
-VisitorFinder::VisitorFinder()
- : VisitorNode()
+VisitorFinder::VisitorFinder() : VisitorNode()
 {
-  mypreference = Preference_data::getInstance();
-  filters = mypreference->getFilters();
-  myPlaylist = new QList<PlaylistItem*>;
+    mypreference= Preference_data::getInstance();
+    filters= mypreference->getFilters();
+    myPlaylist= new QList<PlaylistItem*>;
 }
 
-
-VisitorFinder::~VisitorFinder()
-{
-  
-}
+VisitorFinder::~VisitorFinder() {}
 
 void VisitorFinder::visitDir(Node* _dir)
 {
-
-  Directory* dir=(Directory*)_dir;
-  PlaylistItem* pl_item;
-  QString* a;
-  foreach(QString s, dir->entryList(filters,QDir::Files))
-  {
-    pl_item = new  PlaylistItem;
-    a = new QString;
-    (*a)=dir->absoluteFilePath(s);
-
-    if(!a->isEmpty())
+    Directory* dir= (Directory*)_dir;
+    PlaylistItem* pl_item;
+    QString* a;
+    foreach(QString s, dir->entryList(filters, QDir::Files))
     {
-        pl_item->setURI(*a);
-        a = new QString;
-        pl_item->SetExt(*a);
-        myPlaylist->append(pl_item);
+        pl_item= new PlaylistItem;
+        a= new QString;
+        (*a)= dir->absoluteFilePath(s);
 
+        if(!a->isEmpty())
+        {
+            pl_item->setURI(*a);
+            a= new QString;
+            pl_item->SetExt(*a);
+            myPlaylist->append(pl_item);
+        }
     }
-  }
 
-  Directory* tmp=NULL;
-  foreach(QString p,dir->entryList(QDir::Dirs | QDir::NoDotAndDotDot))
-  {
-    tmp= new Directory(dir->absolutePath()+QDir::separator()+ p);
-    tmp->acceptVisitor(this);
-  }
+    Directory* tmp= NULL;
+    foreach(QString p, dir->entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+    {
+        tmp= new Directory(dir->absolutePath() + QDir::separator() + p);
+        tmp->acceptVisitor(this);
+    }
 }
 void VisitorFinder::visitFile(Node* /*f*/)
 {
-  return;
+    return;
 }
 void VisitorFinder::setFilsters(QStringList _filters)
 {
-  filters = _filters;
+    filters= _filters;
 }
 QList<PlaylistItem*>* VisitorFinder::getItemlist()
 {
-  return myPlaylist;
+    return myPlaylist;
 }
 QStringList* VisitorFinder::getFilter()
 {
-  return &filters;
+    return &filters;
 }

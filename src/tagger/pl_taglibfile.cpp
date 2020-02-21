@@ -19,8 +19,4 @@
  ***************************************************************************/
 #include "pl_taglibfile.h"
 
-PL_TagLibFile::~PL_TagLibFile()
-{
-}
-
-
+PL_TagLibFile::~PL_TagLibFile() {}
