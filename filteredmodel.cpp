@@ -1,5 +1,5 @@
 /***************************************************************************
- *	Copyright (C) 2020 by Renaud Guezennec                               *
+ *	Copyright (C) 2021 by Renaud Guezennec                               *
  *   http://www.rolisteam.org/contact                                      *
  *                                                                         *
  *   This software is free software; you can redistribute it and/or modify *
@@ -17,26 +17,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef FILEREADERHELPER_H
-#define FILEREADERHELPER_H
+#include "filteredmodel.h"
 
-#include <QString>
-#include <vector>
+#include "audiofilemodel.h"
 
-class AudioFileModel;
-class FileReaderHelper
+FilteredModel::FilteredModel(QObject* parent) : QSortFilterProxyModel(parent) {}
+
+QString FilteredModel::search() const
 {
-public:
-    FileReaderHelper();
+    return m_search;
+}
 
-    static void readM3u(const QString& filename, AudioFileModel* model);
+bool FilteredModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+{
+    if(m_search.isEmpty())
+        return true;
+    QModelIndex index= sourceModel()->index(sourceRow, 0, sourceParent);
+    auto title= index.data(AudioFileModel::TitleRole).toString();
+    auto artist= index.data(AudioFileModel::ArtistRole).toString();
+    return title.contains(m_search, Qt::CaseInsensitive) || artist.contains(m_search, Qt::CaseInsensitive);
+}
 
-    static void writeAudioList(const QString& filename, AudioFileModel* model);
-    static void readAudioList(const QString& filename, AudioFileModel* model);
-
-    static std::vector<QString> findAllAudioFiles(const QString& dir);
-
-    static void exportFileToDirectory(AudioFileModel* model);
-};
-
-#endif // FILEREADERHELPER_H
+void FilteredModel::setSearch(const QString& search)
+{
+    m_search= search;
+    invalidateFilter();
+}

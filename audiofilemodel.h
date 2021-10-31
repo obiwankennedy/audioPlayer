@@ -21,26 +21,63 @@
 #define AUDIOFILEMODEL_H
 
 #include <QAbstractListModel>
+#include <memory>
+#include <vector>
+
+struct AudioFileInfo
+{
+    QString m_filepath;
+    QString m_artist;
+    QString m_title;
+    quint64 m_time; // in second
+};
 
 class AudioFileModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
-    explicit AudioFileModel(QObject *parent = nullptr);
+    enum Role
+    {
+        PathRole= Qt::UserRole + 1,
+        ArtistRole,
+        TitleRole,
+        TimeRole,
+        IndexRole,
+        ExportSelectedRole
+    };
+
+    explicit AudioFileModel(QObject* parent= nullptr);
 
     // Basic functionality:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent= QModelIndex()) const override;
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex& index, int role= Qt::DisplayRole) const override;
 
     // Add data:
-    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    bool appendSongs(const QList<QVariantMap>& pathlist);
 
     // Remove data:
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    bool removeSongs(const std::vector<int>& songs);
+
+    std::vector<AudioFileInfo*> songs() const;
+    AudioFileInfo* songInfoAt(int index) const;
+
+    QHash<int, QByteArray> roleNames() const override;
+
+    void infoUpdated(int i);
+
+    void insertSongAt(int i, const std::vector<QString>& vec);
+    void resetModel();
+
+    void addToExport(int i);
+    void cleanExportList();
+
+    const std::vector<int>& exportList() const;
 
 private:
+    std::vector<std::unique_ptr<AudioFileInfo>> m_data;
+    std::vector<int> m_selectedToExport;
 };
 
 #endif // AUDIOFILEMODEL_H

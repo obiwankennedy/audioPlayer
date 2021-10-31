@@ -1,5 +1,5 @@
 /***************************************************************************
- *	Copyright (C) 2020 by Renaud Guezennec                               *
+ *	Copyright (C) 2021 by Renaud Guezennec                               *
  *   http://www.rolisteam.org/contact                                      *
  *                                                                         *
  *   This software is free software; you can redistribute it and/or modify *
@@ -17,26 +17,24 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef FILEREADERHELPER_H
-#define FILEREADERHELPER_H
+#ifndef FILTEREDMODEL_H
+#define FILTEREDMODEL_H
 
-#include <QString>
-#include <vector>
+#include <QSortFilterProxyModel>
 
-class AudioFileModel;
-class FileReaderHelper
+class FilteredModel : public QSortFilterProxyModel
 {
+    Q_OBJECT
+
 public:
-    FileReaderHelper();
+    explicit FilteredModel(QObject* parent= nullptr);
 
-    static void readM3u(const QString& filename, AudioFileModel* model);
+    QString search() const;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+    void setSearch(const QString& search);
 
-    static void writeAudioList(const QString& filename, AudioFileModel* model);
-    static void readAudioList(const QString& filename, AudioFileModel* model);
-
-    static std::vector<QString> findAllAudioFiles(const QString& dir);
-
-    static void exportFileToDirectory(AudioFileModel* model);
+private:
+    QString m_search;
 };
 
-#endif // FILEREADERHELPER_H
+#endif // FILTEREDMODEL_H

@@ -1,9 +1,11 @@
 import QtQuick 2.12
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
+import QtQml 2.12
 
 Menu {
     id: menu
     property QtObject ctrl
+    title: qsTr("File")
     MenuItem {
         text: qsTr("New")
         onTriggered: ctrl.resetData()
@@ -30,37 +32,46 @@ Menu {
     }
     MenuSeparator { }
     MenuItem {
+      text: qsTr("Export SSH")
+      onTriggered: ctrl.exportList()
+    }
+
+   /* MenuSeparator { }
+    MenuItem {
         text: qsTr("Undo")
-        enabled: ctrl.canUndo
+        //enabled: ctrl.canUndo
         onTriggered: {
             ctrl.undo()
         }
     }
     MenuItem {
         text: qsTr("Redo")
-        enabled: ctrl.canRedo
+        //enabled: ctrl.canRedo
         onTriggered: {
             ctrl.redo()
         }
-    }
-    MenuSeparator { }
-    MenuItem {
-        text: qsTr("Import File…")
-        onTriggered: {
-            importDialog.open()
+    }*/
+    /*MenuSeparator { }
+    Instantiator {
+        model: ctrl.recentFiles
+        MenuItem {
+            text: modelData.match(/[-_\w]+[.][\w]+$/i)[0]
+            onTriggered: {
+                ctrl.filename = modelData
+            }
         }
-    }
-    MenuItem {
+    }*/
+    /*MenuItem {
         text: qsTr("Export File…")
         onTriggered: {
-            importDialog.open()
+            //importDialog.open()
         }
-    }
+    }*/
     MenuSeparator { }
     MenuItem {
         text: qsTr("Quit")
         checkable: true
-        checked: ctrl.spacing
+        //checked: ctrl.spacing
         onTriggered: ctrl.spacing = checked
     }
 }

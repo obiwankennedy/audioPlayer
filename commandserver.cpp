@@ -19,7 +19,82 @@
  ***************************************************************************/
 #include "commandserver.h"
 
-CommandServer::CommandServer(QObject *parent) : QObject(parent)
+CommandServer::CommandServer(QObject* parent) : QObject(parent)
 {
+    m_server= new QTcpServer(this);
+    connect(m_server, &QTcpServer::newConnection, this, &CommandServer::sessionOpened);
+}
 
+void CommandServer::startListing()
+{
+    auto ok= m_server->listen(QHostAddress::Any, 4000);
+
+    qDebug() << "listening" << ok;
+}
+
+void CommandServer::sendOffStatus(const QString& status)
+{
+    if(nullptr == m_client)
+        return;
+
+    m_client->write(status.toUtf8());
+}
+
+void CommandServer::sessionOpened()
+{
+    qDebug() << "session openned";
+    m_client= m_server->nextPendingConnection();
+    connect(m_client, &QTcpSocket::readyRead, this, &CommandServer::readCommand);
+}
+
+void CommandServer::processCommand(QStringList list)
+{
+    if(list.empty())
+        return;
+
+    if((list.at(0) == "-n") || (list.at(0) == "next"))
+    {
+        emit next();
+    }
+    else if((list.at(0) == "-p") || (list.at(0) == "previous"))
+    {
+        emit previous();
+    }
+    else if((list.at(0) == "-i") || (list.at(0) == "increase"))
+    {
+        increase();
+    }
+    else if((list.at(0) == "-d") || (list.at(0) == "decrease"))
+    {
+        decrease();
+    }
+    else if((list.at(0) == "-v"))
+    {
+        if(list.size() >= 2)
+        {
+            int i= list.at(1).toInt();
+            emit volume(i);
+        }
+    }
+    else if((list.at(0) == "play"))
+    {
+        emit play();
+    }
+    else if((list.at(0) == "pause"))
+    {
+        emit pause();
+    }
+}
+
+void CommandServer::readCommand()
+{
+    auto byte= m_client->read(100);
+
+    if(byte.isEmpty())
+        return;
+
+    QString nextCommand(byte);
+
+    QStringList arg= nextCommand.split(" ", QString::SkipEmptyParts);
+    processCommand(arg);
 }

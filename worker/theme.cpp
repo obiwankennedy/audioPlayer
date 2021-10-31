@@ -1,5 +1,5 @@
 /***************************************************************************
- *	Copyright (C) 2020 by Renaud Guezennec                               *
+ *	Copyright (C) 2019 by Renaud Guezennec                               *
  *   http://www.rolisteam.org/contact                                      *
  *                                                                         *
  *   This software is free software; you can redistribute it and/or modify *
@@ -17,26 +17,53 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef FILEREADERHELPER_H
-#define FILEREADERHELPER_H
+#include "theme.h"
 
-#include <QString>
-#include <vector>
+#include <QQmlEngine>
+#include <QQmlFileSelector>
 
-class AudioFileModel;
-class FileReaderHelper
+Theme::Theme(QQmlEngine* engine, QObject* parent) : QObject(parent), m_engine(engine)
 {
-public:
-    FileReaderHelper();
+    m_selector.reset(new QQmlFileSelector(m_engine));
+    m_selector->setExtraSelectors(QStringList() << QStringLiteral("+dark"));
+}
 
-    static void readM3u(const QString& filename, AudioFileModel* model);
+Theme::~Theme()= default;
 
-    static void writeAudioList(const QString& filename, AudioFileModel* model);
-    static void readAudioList(const QString& filename, AudioFileModel* model);
+bool Theme::nightMode() const
+{
+    return m_nightMode;
+}
 
-    static std::vector<QString> findAllAudioFiles(const QString& dir);
+void Theme::setNightMode(bool b)
+{
+    if(m_nightMode == b)
+        return;
+    m_nightMode= b;
+    emit nightModeChanged();
+    emit undoIconChanged();
+    emit redoIconChanged();
+    emit listIconChanged();
+}
 
-    static void exportFileToDirectory(AudioFileModel* model);
-};
+QString Theme::imagePath(const QString& image) const
+{
+    return QStringLiteral("qrc:/icons/resources/icons/%1%2")
+        .arg(m_nightMode ? QStringLiteral("+dark/") : QStringLiteral(""))
+        .arg(image);
+}
 
-#endif // FILEREADERHELPER_H
+QString Theme::undoIcon() const
+{
+    return imagePath("undo.svg");
+}
+
+QString Theme::redoIcon() const
+{
+    return imagePath("redo.svg");
+}
+
+QString Theme::listIcon() const
+{
+    return imagePath("list.svg");
+}

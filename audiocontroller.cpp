@@ -19,7 +19,218 @@
  ***************************************************************************/
 #include "audiocontroller.h"
 
-AudioController::AudioController()
-{
+#include "audiofilemodel.h"
+#include "commandserver.h"
+#include <random>
 
+AudioController::AudioController(QObject* parent)
+    : QObject(parent), m_model(new AudioFileModel), m_server(new CommandServer), m_filteredModel(new FilteredModel)
+{
+    connect(&m_player, &QMediaPlayer::volumeChanged, this, &AudioController::volumeChanged);
+    connect(&m_player, &QMediaPlayer::positionChanged, this, &AudioController::seekChanged);
+    connect(&m_player, &QMediaPlayer::positionChanged, this, [this]() {
+        auto songText= title();
+        auto duration= m_player.duration();
+        auto position= m_player.position();
+        auto volume= m_player.volume();
+        m_server->sendOffStatus(QStringLiteral("%1|duration=%2|position=%3|volume=%4")
+                                    .arg(songText)
+                                    .arg(duration)
+                                    .arg(position)
+                                    .arg(volume));
+    });
+    connect(&m_player, &QMediaPlayer::durationChanged, this, &AudioController::durationChanged);
+    connect(&m_player, &QMediaPlayer::mediaStatusChanged, this, &AudioController::mediaStatus);
+
+    connect(m_server.get(), &CommandServer::play, this, &AudioController::play);
+    connect(m_server.get(), &CommandServer::pause, this, &AudioController::pause);
+    connect(m_server.get(), &CommandServer::next, this, &AudioController::next);
+    connect(m_server.get(), &CommandServer::previous, this, &AudioController::previous);
+    connect(m_server.get(), &CommandServer::increase, this, &AudioController::nextInLineSong);
+    connect(m_server.get(), &CommandServer::volume, &m_player, &QMediaPlayer::setVolume);
+    // connect(m_server.get(),&CommandServer::,this, &AudioController::play);
+
+    m_server->startListing();
+    m_filteredModel->setSourceModel(m_model.get());
+}
+
+int AudioController::songIndex() const
+{
+    auto it= m_previousIndex.rbegin();
+    it+= m_pos;
+
+    if(it == m_previousIndex.rend())
+        return 0;
+
+    return (*it);
+}
+
+AudioController::~AudioController()= default;
+
+void AudioController::mediaStatus(QMediaPlayer::MediaStatus status)
+{
+    switch(status)
+    {
+    case QMediaPlayer::EndOfMedia:
+        next();
+        break;
+    default:
+        break;
+    }
+    qDebug() << m_player.errorString() << m_player.error() << status;
+    emit playingChanged();
+}
+
+void AudioController::next()
+{
+    if(m_pos > 0)
+    {
+        m_pos--;
+        updateContent();
+        play();
+        emit songIndexChanged();
+    }
+    else
+    {
+        switch(m_mode)
+        {
+        case LOOP:
+            repeatSong();
+            break;
+        case UNIQUE:
+            break;
+        case NEXT:
+            nextInLineSong();
+            break;
+        case SHUFFLE:
+            shuffleSong();
+            break;
+        }
+    }
+}
+
+void AudioController::pause()
+{
+    m_player.pause();
+}
+
+void AudioController::previous()
+{
+    m_pos++;
+    if(m_pos >= static_cast<int>(m_previousIndex.size()))
+        m_pos= m_previousIndex.size() - 1;
+    updateContent();
+    play();
+    emit songIndexChanged();
+}
+void AudioController::repeatSong()
+{
+    play();
+}
+
+void AudioController::nextInLineSong()
+{
+    auto it= m_previousIndex.rbegin();
+    auto val= (*it) + 1;
+    setSongIndex(val);
+    play();
+}
+void AudioController::shuffleSong()
+{
+    static auto seed1= std::chrono::system_clock::now().time_since_epoch().count();
+    static std::mt19937 rng(seed1);
+    auto r= m_model->rowCount() - 1;
+    std::uniform_int_distribution<qint64> dist(0, r);
+    setSongIndex(static_cast<int>(dist(rng)));
+    play();
+}
+
+void AudioController::resetModel() const
+{
+    m_model->resetModel();
+}
+
+FilteredModel* AudioController::filteredModel() const
+{
+    return m_filteredModel.get();
+}
+
+AudioController::PlayingMode AudioController::mode() const
+{
+    return m_mode;
+}
+
+int AudioController::volume() const
+{
+    return m_player.volume();
+}
+
+qint64 AudioController::seek() const
+{
+    return m_player.position();
+}
+
+qint64 AudioController::duration() const
+{
+    return m_player.duration();
+}
+
+AudioFileModel* AudioController::model() const
+{
+    return m_model.get();
+}
+
+void AudioController::find(const QString& text)
+{
+    m_filteredModel->setSearch(text);
+}
+
+QString AudioController::title() const
+{
+    return m_title;
+}
+
+bool AudioController::isPlaying() const
+{
+    return m_player.state() == QMediaPlayer::PlayingState;
+}
+
+void AudioController::setSongIndex(int index)
+{
+    m_previousIndex.push_back(index);
+    m_pos= 0;
+    updateContent();
+    emit songIndexChanged();
+}
+void AudioController::updateContent()
+{
+    auto info= m_model->songInfoAt(songIndex());
+    if(info == nullptr)
+        return;
+    m_title= QString("%1 - %2").arg(info->m_title, info->m_artist);
+    m_content= QMediaContent(QUrl::fromLocalFile(info->m_filepath));
+    m_player.setMedia(m_content);
+    emit titleChanged();
+}
+void AudioController::setMode(PlayingMode mode)
+{
+    if(mode == m_mode)
+        return;
+    m_mode= mode;
+    emit modeChanged();
+}
+void AudioController::setVolume(int vol)
+{
+    m_player.setVolume(vol);
+}
+void AudioController::setSeek(qint64 move)
+{
+    m_player.setPosition(move);
+}
+
+void AudioController::play()
+{
+    if(m_content.isNull())
+        updateContent();
+    m_player.play();
 }

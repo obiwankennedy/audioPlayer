@@ -21,15 +21,40 @@
 #define COMMANDSERVER_H
 
 #include <QObject>
+#include <QTcpServer>
+#include <QTcpSocket>
+
+#include "audiocontroller.h"
 
 class CommandServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit CommandServer(QObject *parent = nullptr);
+    explicit CommandServer(QObject* parent= nullptr);
+
+    void startListing();
+
+public slots:
+    void sendOffStatus(const QString& status);
 
 signals:
+    void next();
+    void pause();
+    void play();
+    void previous();
+    void increase();
+    void decrease();
+    void changeMode(AudioController::PlayingMode mode);
+    void volume(int v);
 
+private slots:
+    void sessionOpened();
+    void readCommand();
+    void processCommand(QStringList list);
+
+private:
+    QTcpServer* m_server= nullptr;
+    QTcpSocket* m_client= nullptr;
 };
 
 #endif // COMMANDSERVER_H
