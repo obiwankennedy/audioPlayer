@@ -4,17 +4,23 @@ import QtQuick.Layouts 1.12
 import AudioPlayer 1.0
 
 Frame {
+    id: _root
     property QtObject ctrl
+    //height: buttonLyt.implicitHeight
+    //height: 111
+
     RowLayout {
         anchors.fill: parent
         Image {
-            Layout.fillHeight: true
-            Layout.preferredWidth: 50
+            Layout.preferredWidth: 100
             fillMode: Image.PreserveAspectFit
+            source: ctrl.albumArt ? "image://album/%1".arg(ctrl.albumArt) : ""
+            sourceSize.width: 100
+            sourceSize.height: 100
         }
         ColumnLayout {
+            id: buttonLyt
             Layout.fillWidth: true
-            Layout.fillHeight: true
             TextField {
                 Layout.fillWidth: true
                 text: ctrl.title
@@ -53,7 +59,7 @@ Frame {
                 }
                 Slider {//volume
                     from: 0
-                    to: 100
+                    to: 1.0
                     value: ctrl.volume
                     onValueChanged: ctrl.volume = value
                 }

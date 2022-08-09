@@ -20,31 +20,35 @@
 #ifndef AUDIOCONTROLLER_H
 #define AUDIOCONTROLLER_H
 
-#include <QMediaContent>
+#include <QAudioOutput>
 #include <QMediaPlayer>
 #include <QObject>
 #include <QPointer>
+#include <QUrl>
 
+#include "albumpictureprovider.h"
+#include "audiofilemodel.h"
 #include "filteredmodel.h"
 
 #include <deque>
 #include <memory>
 
-class AudioFileModel;
 class CommandServer;
-class FilteredModel;
 class AudioController : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int songIndex READ songIndex WRITE setSongIndex NOTIFY songIndexChanged)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(PlayingMode mode READ mode WRITE setMode NOTIFY modeChanged)
-    Q_PROPERTY(int volume READ volume WRITE setVolume NOTIFY volumeChanged)
+    Q_PROPERTY(float volume READ volume WRITE setVolume NOTIFY volumeChanged)
     Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged)
     Q_PROPERTY(qint64 seek READ seek WRITE setSeek NOTIFY seekChanged)
     Q_PROPERTY(AudioFileModel* model READ model NOTIFY modelChanged)
     Q_PROPERTY(bool playing READ isPlaying NOTIFY playingChanged)
     Q_PROPERTY(FilteredModel* filteredModel READ filteredModel CONSTANT)
+    Q_PROPERTY(QString songImage READ songImage NOTIFY songIndexChanged)
+    Q_PROPERTY(AlbumPictureProvider* pictureProvider READ pictureProvider CONSTANT)
+    Q_PROPERTY(QString albumArt READ albumArt NOTIFY albumArtChanged)
 public:
     enum PlayingMode
     {
@@ -59,7 +63,7 @@ public:
 
     int songIndex() const;
     PlayingMode mode() const;
-    int volume() const;
+    float volume() const;
     qint64 seek() const;
     AudioFileModel* model() const;
     qint64 duration() const;
@@ -67,11 +71,14 @@ public:
     bool isPlaying() const;
     FilteredModel* filteredModel() const;
     void resetModel() const;
+    QString songImage() const;
+    AlbumPictureProvider* pictureProvider() const;
+    QString albumArt() const;
 
 public slots:
     void setSongIndex(int song);
     void setMode(PlayingMode mode);
-    void setVolume(int vol);
+    void setVolume(float vol);
     void setSeek(qint64 move);
 
     void play();
@@ -89,6 +96,7 @@ signals:
     void durationChanged(qint64 duration);
     void titleChanged();
     void playingChanged();
+    void albumArtChanged();
 
 protected:
     void mediaStatus(QMediaPlayer::MediaStatus status);
@@ -100,13 +108,16 @@ protected slots:
     void updateContent();
 
 private:
-    // QPointer<AudioFileModel> m_model;
     std::unique_ptr<AudioFileModel> m_model;
     std::unique_ptr<CommandServer> m_server;
     std::unique_ptr<FilteredModel> m_filteredModel;
+    std::unique_ptr<AlbumPictureProvider> m_pictureProvider;
+    std::unique_ptr<QMediaPlayer> m_player;
+    std::unique_ptr<QAudioOutput> m_audioOutput;
+
     PlayingMode m_mode= SHUFFLE;
-    QMediaPlayer m_player;
-    QMediaContent m_content;
+
+    QUrl m_content;
     int m_duration;
     QString m_title;
     int m_pos= 0;

@@ -51,14 +51,20 @@ int main(int argc, char* argv[])
 
     QQuickStyle::setStyle("Universal");
 
+    std::unique_ptr<MainController> mainController(new MainController);
     QQmlApplicationEngine qmlEngine;
 
-    qmlEngine.rootContext()->setContextProperty("_themeCtrl", new Theme(&qmlEngine));
-    qmlRegisterType<MainController>("AudioPlayer", 1, 0, "MainController");
-    qmlRegisterType<AudioController>("AudioPlayer", 1, 0, "AudioController");
+    qmlEngine.addImageProvider("album", mainController->audioCtrl()->pictureProvider());
+
+    qmlRegisterSingletonInstance("AudioPlayer", 1, 0, "MainController", mainController.get());
+    qmlRegisterSingletonInstance("Customization", 1, 0, "Theme", new Theme(&qmlEngine));
+
+    // qmlRegisterType<MainController>("AudioPlayer", 1, 0, "MainController");
+    qmlRegisterUncreatableType<AudioController>("AudioPlayer", 1, 0, "AudioController", "Just for enum");
     qRegisterMetaType<QAbstractItemModel*>();
     qRegisterMetaType<FilteredModel*>();
     qRegisterMetaType<AudioFileModel*>();
+    qRegisterMetaType<AudioController*>();
     qRegisterMetaType<AudioController::PlayingMode>();
 
     qmlEngine.load(QLatin1String("qrc:/resources/qml/main.qml"));

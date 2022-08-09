@@ -6,6 +6,7 @@ LANGUAGE = C++
 QT += gui core quick quickwidgets dbus svg xml multimedia printsupport quickcontrols2
 
 SOURCES += main.cpp maincontroller.cpp \
+    albumpictureprovider.cpp \
     audiocontroller.cpp \
     audiofilemodel.cpp worker/theme.cpp \
     commandserver.cpp \
@@ -14,6 +15,7 @@ SOURCES += main.cpp maincontroller.cpp \
 
 
 HEADERS += maincontroller.h \
+    albumpictureprovider.h \
     audiocontroller.h \
     audiofilemodel.h worker/theme.h \
     commandserver.h \

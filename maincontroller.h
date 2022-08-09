@@ -22,11 +22,13 @@
 
 #include <QAbstractItemModel>
 #include <QObject>
+#include <QStringList>
 #include <memory>
 
-class AudioFileModel;
-class FilteredModel;
-class AudioController;
+#include "audiocontroller.h"
+#include "audiofilemodel.h"
+#include "filteredmodel.h"
+
 class MainController : public QObject
 {
     Q_OBJECT

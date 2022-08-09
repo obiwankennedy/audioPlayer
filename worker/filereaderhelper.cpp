@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "filereaderhelper.h"
 
+#include <QBuffer>
 #include <QDataStream>
 #include <QDebug>
 #include <QDir>
@@ -52,7 +53,9 @@ void FileReaderHelper::readM3u(const QString& filename, AudioFileModel* model)
         QString title;
         int duration= 0;
         QString artist;
-        vec.append(QVariantMap({{"path", uri}, {"title", title}, {"artist", artist}, {"time", duration}}));
+        QString album;
+        vec.append(
+            QVariantMap({{"path", uri}, {"title", title}, {"artist", artist}, {"album", album}, {"time", duration}}));
     }
     model->appendSongs(vec);
 }
@@ -60,6 +63,7 @@ void FileReaderHelper::readM3u(const QString& filename, AudioFileModel* model)
 void FileReaderHelper::writeAudioList(const QString& filename, AudioFileModel* model)
 {
     auto songs= model->songs();
+    QJsonObject mainObj;
     QJsonArray array;
     for(auto song : songs)
     {
@@ -67,10 +71,32 @@ void FileReaderHelper::writeAudioList(const QString& filename, AudioFileModel* m
         obj["path"]= song->m_filepath;
         obj["title"]= song->m_title;
         obj["artist"]= song->m_artist;
+        obj["album"]= song->m_album;
         obj["time"]= static_cast<long long int>(song->m_time);
         array.append(obj);
     }
-    QJsonDocument doc(array);
+
+    auto images= model->dataImage();
+    auto keys= images->keys();
+    QJsonArray imgArray;
+    for(auto const& key : qAsConst(keys))
+    {
+        auto value= images->value(key);
+        if(value.isNull())
+            continue;
+        QJsonObject obj;
+        obj["key"]= key;
+        QByteArray array;
+        QBuffer buffer(&array);
+        buffer.open(QIODevice::WriteOnly);
+        value.save(&buffer, "jpeg");
+        obj["img"]= QString::fromUtf8(array.toBase64());
+        imgArray.append(obj);
+    }
+    mainObj["songs"]= array;
+    mainObj["images"]= imgArray;
+
+    QJsonDocument doc(mainObj);
 
     QFile file(filename);
     if(!file.open(QIODevice::WriteOnly))
@@ -82,22 +108,38 @@ void FileReaderHelper::writeAudioList(const QString& filename, AudioFileModel* m
 
 void FileReaderHelper::readAudioList(const QString& filename, AudioFileModel* model)
 {
+    qDebug() << filename;
     QFile file(filename);
     if(!file.open(QIODevice::ReadOnly))
         qDebug() << "error text" << filename;
 
     QJsonDocument doc= QJsonDocument::fromJson(file.readAll());
 
-    auto array= doc.array();
+    auto mainObj= doc.object();
+
+    auto array= mainObj["songs"].toArray();
     QList<QVariantMap> vec;
-    for(auto value : array)
+    for(auto const& value : qAsConst(array))
     {
         auto obj= value.toObject();
         vec.append(QVariantMap({{"path", obj["path"].toString()},
                                 {"title", obj["title"].toString()},
                                 {"artist", obj["artist"].toString()},
+                                {"album", obj["album"].toString()},
                                 {"time", obj["time"].toInt()}}));
     }
+
+    auto images= model->dataImage();
+    auto imgarray= mainObj["images"].toArray();
+    for(auto const& imageObjRef : qAsConst(imgarray))
+    {
+        auto obj= imageObjRef.toObject();
+
+        auto key= obj["key"].toString();
+        auto data= QImage::fromData(QByteArray::fromBase64(obj["img"].toString().toUtf8()));
+        images->insert(key, data);
+    }
+
     model->appendSongs(vec);
 }
 

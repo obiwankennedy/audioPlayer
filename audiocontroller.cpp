@@ -21,33 +21,42 @@
 
 #include "audiofilemodel.h"
 #include "commandserver.h"
+#include <QMediaMetaData>
 #include <random>
 
 AudioController::AudioController(QObject* parent)
-    : QObject(parent), m_model(new AudioFileModel), m_server(new CommandServer), m_filteredModel(new FilteredModel)
+    : QObject(parent)
+    , m_model(new AudioFileModel)
+    , m_server(new CommandServer)
+    , m_filteredModel(new FilteredModel)
+    , m_pictureProvider(new AlbumPictureProvider())
+    , m_player(new QMediaPlayer)
+    , m_audioOutput(new QAudioOutput)
 {
-    connect(&m_player, &QMediaPlayer::volumeChanged, this, &AudioController::volumeChanged);
-    connect(&m_player, &QMediaPlayer::positionChanged, this, &AudioController::seekChanged);
-    connect(&m_player, &QMediaPlayer::positionChanged, this, [this]() {
+    m_player->setAudioOutput(m_audioOutput.get());
+
+    connect(m_audioOutput.get(), &QAudioOutput::volumeChanged, this, &AudioController::volumeChanged);
+    connect(m_player.get(), &QMediaPlayer::positionChanged, this, &AudioController::seekChanged);
+    connect(m_player.get(), &QMediaPlayer::positionChanged, this, [this]() {
         auto songText= title();
-        auto duration= m_player.duration();
-        auto position= m_player.position();
-        auto volume= m_player.volume();
+        auto duration= m_player->duration();
+        auto position= m_player->position();
+        auto volume= m_audioOutput->volume();
         m_server->sendOffStatus(QStringLiteral("%1|duration=%2|position=%3|volume=%4")
                                     .arg(songText)
                                     .arg(duration)
                                     .arg(position)
                                     .arg(volume));
     });
-    connect(&m_player, &QMediaPlayer::durationChanged, this, &AudioController::durationChanged);
-    connect(&m_player, &QMediaPlayer::mediaStatusChanged, this, &AudioController::mediaStatus);
+    connect(m_player.get(), &QMediaPlayer::durationChanged, this, &AudioController::durationChanged);
+    connect(m_player.get(), &QMediaPlayer::mediaStatusChanged, this, &AudioController::mediaStatus);
 
     connect(m_server.get(), &CommandServer::play, this, &AudioController::play);
     connect(m_server.get(), &CommandServer::pause, this, &AudioController::pause);
     connect(m_server.get(), &CommandServer::next, this, &AudioController::next);
     connect(m_server.get(), &CommandServer::previous, this, &AudioController::previous);
     connect(m_server.get(), &CommandServer::increase, this, &AudioController::nextInLineSong);
-    connect(m_server.get(), &CommandServer::volume, &m_player, &QMediaPlayer::setVolume);
+    connect(m_server.get(), &CommandServer::volume, m_audioOutput.get(), &QAudioOutput::setVolume);
     // connect(m_server.get(),&CommandServer::,this, &AudioController::play);
 
     m_server->startListing();
@@ -74,10 +83,33 @@ void AudioController::mediaStatus(QMediaPlayer::MediaStatus status)
     case QMediaPlayer::EndOfMedia:
         next();
         break;
+    case QMediaPlayer::BufferedMedia:
+    {
+        auto meta= m_player->metaData();
+        auto keys= meta.keys();
+
+        if(keys.contains(QMediaMetaData::CoverArtImage))
+        {
+            auto img= meta.value(QMediaMetaData::CoverArtImage);
+            m_pictureProvider->setCurrentImage(img.value<QImage>(), title());
+        }
+        else if(keys.contains(QMediaMetaData::ThumbnailImage))
+        {
+            auto img= meta.value(QMediaMetaData::ThumbnailImage);
+            m_pictureProvider->setCurrentImage(img.value<QImage>(), title());
+        }
+        else
+        {
+            m_pictureProvider->setCurrentImage({}, {});
+        }
+
+        emit albumArtChanged();
+    }
+    break;
     default:
         break;
     }
-    qDebug() << m_player.errorString() << m_player.error() << status;
+    // qDebug() << "status:" << status;//BufferedMedia
     emit playingChanged();
 }
 
@@ -111,7 +143,7 @@ void AudioController::next()
 
 void AudioController::pause()
 {
-    m_player.pause();
+    m_player->pause();
 }
 
 void AudioController::previous()
@@ -150,6 +182,30 @@ void AudioController::resetModel() const
     m_model->resetModel();
 }
 
+QString AudioController::songImage() const
+{
+    QString res;
+    auto info= m_model->songInfoAt(songIndex());
+
+    if(info && !info->m_album.isEmpty() && !info->m_artist.isEmpty())
+        res= QString("%1-%2").arg(info->m_artist, info->m_album);
+
+    auto data= m_model->dataImage();
+    if(data->contains(res))
+        res= QString();
+    return res;
+}
+
+AlbumPictureProvider* AudioController::pictureProvider() const
+{
+    return m_pictureProvider.get();
+}
+
+QString AudioController::albumArt() const
+{
+    return m_pictureProvider->id();
+}
+
 FilteredModel* AudioController::filteredModel() const
 {
     return m_filteredModel.get();
@@ -160,19 +216,19 @@ AudioController::PlayingMode AudioController::mode() const
     return m_mode;
 }
 
-int AudioController::volume() const
+float AudioController::volume() const
 {
-    return m_player.volume();
+    return m_audioOutput->volume();
 }
 
 qint64 AudioController::seek() const
 {
-    return m_player.position();
+    return m_player->position();
 }
 
 qint64 AudioController::duration() const
 {
-    return m_player.duration();
+    return m_player->duration();
 }
 
 AudioFileModel* AudioController::model() const
@@ -192,7 +248,7 @@ QString AudioController::title() const
 
 bool AudioController::isPlaying() const
 {
-    return m_player.state() == QMediaPlayer::PlayingState;
+    return m_player->playbackState() == QMediaPlayer::PlayingState;
 }
 
 void AudioController::setSongIndex(int index)
@@ -208,8 +264,17 @@ void AudioController::updateContent()
     if(info == nullptr)
         return;
     m_title= QString("%1 - %2").arg(info->m_title, info->m_artist);
-    m_content= QMediaContent(QUrl::fromLocalFile(info->m_filepath));
-    m_player.setMedia(m_content);
+    m_content= QUrl::fromLocalFile(info->m_filepath);
+    m_player->setSource(m_content);
+
+    /*auto img= meta.value(QMediaMetaData::CoverArtImage).value<QImage>();
+    if(img.isNull())
+        img= meta.value(QMediaMetaData::ThumbnailImage).value<QImage>();
+
+    if(img.isNull())
+        next();*/
+
+    // m_pictureProvider->setCurrentImage(img);
     emit titleChanged();
 }
 void AudioController::setMode(PlayingMode mode)
@@ -219,18 +284,18 @@ void AudioController::setMode(PlayingMode mode)
     m_mode= mode;
     emit modeChanged();
 }
-void AudioController::setVolume(int vol)
+void AudioController::setVolume(float vol)
 {
-    m_player.setVolume(vol);
+    m_audioOutput->setVolume(vol);
 }
 void AudioController::setSeek(qint64 move)
 {
-    m_player.setPosition(move);
+    m_player->setPosition(move);
 }
 
 void AudioController::play()
 {
-    if(m_content.isNull())
+    if(m_content.isValid())
         updateContent();
-    m_player.play();
+    m_player->play();
 }

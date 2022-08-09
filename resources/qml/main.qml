@@ -1,10 +1,12 @@
-import QtQuick 2.12
-import QtQuick.Window 2.2
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Dialogs 1.3
-import QtQuick.Controls.Universal 2.12
-import AudioPlayer 1.0
+import QtQuick
+import QtCore
+import QtQuick.Window
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Dialogs
+import QtQuick.Controls.Universal
+import AudioPlayer
+import Customization
 
 ApplicationWindow {
     id: root
@@ -15,25 +17,16 @@ ApplicationWindow {
     property int idx: 0
     property bool darkMode: true
 
-    MainController {
-        id: ctrl
-    }
-
-   /* AudioController {
-        id: audioCtrl
-        model: ctrl.audioModel
-    }*/
-
-    onDarkModeChanged: _themeCtrl.nightMode = root.darkMode
+    onDarkModeChanged: Theme.nightMode = root.darkMode
     Universal.theme: root.darkMode ? Universal.Dark: Universal.Light
 
     menuBar: MenuBar {
         id: menu
         FileMenu {
-            ctrl: ctrl
+            ctrl: MainController
         }
         EditMenu {
-            ctrl:ctrl
+            ctrl:MainController
             darkMode: root.darkMode
             onDarkModeChanged: root.darkMode = darkMode
             onHidePlayer: audioPlayer.visible = !audioPlayer.visible
@@ -42,31 +35,30 @@ ApplicationWindow {
 
     header: AudioPlayer {
         id: audioPlayer
-        ctrl: ctrl.audioCtrl
+        ctrl: MainController.audioCtrl
+        //height: 50
     }
 
     FileDialog {
         id: openDialog
         title: qsTr("Load playlist from File")
-        folder: shortcuts.home
-        selectMultiple: false
+        currentFolder:  StandardPaths.writableLocation(StandardPaths.MusicLocation)
+        fileMode: FileDialog.OpenFile
         nameFilters: ["Playlist (*.apl *.m3u)"]
         onAccepted: {
-            ctrl.setFilename(openDialog.fileUrl)
-            ctrl.loadFile();
+            MainController.setFilename(openDialog.fileUrl)
+            MainController.loadFile();
             close()
         }
         onRejected: close()
     }
 
-    FileDialog {
+    FolderDialog {
         id: openDir
         title: qsTr("Add directory at selection")
-        folder: shortcuts.home
-        selectFolder: true
-        selectExisting: true
+        currentFolder: StandardPaths.writableLocation(StandardPaths.MusicLocation)
         onAccepted: {
-            ctrl.addDirectory(view.currentIndex,openDir.fileUrl);
+            MainController.addDirectory(view.currentIndex,openDir.fileUrl);
             close()
         }
         onRejected: close()
@@ -75,12 +67,11 @@ ApplicationWindow {
     FileDialog {
         id: addAudioFiles
         title: qsTr("Load playlist from File")
-        folder: shortcuts.home
-        selectExisting: true
-        selectMultiple: true
+        currentFolder: StandardPaths.writableLocation(StandardPaths.MusicLocation)
+        fileMode: FileDialog.OpenFiles
         nameFilters: ["Audiofiles (*.mp3 *.mpc *.flac *.ogg *.wma)"]
         onAccepted: {
-            ctrl.addFiles(addAudioFiles.fileUrls, view.currentIndex);
+            MainController.addFiles(addAudioFiles.fileUrls, view.currentIndex);
             close()
         }
         onRejected: close()
@@ -89,14 +80,13 @@ ApplicationWindow {
     FileDialog {
         id: saveDialog
         title: qsTr("Save playlist into File")
-        folder: shortcuts.home
-        selectExisting: false
-        selectMultiple: false
+        currentFolder: StandardPaths.writableLocation(StandardPaths.MusicLocation)
+        fileMode: FileDialog.SaveFile
         defaultSuffix: "apl"
         nameFilters: ["Playlist (*.apl)"]
         onAccepted: {
-            ctrl.setFilename(saveDialog.fileUrl)
-            ctrl.saveFile();
+            MainController.setFilename(saveDialog.fileUrl)
+            MainController.saveFile();
             close()
         }
         onRejected: close()
@@ -112,32 +102,21 @@ ApplicationWindow {
             anchors.rightMargin: 20
             anchors.bottomMargin: 20
 
-            Component.completed: view.currentIndex = ctrl.audioCtrl.songIndex
+            Component.onCompleted: view.currentIndex = MainController.audioCtrl.songIndex
 
             highlightMoveDuration: 20
-            function ensureVisible(index) {
-                var hTotal = view.contentHeight
-                var itemCount = view.count
-                var hViewPort = view.height
-                var visibleItems = hViewPort * itemCount/hTotal
-                var marge = hViewPort/2
-                var step = hTotal/itemCount
-                var value = (step * index - marge)
-                if(Math.abs(value - view.contentY) > marge)
-                    view.contentY = value;
-            }
 
             highlight: Rectangle { color: Universal.accent; radius: 5 }
 
             Connections {
-                target: ctrl.audioCtrl
+                target: MainController.audioCtrl
                 function onSongIndexChanged() {
-                    view.positionViewAtIndex(ctrl.audioCtrl.songIndex, ListView.Center)//view.ensureVisible(ctrl.audioCtrl.songIndex)
+                    view.positionViewAtIndex(MainController.audioCtrl.songIndex, ListView.Center)//view.ensureVisible(ctrl.audioCtrl.songIndex)
                 }
             }
             focus: true
             clip: true
-            model: ctrl.filteredModel
+            model: MainController.filteredModel
             delegate:  Item {
                 width: view.width
                 height: 40
@@ -153,16 +132,16 @@ ApplicationWindow {
                         Label {//title
                             text: title
                             Layout.preferredWidth: lyt.width/2
-                            font.bold: ctrl.audioCtrl.songIndex === model.songIndex
+                            font.bold: MainController.audioCtrl.songIndex === model.songIndex
                         }
                         Label {//artist
                             text: artist
                             Layout.fillWidth: true
-                            font.bold: ctrl.audioCtrl.songIndex === model.songIndex
+                            font.bold: MainController.audioCtrl.songIndex === model.songIndex
                         }
                         Label {//time
                             text: time
-                            font.bold: ctrl.audioCtrl.songIndex === model.songIndex
+                            font.bold: MainController.audioCtrl.songIndex === model.songIndex
                         }
                     }
 
@@ -178,22 +157,22 @@ ApplicationWindow {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     from: 0
-                    to: ctrl.audioCtrl.duration
-                    value: ctrl.audioCtrl.seek
-                    visible: ctrl.audioCtrl.songIndex === model.songIndex
+                    to: MainController.audioCtrl.duration
+                    value: MainController.audioCtrl.seek
+                    visible: MainController.audioCtrl.songIndex === model.songIndex
 
                 }
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
                     onDoubleClicked:{
-                        ctrl.audioCtrl.songIndex = model.songIndex;
-                        ctrl.audioCtrl.play()
+                        MainController.audioCtrl.songIndex = model.songIndex;
+                        MainController.audioCtrl.play()
                     }
-                    onClicked: {
+                    onClicked: (mouse)=>{
                         if (mouse.button === Qt.RightButton)
                              contextMenu.popup()
-                        else (mouse.button === Qt.LeftButton)
+                        else if(mouse.button === Qt.LeftButton)
                             view.currentIndex = index
                     }
 
@@ -206,7 +185,7 @@ ApplicationWindow {
 
                         MenuItem {
                           text: qsTr("Mark song to be exported")
-                          onTriggered: ctrl.addToExport(model.songIndex)
+                          onTriggered: MainController.addToExport(model.songIndex)
                         }
 
                         MenuItem {
@@ -216,7 +195,7 @@ ApplicationWindow {
 
                         MenuItem {
                             text: "Remove current selection…"
-                            onTriggered: ctrl.removeSelection()
+                            onTriggered: MainController.removeSelection()
                         }
                     }
                 }

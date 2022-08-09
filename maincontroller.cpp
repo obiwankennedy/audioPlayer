@@ -50,7 +50,11 @@ AudioController* MainController::audioCtrl() const
     return m_audioCtrl.get();
 }
 
-MainController::~MainController()= default;
+MainController::~MainController()
+{
+    saveSettings();
+}
+
 QAbstractItemModel* MainController::model() const
 {
     return m_audioCtrl->model();
@@ -72,6 +76,7 @@ void MainController::setFilename(QString filename)
         return;
 
     m_filename= QUrl(filename).toLocalFile();
+    qDebug() << m_filename << "filename";
     emit filenameChanged(m_filename);
 }
 

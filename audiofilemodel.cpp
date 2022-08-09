@@ -19,12 +19,14 @@
  ***************************************************************************/
 #include "audiofilemodel.h"
 
+#include <QImage>
 #include <taglib/attachedpictureframe.h>
 #include <taglib/fileref.h>
 #include <taglib/id3v1tag.h>
 #include <taglib/id3v2frame.h>
 #include <taglib/id3v2tag.h>
 #include <taglib/mp4tag.h>
+#include <taglib/mpegfile.h>
 #include <taglib/tlist.h>
 #include <taglib/tpropertymap.h>
 #include <taglib/tstring.h>
@@ -40,12 +42,36 @@ QString timeToText(quint64 second)
     return QString("%1:%2").arg(min, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
 }
 
-void readMetaData(const std::vector<AudioFileInfo*>& vec, AudioFileModel* model)
+QImage readCoverImageFromMP3(const QString& file)
+{
+    TagLib::MPEG::File mpgTagger(file.toLocal8Bit());
+    auto tagv2= mpgTagger.ID3v2Tag(true);
+    if(!tagv2)
+        return {};
+
+    TagLib::ID3v2::FrameList frames= tagv2->frameList("APIC");
+
+    if(frames.isEmpty())
+    {
+        // qDebug() << "No picture to read" << file;
+        return {};
+    }
+    TagLib::ID3v2::AttachedPictureFrame* picFrame= static_cast<TagLib::ID3v2::AttachedPictureFrame*>(frames.front());
+
+    // qDebug() << picFrame->mimeType().toCString();
+    QImage image;
+    image.loadFromData((const uchar*)picFrame->picture().data(), picFrame->picture().size());
+    return image;
+}
+
+void readMetaData(const std::vector<AudioFileInfo*>& vec, AudioFileModel* model, QHash<QString, QImage>& dataImage)
 {
     int i= 0;
     qDebug() << "Beginning meta data reading ";
-    std::for_each(vec.begin(), vec.end(), [&i, &model](AudioFileInfo* info) {
-        if(info->m_time != 0 && !info->m_title.isEmpty() && !info->m_artist.isEmpty())
+    std::for_each(vec.begin(), vec.end(), [&i, &model, &dataImage](AudioFileInfo* info) {
+        if(info->m_time != 0 && !info->m_title.isEmpty() && !info->m_artist.isEmpty() && !info->m_album.isEmpty()
+           && dataImage.contains(QString("%1-%2").arg(info->m_artist, info->m_album))
+           && !dataImage[QString("%1-%2").arg(info->m_artist, info->m_album)].isNull())
             return;
 
         TagLib::FileRef ref(info->m_filepath.toLocal8Bit());
@@ -55,9 +81,27 @@ void readMetaData(const std::vector<AudioFileInfo*>& vec, AudioFileModel* model)
             return;
         info->m_title= TStringToQString(tag->title());
         info->m_artist= TStringToQString(tag->artist());
+        info->m_album= TStringToQString(tag->album());
         if(audio == nullptr)
             return;
         info->m_time= static_cast<quint64>(ref.audioProperties()->length());
+
+        if(!dataImage.contains(QString("%1-%2").arg(info->m_artist, info->m_album))
+           || dataImage[QString("%1-%2").arg(info->m_artist, info->m_album)].isNull())
+        { // get images
+            if(info->m_filepath.endsWith("mp3"))
+            {
+                QImage image= readCoverImageFromMP3(info->m_filepath);
+                if(!image.isNull())
+                {
+                    dataImage.insert(QString("%1-%2").arg(info->m_artist, info->m_album), image);
+                    qDebug() << "Picture has been found." << info->m_title << info->m_artist;
+                }
+            }
+            else if(info->m_filepath.endsWith("m4a"))
+            {
+            }
+        }
         model->infoUpdated(i);
         ++i;
     });
@@ -120,22 +164,21 @@ bool AudioFileModel::appendSongs(const QList<QVariantMap>& pathlist)
     std::for_each(pathlist.begin(), pathlist.end(), [this](const QVariantMap& map) {
         std::unique_ptr<AudioFileInfo> info(
             new AudioFileInfo({map["path"].toString(), map["artist"].toString().trimmed(),
-                               map["title"].toString().trimmed(), map["time"].toUInt()}));
+                               map["title"].toString().trimmed(), map["album"].toString(), map["time"].toUInt()}));
         m_data.push_back(std::move(info));
     });
     endInsertRows();
 
-    /*QtConcurrent::run([this]() {
-        auto songList= songs();
-        readMetaData(songList, this);
-    });*/
-
+    /* QtConcurrent::run([this]() {
+         auto songList= songs();
+         readMetaData(songList, this, m_dataImage);
+     });*/
     return true;
 }
 
 AudioFileInfo* AudioFileModel::songInfoAt(int index) const
 {
-    if(index < 0 || index > static_cast<int>(m_data.size()))
+    if(index < 0 || index >= static_cast<int>(m_data.size()))
         return nullptr;
 
     return m_data.at(static_cast<std::size_t>(index)).get();
@@ -157,6 +200,7 @@ QHash<int, QByteArray> AudioFileModel::roleNames() const
                                         {ArtistRole, "artist"},
                                         {TitleRole, "title"},
                                         {TimeRole, "time"},
+                                        {AlbumRole, "album"},
                                         {IndexRole, "songIndex"},
                                         {ExportSelectedRole, "isSelectedForExport"}});
     return hash;
@@ -196,7 +240,7 @@ void AudioFileModel::insertSongAt(int i, const std::vector<QString>& vec)
     }
     endInsertRows();
 
-    QtConcurrent::run([this, songs]() { readMetaData(songs, this); });
+    QtConcurrent::run([this, songs]() { readMetaData(songs, this, m_dataImage); });
 }
 
 void AudioFileModel::resetModel()
@@ -221,4 +265,9 @@ void AudioFileModel::cleanExportList()
 const std::vector<int>& AudioFileModel::exportList() const
 {
     return m_selectedToExport;
+}
+
+QHash<QString, QImage>* AudioFileModel::dataImage()
+{
+    return &m_dataImage;
 }

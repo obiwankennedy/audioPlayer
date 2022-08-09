@@ -21,6 +21,9 @@
 #define AUDIOFILEMODEL_H
 
 #include <QAbstractListModel>
+#include <QHash>
+#include <QImage>
+#include <QString>
 #include <memory>
 #include <vector>
 
@@ -29,6 +32,7 @@ struct AudioFileInfo
     QString m_filepath;
     QString m_artist;
     QString m_title;
+    QString m_album;
     quint64 m_time; // in second
 };
 
@@ -42,6 +46,7 @@ public:
         PathRole= Qt::UserRole + 1,
         ArtistRole,
         TitleRole,
+        AlbumRole,
         TimeRole,
         IndexRole,
         ExportSelectedRole
@@ -75,9 +80,12 @@ public:
 
     const std::vector<int>& exportList() const;
 
+    QHash<QString, QImage>* dataImage();
+
 private:
     std::vector<std::unique_ptr<AudioFileInfo>> m_data;
     std::vector<int> m_selectedToExport;
+    QHash<QString, QImage> m_dataImage;
 };
 
 #endif // AUDIOFILEMODEL_H

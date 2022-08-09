@@ -95,6 +95,6 @@ void CommandServer::readCommand()
 
     QString nextCommand(byte);
 
-    QStringList arg= nextCommand.split(" ", QString::SkipEmptyParts);
+    QStringList arg= nextCommand.split(" ", Qt::SkipEmptyParts);
     processCommand(arg);
 }
