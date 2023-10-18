@@ -1,5 +1,5 @@
 /***************************************************************************
- *	Copyright (C) 2021 by Renaud Guezennec                               *
+ *	Copyright (C) 2022 by Renaud Guezennec                               *
  *   http://www.rolisteam.org/contact                                      *
  *                                                                         *
  *   This software is free software; you can redistribute it and/or modify *
@@ -17,26 +17,18 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "albumpictureprovider.h"
+#ifndef ARTCOVERIMAGE_H
+#define ARTCOVERIMAGE_H
 
-#include <QDebug>
+#include <QQuickItem>
 
-AlbumPictureProvider::AlbumPictureProvider() : QQuickImageProvider(QQmlImageProviderBase::Image) {}
-
-void AlbumPictureProvider::setCurrentImage(const QImage& img, const QString& id)
+class ArtCoverImage : public QQuickItem
 {
-    //qDebug() << "AlbumPictureProvider Set Current Image &&&&&"  << id << img.isNull();
-    m_expectedId= id;
-    m_currentImage= img;
-}
+    Q_OBJECT
+    QML_ELEMENT
+    // Q_PROPERT
+public:
+    ArtCoverImage();
+};
 
-QImage AlbumPictureProvider::requestImage(const QString& id, QSize* size, const QSize& requestedSize)
-{
-    //qDebug() << "AlbumPictureProvider Request image";
-    Q_UNUSED(size)
-    Q_UNUSED(requestedSize)
-    if(id == m_expectedId)
-        return m_currentImage.scaled(requestedSize.width(), requestedSize.height(), Qt::KeepAspectRatio);
-    else
-        return {};
-}
+#endif // ARTCOVERIMAGE_H

@@ -30,6 +30,8 @@
 
 MainController::MainController(QObject* parent) : QObject(parent), m_audioCtrl(new AudioController)
 {
+    connect(m_audioCtrl.get(), &AudioController::deviceIndexChanged, this, &MainController::deviceIndexChanged);
+    connect(m_audioCtrl.get(), &AudioController::hasVideoChanged, this, &MainController::hasVideoChanged);
     loadSettings();
     if(!m_filename.isEmpty())
         loadFile();
@@ -115,6 +117,11 @@ void MainController::removeSelection()
     model->removeSongs(idxs);
 }
 
+void MainController::setDeviceIndex(int index)
+{
+    m_audioCtrl->setDeviceIndex(index);
+}
+
 void MainController::loadFile()
 {
     if(m_filename.endsWith("m3u"))
@@ -166,4 +173,19 @@ void MainController::addDirectory(int idx, const QString& url)
     auto vec= FileReaderHelper::findAllAudioFiles(QUrl(url).toLocalFile());
     auto model= m_audioCtrl->model();
     model->insertSongAt(idx, vec);
+}
+
+QAbstractItemModel *MainController::outputModel() const
+{
+    return m_audioCtrl->devices();
+}
+
+int MainController::deviceIndex() const
+{
+    return m_audioCtrl->deviceIndex();
+}
+
+bool MainController::hasVideo() const
+{
+    return m_audioCtrl->hasVideo();
 }

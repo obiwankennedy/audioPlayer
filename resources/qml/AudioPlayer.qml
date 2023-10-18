@@ -1,22 +1,38 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
-import AudioPlayer 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import AudioPlayer
+import QtMultimedia
 
 Frame {
     id: _root
     property QtObject ctrl
-    //height: buttonLyt.implicitHeight
-    //height: 111
+
+    signal settings
+
+    onCtrlChanged: {
+        _root.ctrl.videoOutput = videoOutputImage
+    }
 
     RowLayout {
         anchors.fill: parent
-        Image {
+        Item {
             Layout.preferredWidth: 100
-            fillMode: Image.PreserveAspectFit
-            source: ctrl.albumArt ? "image://album/%1".arg(ctrl.albumArt) : ""
-            sourceSize.width: 100
-            sourceSize.height: 100
+            Layout.preferredHeight: 100
+            Image {
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectFit
+                source: ctrl.albumArt ? "image://album/%1".arg(ctrl.albumArt) : "qrc:/resources/icons/Album.svg"
+                sourceSize.width: 100
+                sourceSize.height: 100
+                visible: !MainController.hasVideo
+            }
+            VideoOutput {
+                id: videoOutputImage
+                anchors.fill: parent
+                visible: MainController.hasVideo
+                fillMode: VideoOutput.PreserveAspectFit
+            }
         }
         ColumnLayout {
             id: buttonLyt
@@ -97,6 +113,14 @@ Frame {
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 32
                 }
+                ImageButton {
+                    onClicked: _root.settings()
+                    source: "qrc:/resources/icons/settings.svg"
+                    rotation: -90
+                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: 32
+                    Layout.leftMargin: 32
+                }
                 Item {
                     Layout.fillWidth: true
                 }
@@ -104,6 +128,7 @@ Frame {
                     id: find
                     placeholderText: qsTr("Find")
                     onEditingFinished: ctrl.find(find.text)
+                    Layout.preferredWidth: 130
                 }
             }
         }

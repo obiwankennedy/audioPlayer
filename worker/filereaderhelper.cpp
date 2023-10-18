@@ -154,12 +154,12 @@ std::vector<QString> FileReaderHelper::findAllAudioFiles(const QString& dir)
                                               << "*.flac"
                                               << "*.ogg",
                                 QDir::Files);
-    for(QString s : list)
+    for(const QString &s : list)
     {
         vec.push_back(direct.absoluteFilePath(s));
     }
 
-    for(QString p : direct.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+    for(const QString &p : direct.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
     {
         auto vec1= findAllAudioFiles(direct.absoluteFilePath(p));
         vec.insert(vec.end(), vec1.begin(), vec1.end());
@@ -178,14 +178,15 @@ void FileReaderHelper::exportFileToDirectory(AudioFileModel* model)
 
         songPaths << songInfo->m_filepath;
     }
-    songPaths.append("www:/home/www/rolisteam/blog/file/export_music/");
+    // songPaths.append("www:/home/www/rolisteam/blog/file/export_music/");
+    songPaths.append("/home/renaud/music/");
     QProcess proc;
-    proc.start("scp", songPaths);
+    proc.start("cp", songPaths);
     if(!proc.waitForFinished())
         return;
 
-    for(const auto& song : qAsConst(songPaths))
+    /*for(const auto& song : qAsConst(songPaths))
     {
         qDebug() << QString("http://blog.rolisteam.org/file/export_music/%1").arg(song);
-    }
+    }*/
 }

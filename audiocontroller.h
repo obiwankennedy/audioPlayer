@@ -29,6 +29,7 @@
 #include "albumpictureprovider.h"
 #include "audiofilemodel.h"
 #include "filteredmodel.h"
+#include "devicemodel.h"
 
 #include <deque>
 #include <memory>
@@ -49,6 +50,9 @@ class AudioController : public QObject
     Q_PROPERTY(QString songImage READ songImage NOTIFY songIndexChanged)
     Q_PROPERTY(AlbumPictureProvider* pictureProvider READ pictureProvider CONSTANT)
     Q_PROPERTY(QString albumArt READ albumArt NOTIFY albumArtChanged)
+    Q_PROPERTY(DeviceModel* devices READ devices CONSTANT)
+    Q_PROPERTY(bool hasVideo READ hasVideo NOTIFY hasVideoChanged FINAL)
+    Q_PROPERTY(QObject* videoOutput READ videoOutput WRITE setVideoOutput NOTIFY videoOutputChanged)
 public:
     enum PlayingMode
     {
@@ -74,6 +78,14 @@ public:
     QString songImage() const;
     AlbumPictureProvider* pictureProvider() const;
     QString albumArt() const;
+    DeviceModel* devices() const;
+    void setDeviceIndex(int);
+    int deviceIndex() const;
+
+    bool hasVideo() const;
+
+    QObject *videoOutput() const;
+    void setVideoOutput(QObject *newVideoOutput);
 
 public slots:
     void setSongIndex(int song);
@@ -86,6 +98,7 @@ public slots:
     void next();
     void previous();
     void find(const QString& text);
+    void updateAudioDevices();
 
 signals:
     void songIndexChanged();
@@ -97,6 +110,10 @@ signals:
     void titleChanged();
     void playingChanged();
     void albumArtChanged();
+    void hasVideoChanged();
+
+    void videoOutputChanged();
+    void deviceIndexChanged();
 
 protected:
     void mediaStatus(QMediaPlayer::MediaStatus status);
@@ -114,6 +131,7 @@ private:
     std::unique_ptr<AlbumPictureProvider> m_pictureProvider;
     std::unique_ptr<QMediaPlayer> m_player;
     std::unique_ptr<QAudioOutput> m_audioOutput;
+    std::unique_ptr<DeviceModel> m_devices;
 
     PlayingMode m_mode= SHUFFLE;
 
@@ -122,6 +140,7 @@ private:
     QString m_title;
     int m_pos= 0;
     std::deque<int> m_previousIndex;
+    int m_deviceIndex = 0;
 };
 
 #endif // AUDIOCONTROLLER_H

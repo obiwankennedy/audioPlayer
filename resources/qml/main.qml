@@ -36,6 +36,7 @@ ApplicationWindow {
     header: AudioPlayer {
         id: audioPlayer
         ctrl: MainController.audioCtrl
+        onSettings: settingDialog.open()
         //height: 50
     }
 
@@ -46,7 +47,7 @@ ApplicationWindow {
         fileMode: FileDialog.OpenFile
         nameFilters: ["Playlist (*.apl *.m3u)"]
         onAccepted: {
-            MainController.setFilename(openDialog.fileUrl)
+            MainController.setFilename(openDialog.selectedFile)
             MainController.loadFile();
             close()
         }
@@ -90,6 +91,43 @@ ApplicationWindow {
             close()
         }
         onRejected: close()
+    }
+
+    Dialog {
+        id: settingDialog
+        title: qsTr("Settings")
+        parent: Overlay.overlay
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
+        GridLayout {
+
+            columns: 2
+            Label {
+                text: qsTr("Audio output")
+            }
+
+            ComboBox {
+                id: output
+                Layout.preferredWidth: 200
+                model: MainController.outputModel
+                textRole: "display"
+                onCurrentIndexChanged: MainController.deviceIndex = output.currentIndex
+                Component.onCompleted: {
+                    console.log("deviceIndex:",MainController.deviceIndex)
+                    output.currentIndex= MainController.deviceIndex
+                }
+            }
+            Label {
+                text: qsTr("Refresh the list")
+            }
+
+            Button {
+                id: refresh
+                icon.name: "view-refresh"
+                onClicked: MainController.audioCtrl.updateAudioDevices()
+            }
+        }
+        standardButtons: Dialog.Ok
     }
 
 

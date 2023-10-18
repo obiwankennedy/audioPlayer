@@ -7,18 +7,22 @@ QT += gui core quick quickwidgets dbus svg xml multimedia printsupport quickcont
 
 SOURCES += main.cpp maincontroller.cpp \
     albumpictureprovider.cpp \
+    artcoverimage.cpp \
     audiocontroller.cpp \
     audiofilemodel.cpp worker/theme.cpp \
     commandserver.cpp \
+    devicemodel.cpp \
     filteredmodel.cpp \
     worker/filereaderhelper.cpp
 
 
 HEADERS += maincontroller.h \
     albumpictureprovider.h \
+    artcoverimage.h \
     audiocontroller.h \
     audiofilemodel.h worker/theme.h \
     commandserver.h \
+    devicemodel.h \
     filteredmodel.h \
     worker/filereaderhelper.h
 

@@ -38,8 +38,15 @@ class MainController : public QObject
     Q_PROPERTY(QStringList recentFiles READ recentFiles CONSTANT)
     Q_PROPERTY(FilteredModel* filteredModel READ filteredModel CONSTANT)
     Q_PROPERTY(AudioController* audioCtrl READ audioCtrl CONSTANT)
+    Q_PROPERTY(QAbstractItemModel* outputModel READ outputModel CONSTANT)
+    Q_PROPERTY(int deviceIndex READ deviceIndex WRITE setDeviceIndex NOTIFY deviceIndexChanged)
+    Q_PROPERTY(bool hasVideo READ hasVideo NOTIFY hasVideoChanged FINAL)
 public:
     explicit MainController(QObject* parent= nullptr);
+    MainController(const MainController &) = delete;
+    MainController(MainController &&) = delete;
+    MainController &operator=(const MainController &) = delete;
+    MainController &operator=(MainController &&) = delete;
     virtual ~MainController() override;
 
     QString filename() const { return m_filename; }
@@ -53,6 +60,13 @@ public:
 
     void saveSettings();
 
+    QAbstractItemModel *outputModel() const;
+    int deviceIndex() const;
+
+
+
+    bool hasVideo() const;
+
 public slots:
     void addFiles(const QStringList& file, int idx);
     void addDirectory(int idx, const QString& url);
@@ -65,9 +79,12 @@ public slots:
     void resetExport();
     void exportList();
     void removeSelection();
+    void setDeviceIndex(int index);
 
 signals:
     void filenameChanged(QString filename);
+    void deviceIndexChanged();
+    void hasVideoChanged();
 
 protected:
     void loadSettings();

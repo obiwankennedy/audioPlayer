@@ -23,5 +23,6 @@
         <file>resources/icons/Search.svg</file>
         <file>resources/icons/Shuffle.svg</file>
         <file>resources/qml/ImageButton.qml</file>
+        <file>resources/icons/settings.svg</file>
     </qresource>
 </RCC>

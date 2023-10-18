@@ -22,6 +22,8 @@
 #include "audiofilemodel.h"
 #include "commandserver.h"
 #include <QMediaMetaData>
+#include <QMediaDevices>
+#include <QAudioDevice>
 #include <random>
 
 AudioController::AudioController(QObject* parent)
@@ -32,8 +34,34 @@ AudioController::AudioController(QObject* parent)
     , m_pictureProvider(new AlbumPictureProvider())
     , m_player(new QMediaPlayer)
     , m_audioOutput(new QAudioOutput)
+    , m_devices(new DeviceModel)
 {
     m_player->setAudioOutput(m_audioOutput.get());
+
+
+    auto const& devicesList = QMediaDevices::audioOutputs();
+    m_deviceIndex =  devicesList.indexOf(QMediaDevices::defaultAudioOutput());
+    QStringList deviceNameList;
+    deviceNameList.reserve(devicesList.size());
+    std::transform(std::begin(devicesList), std::end(devicesList), std::back_inserter(deviceNameList), [](const QAudioDevice& device){
+            return device.description();
+    });
+
+    auto updateList = [this](){
+        auto const& devicesList = QMediaDevices::audioOutputs();
+        QStringList deviceNameList;
+        deviceNameList.reserve(devicesList.size());
+        std::transform(std::begin(devicesList), std::end(devicesList), std::back_inserter(deviceNameList), [](const QAudioDevice& device){
+            return device.description();
+        });
+        m_devices->setDeviceList(deviceNameList);
+    };
+
+
+    auto mediaDevice = new QMediaDevices(this);
+    connect(mediaDevice, &QMediaDevices::audioOutputsChanged, this, updateList);
+    connect(m_player.get(), &QMediaPlayer::audioOutputChanged, this, updateList);
+    updateList();
 
     connect(m_audioOutput.get(), &QAudioOutput::volumeChanged, this, &AudioController::volumeChanged);
     connect(m_player.get(), &QMediaPlayer::positionChanged, this, &AudioController::seekChanged);
@@ -48,6 +76,42 @@ AudioController::AudioController(QObject* parent)
                                     .arg(position)
                                     .arg(volume));
     });
+
+    auto updateMetaData = [this](){
+        auto meta= m_player->metaData();
+
+        auto keys= meta.keys();
+        auto tracks = m_player->audioTracks();
+        qDebug() << keys << title() ;
+        for(const auto &track : tracks)
+        {
+            qDebug() << track.keys() << "\n";
+        }
+
+        if(keys.contains(QMediaMetaData::CoverArtImage))
+        {
+            auto img= meta.value(QMediaMetaData::CoverArtImage);
+            m_pictureProvider->setCurrentImage(img.value<QImage>(), title());
+        }
+        else if(keys.contains(QMediaMetaData::ThumbnailImage))
+        {
+            auto img= meta.value(QMediaMetaData::ThumbnailImage);
+            m_pictureProvider->setCurrentImage(img.value<QImage>(), title());
+        }
+        else
+        {
+            m_pictureProvider->setCurrentImage({}, {});
+        }
+
+
+        emit albumArtChanged();
+    };
+    connect(m_player.get(), &QMediaPlayer::metaDataChanged, this, updateMetaData);
+    connect(m_player.get(), &QMediaPlayer::tracksChanged, this, updateMetaData);
+    connect(m_player.get(), &QMediaPlayer::activeTracksChanged, this, updateMetaData);
+    connect(m_player.get(), &QMediaPlayer::hasVideoChanged, this, &AudioController::hasVideoChanged);
+    connect(m_player.get(), &QMediaPlayer::videoOutputChanged, this, &AudioController::videoOutputChanged);
+
     connect(m_player.get(), &QMediaPlayer::durationChanged, this, &AudioController::durationChanged);
     connect(m_player.get(), &QMediaPlayer::mediaStatusChanged, this, &AudioController::mediaStatus);
 
@@ -78,14 +142,8 @@ AudioController::~AudioController()= default;
 
 void AudioController::mediaStatus(QMediaPlayer::MediaStatus status)
 {
-    switch(status)
-    {
-    case QMediaPlayer::EndOfMedia:
-        next();
-        break;
-    case QMediaPlayer::BufferedMedia:
-    {
-        auto meta= m_player->metaData();
+    auto updateImage =     [this](){
+        /*auto meta= m_player->metaData();
         auto keys= meta.keys();
 
         if(keys.contains(QMediaMetaData::CoverArtImage))
@@ -103,9 +161,21 @@ void AudioController::mediaStatus(QMediaPlayer::MediaStatus status)
             m_pictureProvider->setCurrentImage({}, {});
         }
 
-        emit albumArtChanged();
-    }
+
+        emit albumArtChanged();*/
+    };
+
+    switch(status)
+    {
+    case QMediaPlayer::EndOfMedia:
+        next();
+        break;
+    case QMediaPlayer::BufferedMedia:
+        updateImage();
     break;
+    case QMediaPlayer::LoadedMedia:
+        updateImage();
+        break;
     default:
         break;
     }
@@ -206,6 +276,37 @@ QString AudioController::albumArt() const
     return m_pictureProvider->id();
 }
 
+DeviceModel *AudioController::devices() const
+{
+    return m_devices.get();
+}
+
+void AudioController::setDeviceIndex(int index)
+{
+    if(index <0 || m_deviceIndex == index)
+        return;
+
+
+    auto const& devicesList = QMediaDevices::audioOutputs();
+
+    if(index >= devicesList.size())
+        return;
+
+    m_deviceIndex = index;
+    m_audioOutput->setDevice(devicesList[index]);
+    emit deviceIndexChanged();
+}
+
+int AudioController::deviceIndex() const
+{
+    return m_deviceIndex;
+}
+
+bool AudioController::hasVideo() const
+{
+    return m_player->hasVideo();
+}
+
 FilteredModel* AudioController::filteredModel() const
 {
     return m_filteredModel.get();
@@ -239,6 +340,17 @@ AudioFileModel* AudioController::model() const
 void AudioController::find(const QString& text)
 {
     m_filteredModel->setSearch(text);
+}
+
+void AudioController::updateAudioDevices()
+{
+    auto const& devicesList = QMediaDevices::audioOutputs();
+    QStringList deviceNameList;
+    deviceNameList.reserve(devicesList.size());
+    std::transform(std::begin(devicesList), std::end(devicesList), std::back_inserter(deviceNameList), [](const QAudioDevice& device){
+        return device.description();
+    });
+    m_devices->setDeviceList(deviceNameList);
 }
 
 QString AudioController::title() const
@@ -298,4 +410,14 @@ void AudioController::play()
     if(m_content.isValid())
         updateContent();
     m_player->play();
+}
+
+QObject *AudioController::videoOutput() const
+{
+    return m_player->videoOutput();
+}
+
+void AudioController::setVideoOutput(QObject *newVideoOutput)
+{
+    m_player->setVideoOutput(newVideoOutput);
 }
