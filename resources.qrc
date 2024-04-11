@@ -1,0 +1,28 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/qml/main.qml</file>
+        <file>resources/qml/FileMenu.qml</file>
+        <file>resources/qml/EditMenu.qml</file>
+        <file>resources/qml/AudioPlayer.qml</file>
+        <file>resources/icons/Album.svg</file>
+        <file>resources/icons/Create Playlist.svg</file>
+        <file>resources/icons/Delete.svg</file>
+        <file>resources/icons/Download.svg</file>
+        <file>resources/icons/Favorite.svg</file>
+        <file>resources/icons/Library.svg</file>
+        <file>resources/icons/Next.svg</file>
+        <file>resources/icons/Notification.svg</file>
+        <file>resources/icons/Pause.svg</file>
+        <file>resources/icons/Play.svg</file>
+        <file>resources/icons/Podcast.svg</file>
+        <file>resources/icons/Previous.svg</file>
+        <file>resources/icons/Queue.svg</file>
+        <file>resources/icons/Radio.svg</file>
+        <file>resources/icons/Repeat.svg</file>
+        <file>resources/icons/Repeat One.svg</file>
+        <file>resources/icons/Search.svg</file>
+        <file>resources/icons/Shuffle.svg</file>
+        <file>resources/qml/ImageButton.qml</file>
+        <file>resources/icons/settings.svg</file>
+    </qresource>
+</RCC>
