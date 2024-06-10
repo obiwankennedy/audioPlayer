@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import AudioPlayer
 import QtMultimedia
+import Views
 
 Frame {
     id: _root
@@ -134,3 +134,4 @@ Frame {
         }
     }
 }
+

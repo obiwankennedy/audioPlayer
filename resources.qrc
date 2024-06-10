@@ -1,9 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/qml/main.qml</file>
-        <file>resources/qml/FileMenu.qml</file>
-        <file>resources/qml/EditMenu.qml</file>
-        <file>resources/qml/AudioPlayer.qml</file>
         <file>resources/icons/Album.svg</file>
         <file>resources/icons/Create Playlist.svg</file>
         <file>resources/icons/Delete.svg</file>
@@ -22,7 +18,6 @@
         <file>resources/icons/Repeat One.svg</file>
         <file>resources/icons/Search.svg</file>
         <file>resources/icons/Shuffle.svg</file>
-        <file>resources/qml/ImageButton.qml</file>
         <file>resources/icons/settings.svg</file>
     </qresource>
 </RCC>

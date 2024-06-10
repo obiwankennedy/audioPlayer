@@ -21,11 +21,12 @@
 #define FILTEREDMODEL_H
 
 #include <QSortFilterProxyModel>
+#include <QQmlEngine>
 
 class FilteredModel : public QSortFilterProxyModel
 {
     Q_OBJECT
-
+    QML_ELEMENT
 public:
     explicit FilteredModel(QObject* parent= nullptr);
 

@@ -24,6 +24,8 @@
 #include <QObject>
 #include <QStringList>
 #include <memory>
+#include <QQmlEngine>
+#include <QQmlParserStatus>
 
 #include "audiocontroller.h"
 #include "audiofilemodel.h"
@@ -32,6 +34,8 @@
 class MainController : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
     Q_PROPERTY(QString filename READ filename WRITE setFilename NOTIFY filenameChanged)
     Q_PROPERTY(QAbstractItemModel* model READ model CONSTANT)
     Q_PROPERTY(AudioFileModel* audioModel READ audioModel CONSTANT)
@@ -41,8 +45,9 @@ class MainController : public QObject
     Q_PROPERTY(QAbstractItemModel* outputModel READ outputModel CONSTANT)
     Q_PROPERTY(int deviceIndex READ deviceIndex WRITE setDeviceIndex NOTIFY deviceIndexChanged)
     Q_PROPERTY(bool hasVideo READ hasVideo NOTIFY hasVideoChanged FINAL)
+
 public:
-    explicit MainController(QObject* parent= nullptr);
+    explicit MainController(QObject* parent);
     MainController(const MainController &) = delete;
     MainController(MainController &&) = delete;
     MainController &operator=(const MainController &) = delete;
@@ -63,9 +68,9 @@ public:
     QAbstractItemModel *outputModel() const;
     int deviceIndex() const;
 
-
-
     bool hasVideo() const;
+
+    static MainController* create(QQmlEngine* qmlEngine, QJSEngine* jsEngine);
 
 public slots:
     void addFiles(const QStringList& file, int idx);

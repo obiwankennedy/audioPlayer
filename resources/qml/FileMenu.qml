@@ -75,3 +75,4 @@ Menu {
         onTriggered: ctrl.spacing = checked
     }
 }
+

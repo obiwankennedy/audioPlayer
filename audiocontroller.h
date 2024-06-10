@@ -28,16 +28,18 @@
 
 #include "albumpictureprovider.h"
 #include "audiofilemodel.h"
-#include "filteredmodel.h"
 #include "devicemodel.h"
+#include "filteredmodel.h"
+#include "worker/fakenetworkreceiver.h"
 
 #include <deque>
 #include <memory>
+#include <QQmlEngine>
 
 class CommandServer;
-class AudioController : public QObject
-{
+class AudioController : public QObject {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(int songIndex READ songIndex WRITE setSongIndex NOTIFY songIndexChanged)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(PlayingMode mode READ mode WRITE setMode NOTIFY modeChanged)
@@ -54,15 +56,14 @@ class AudioController : public QObject
     Q_PROPERTY(bool hasVideo READ hasVideo NOTIFY hasVideoChanged FINAL)
     Q_PROPERTY(QObject* videoOutput READ videoOutput WRITE setVideoOutput NOTIFY videoOutputChanged)
 public:
-    enum PlayingMode
-    {
+    enum PlayingMode {
         LOOP,
         UNIQUE,
         NEXT,
         SHUFFLE
     };
     Q_ENUM(PlayingMode)
-    AudioController(QObject* parent= nullptr);
+    AudioController(QObject* parent = nullptr);
     ~AudioController() override;
 
     int songIndex() const;
@@ -84,9 +85,9 @@ public:
 
     bool hasVideo() const;
 
-    QObject *videoOutput() const;
-    void setVideoOutput(QObject *newVideoOutput);
-
+    QObject* videoOutput() const;
+    void setVideoOutput(QObject* newVideoOutput);
+    // static AudioController* sCtrl;
 public slots:
     void setSongIndex(int song);
     void setMode(PlayingMode mode);
@@ -99,6 +100,7 @@ public slots:
     void previous();
     void find(const QString& text);
     void updateAudioDevices();
+    void display(int i);
 
 signals:
     void songIndexChanged();
@@ -132,13 +134,14 @@ private:
     std::unique_ptr<QMediaPlayer> m_player;
     std::unique_ptr<QAudioOutput> m_audioOutput;
     std::unique_ptr<DeviceModel> m_devices;
+    FakeNetworkReceiver* m_network { nullptr };
 
-    PlayingMode m_mode= SHUFFLE;
+    PlayingMode m_mode = SHUFFLE;
 
     QUrl m_content;
     int m_duration;
     QString m_title;
-    int m_pos= 0;
+    int m_pos = 0;
     std::deque<int> m_previousIndex;
     int m_deviceIndex = 0;
 };

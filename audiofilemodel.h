@@ -23,6 +23,7 @@
 #include <QAbstractListModel>
 #include <QHash>
 #include <QImage>
+#include <QQmlEngine>
 #include <QString>
 #include <memory>
 #include <vector>
@@ -39,7 +40,7 @@ struct AudioFileInfo
 class AudioFileModel : public QAbstractListModel
 {
     Q_OBJECT
-
+    QML_ELEMENT
 public:
     enum Role
     {

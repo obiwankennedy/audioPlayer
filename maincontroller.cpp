@@ -25,8 +25,17 @@
 #include <QFile>
 #include <QSettings>
 #include <QUrl>
+#include <QQmlContext>
 
 #include "worker/filereaderhelper.h"
+
+
+MainController* MainController::create(QQmlEngine* qmlEngine, QJSEngine* jsEngine)
+{
+    auto ctrl = new MainController(nullptr);
+    qmlEngine->addImageProvider("album", ctrl->audioCtrl()->pictureProvider());
+    return ctrl;
+}
 
 MainController::MainController(QObject* parent) : QObject(parent), m_audioCtrl(new AudioController)
 {
@@ -189,3 +198,4 @@ bool MainController::hasVideo() const
 {
     return m_audioCtrl->hasVideo();
 }
+

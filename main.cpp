@@ -19,42 +19,37 @@
 
 #include "uiwatchdog.h"
 #include <QAbstractItemModel>
-#include <QApplication>
+#include <QGuiApplication>
 #include <QOpenGLContext>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
-#include "audiocontroller.h"
-#include "audiofilemodel.h"
-//#include "commandserver.h"
-#include "filteredmodel.h"
+
 #include "maincontroller.h"
-#include "worker/theme.h"
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
     app.setOrganizationName(QStringLiteral("AudioPlayer"));
     app.setOrganizationDomain(QStringLiteral("org.rolisteam"));
-    auto format= QSurfaceFormat::defaultFormat();
-    if(QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGL)
-    {
-        format.setVersion(3, 2);
-        format.setProfile(QSurfaceFormat::CoreProfile);
-    }
-    format.setDepthBufferSize(24);
-    format.setStencilBufferSize(8);
-    format.setSamples(8);
-    QSurfaceFormat::setDefaultFormat(format);
 
     QQuickStyle::setStyle("Universal");
 
-    std::unique_ptr<MainController> mainController(new MainController);
-    QQmlApplicationEngine qmlEngine;
+    QQmlApplicationEngine engine;
+    QObject::connect(
+        &engine, &QQmlApplicationEngine::objectCreated, &app,
+        [](QObject *obj, const QUrl &objUrl) {
+            qDebug() << "Object Created:" << objUrl;
+            if (!obj)
+                QCoreApplication::exit(-1);
+        },
+        Qt::QueuedConnection);
 
-    qmlEngine.addImageProvider("album", mainController->audioCtrl()->pictureProvider());
+    engine.loadFromModule("Views", "Main");
+
+    /*qmlEngine.addImageProvider("album", mainController->audioCtrl()->pictureProvider());
 
     qmlRegisterSingletonInstance("AudioPlayer", 1, 0, "MainController", mainController.get());
     qmlRegisterSingletonInstance("Customization", 1, 0, "Theme", new Theme(&qmlEngine));
@@ -67,7 +62,7 @@ int main(int argc, char* argv[])
     qRegisterMetaType<AudioController*>();
     qRegisterMetaType<AudioController::PlayingMode>();
 
-    qmlEngine.load(QLatin1String("qrc:/resources/qml/main.qml"));
+    qmlEngine.load(QLatin1String("qrc:/resources/qml/main.qml"));*/
 
     return app.exec();
 }

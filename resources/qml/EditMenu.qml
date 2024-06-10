@@ -26,3 +26,4 @@ Menu {
         onTriggered: menu.darkMode = !menu.darkMode
     }
 }
+

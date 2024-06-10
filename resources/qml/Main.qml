@@ -1,12 +1,11 @@
 import QtQuick
 import QtCore
-import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 import QtQuick.Controls.Universal
-import AudioPlayer
 import Customization
+import Views
 
 ApplicationWindow {
     id: root
@@ -171,6 +170,7 @@ ApplicationWindow {
                             text: title
                             Layout.preferredWidth: lyt.width/2
                             font.bold: MainController.audioCtrl.songIndex === model.songIndex
+                            clip: true
                         }
                         Label {//artist
                             text: artist

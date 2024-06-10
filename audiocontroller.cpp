@@ -21,10 +21,19 @@
 
 #include "audiofilemodel.h"
 #include "commandserver.h"
-#include <QMediaMetaData>
-#include <QMediaDevices>
 #include <QAudioDevice>
+#include <QMediaDevices>
+#include <QMediaMetaData>
 #include <random>
+
+typedef void (*PtrFunct)(int);
+
+AudioController* sCtrl { nullptr };
+
+void show(int i)
+{
+    sCtrl->display(i);
+}
 
 AudioController::AudioController(QObject* parent)
     : QObject(parent)
@@ -36,27 +45,30 @@ AudioController::AudioController(QObject* parent)
     , m_audioOutput(new QAudioOutput)
     , m_devices(new DeviceModel)
 {
+    sCtrl = this;
     m_player->setAudioOutput(m_audioOutput.get());
+    auto fp = &show;
+    std::function<void(int)> f = std::bind(&AudioController::display, this, std::placeholders::_1);
 
+    m_network = new FakeNetworkReceiver(fp, this);
 
     auto const& devicesList = QMediaDevices::audioOutputs();
-    m_deviceIndex =  devicesList.indexOf(QMediaDevices::defaultAudioOutput());
+    m_deviceIndex = devicesList.indexOf(QMediaDevices::defaultAudioOutput());
     QStringList deviceNameList;
     deviceNameList.reserve(devicesList.size());
-    std::transform(std::begin(devicesList), std::end(devicesList), std::back_inserter(deviceNameList), [](const QAudioDevice& device){
-            return device.description();
+    std::transform(std::begin(devicesList), std::end(devicesList), std::back_inserter(deviceNameList), [](const QAudioDevice& device) {
+        return device.description();
     });
 
-    auto updateList = [this](){
+    auto updateList = [this]() {
         auto const& devicesList = QMediaDevices::audioOutputs();
         QStringList deviceNameList;
         deviceNameList.reserve(devicesList.size());
-        std::transform(std::begin(devicesList), std::end(devicesList), std::back_inserter(deviceNameList), [](const QAudioDevice& device){
+        std::transform(std::begin(devicesList), std::end(devicesList), std::back_inserter(deviceNameList), [](const QAudioDevice& device) {
             return device.description();
         });
         m_devices->setDeviceList(deviceNameList);
     };
-
 
     auto mediaDevice = new QMediaDevices(this);
     connect(mediaDevice, &QMediaDevices::audioOutputsChanged, this, updateList);
@@ -66,10 +78,10 @@ AudioController::AudioController(QObject* parent)
     connect(m_audioOutput.get(), &QAudioOutput::volumeChanged, this, &AudioController::volumeChanged);
     connect(m_player.get(), &QMediaPlayer::positionChanged, this, &AudioController::seekChanged);
     connect(m_player.get(), &QMediaPlayer::positionChanged, this, [this]() {
-        auto songText= title();
-        auto duration= m_player->duration();
-        auto position= m_player->position();
-        auto volume= m_audioOutput->volume();
+        auto songText = title();
+        auto duration = m_player->duration();
+        auto position = m_player->position();
+        auto volume = m_audioOutput->volume();
         m_server->sendOffStatus(QStringLiteral("%1|duration=%2|position=%3|volume=%4")
                                     .arg(songText)
                                     .arg(duration)
@@ -77,32 +89,25 @@ AudioController::AudioController(QObject* parent)
                                     .arg(volume));
     });
 
-    auto updateMetaData = [this](){
-        auto meta= m_player->metaData();
+    auto updateMetaData = [this]() {
+        auto meta = m_player->metaData();
 
-        auto keys= meta.keys();
+        auto keys = meta.keys();
         auto tracks = m_player->audioTracks();
-        qDebug() << keys << title() ;
-        for(const auto &track : tracks)
-        {
+        qDebug() << keys << title();
+        for (const auto& track : tracks) {
             qDebug() << track.keys() << "\n";
         }
 
-        if(keys.contains(QMediaMetaData::CoverArtImage))
-        {
-            auto img= meta.value(QMediaMetaData::CoverArtImage);
+        if (keys.contains(QMediaMetaData::CoverArtImage)) {
+            auto img = meta.value(QMediaMetaData::CoverArtImage);
             m_pictureProvider->setCurrentImage(img.value<QImage>(), title());
-        }
-        else if(keys.contains(QMediaMetaData::ThumbnailImage))
-        {
-            auto img= meta.value(QMediaMetaData::ThumbnailImage);
+        } else if (keys.contains(QMediaMetaData::ThumbnailImage)) {
+            auto img = meta.value(QMediaMetaData::ThumbnailImage);
             m_pictureProvider->setCurrentImage(img.value<QImage>(), title());
-        }
-        else
-        {
+        } else {
             m_pictureProvider->setCurrentImage({}, {});
         }
-
 
         emit albumArtChanged();
     };
@@ -129,20 +134,20 @@ AudioController::AudioController(QObject* parent)
 
 int AudioController::songIndex() const
 {
-    auto it= m_previousIndex.rbegin();
-    it+= m_pos;
+    auto it = m_previousIndex.rbegin();
+    it += m_pos;
 
-    if(it == m_previousIndex.rend())
+    if (it == m_previousIndex.rend())
         return 0;
 
     return (*it);
 }
 
-AudioController::~AudioController()= default;
+AudioController::~AudioController() = default;
 
 void AudioController::mediaStatus(QMediaPlayer::MediaStatus status)
 {
-    auto updateImage =     [this](){
+    auto updateImage = [this]() {
         /*auto meta= m_player->metaData();
         auto keys= meta.keys();
 
@@ -165,14 +170,13 @@ void AudioController::mediaStatus(QMediaPlayer::MediaStatus status)
         emit albumArtChanged();*/
     };
 
-    switch(status)
-    {
+    switch (status) {
     case QMediaPlayer::EndOfMedia:
         next();
         break;
     case QMediaPlayer::BufferedMedia:
         updateImage();
-    break;
+        break;
     case QMediaPlayer::LoadedMedia:
         updateImage();
         break;
@@ -185,17 +189,13 @@ void AudioController::mediaStatus(QMediaPlayer::MediaStatus status)
 
 void AudioController::next()
 {
-    if(m_pos > 0)
-    {
+    if (m_pos > 0) {
         m_pos--;
         updateContent();
         play();
         emit songIndexChanged();
-    }
-    else
-    {
-        switch(m_mode)
-        {
+    } else {
+        switch (m_mode) {
         case LOOP:
             repeatSong();
             break;
@@ -219,8 +219,8 @@ void AudioController::pause()
 void AudioController::previous()
 {
     m_pos++;
-    if(m_pos >= static_cast<int>(m_previousIndex.size()))
-        m_pos= m_previousIndex.size() - 1;
+    if (m_pos >= static_cast<int>(m_previousIndex.size()))
+        m_pos = m_previousIndex.size() - 1;
     updateContent();
     play();
     emit songIndexChanged();
@@ -232,16 +232,16 @@ void AudioController::repeatSong()
 
 void AudioController::nextInLineSong()
 {
-    auto it= m_previousIndex.rbegin();
-    auto val= (*it) + 1;
+    auto it = m_previousIndex.rbegin();
+    auto val = (*it) + 1;
     setSongIndex(val);
     play();
 }
 void AudioController::shuffleSong()
 {
-    static auto seed1= std::chrono::system_clock::now().time_since_epoch().count();
+    static auto seed1 = std::chrono::system_clock::now().time_since_epoch().count();
     static std::mt19937 rng(seed1);
-    auto r= m_model->rowCount() - 1;
+    auto r = m_model->rowCount() - 1;
     std::uniform_int_distribution<qint64> dist(0, r);
     setSongIndex(static_cast<int>(dist(rng)));
     play();
@@ -255,14 +255,14 @@ void AudioController::resetModel() const
 QString AudioController::songImage() const
 {
     QString res;
-    auto info= m_model->songInfoAt(songIndex());
+    auto info = m_model->songInfoAt(songIndex());
 
-    if(info && !info->m_album.isEmpty() && !info->m_artist.isEmpty())
-        res= QString("%1-%2").arg(info->m_artist, info->m_album);
+    if (info && !info->m_album.isEmpty() && !info->m_artist.isEmpty())
+        res = QString("%1-%2").arg(info->m_artist, info->m_album);
 
-    auto data= m_model->dataImage();
-    if(data->contains(res))
-        res= QString();
+    auto data = m_model->dataImage();
+    if (data->contains(res))
+        res = QString();
     return res;
 }
 
@@ -276,20 +276,24 @@ QString AudioController::albumArt() const
     return m_pictureProvider->id();
 }
 
-DeviceModel *AudioController::devices() const
+DeviceModel* AudioController::devices() const
 {
     return m_devices.get();
 }
 
+void AudioController::display(int i)
+{
+    //qDebug() << "timer:" << i;
+}
+
 void AudioController::setDeviceIndex(int index)
 {
-    if(index <0 || m_deviceIndex == index)
+    if (index < 0 || m_deviceIndex == index)
         return;
-
 
     auto const& devicesList = QMediaDevices::audioOutputs();
 
-    if(index >= devicesList.size())
+    if (index >= devicesList.size())
         return;
 
     m_deviceIndex = index;
@@ -347,7 +351,7 @@ void AudioController::updateAudioDevices()
     auto const& devicesList = QMediaDevices::audioOutputs();
     QStringList deviceNameList;
     deviceNameList.reserve(devicesList.size());
-    std::transform(std::begin(devicesList), std::end(devicesList), std::back_inserter(deviceNameList), [](const QAudioDevice& device){
+    std::transform(std::begin(devicesList), std::end(devicesList), std::back_inserter(deviceNameList), [](const QAudioDevice& device) {
         return device.description();
     });
     m_devices->setDeviceList(deviceNameList);
@@ -366,17 +370,17 @@ bool AudioController::isPlaying() const
 void AudioController::setSongIndex(int index)
 {
     m_previousIndex.push_back(index);
-    m_pos= 0;
+    m_pos = 0;
     updateContent();
     emit songIndexChanged();
 }
 void AudioController::updateContent()
 {
-    auto info= m_model->songInfoAt(songIndex());
-    if(info == nullptr)
+    auto info = m_model->songInfoAt(songIndex());
+    if (info == nullptr)
         return;
-    m_title= QString("%1 - %2").arg(info->m_title, info->m_artist);
-    m_content= QUrl::fromLocalFile(info->m_filepath);
+    m_title = QString("%1 - %2").arg(info->m_title, info->m_artist);
+    m_content = QUrl::fromLocalFile(info->m_filepath);
     m_player->setSource(m_content);
 
     /*auto img= meta.value(QMediaMetaData::CoverArtImage).value<QImage>();
@@ -391,9 +395,9 @@ void AudioController::updateContent()
 }
 void AudioController::setMode(PlayingMode mode)
 {
-    if(mode == m_mode)
+    if (mode == m_mode)
         return;
-    m_mode= mode;
+    m_mode = mode;
     emit modeChanged();
 }
 void AudioController::setVolume(float vol)
@@ -407,17 +411,17 @@ void AudioController::setSeek(qint64 move)
 
 void AudioController::play()
 {
-    if(m_content.isValid())
+    if (m_content.isValid())
         updateContent();
     m_player->play();
 }
 
-QObject *AudioController::videoOutput() const
+QObject* AudioController::videoOutput() const
 {
     return m_player->videoOutput();
 }
 
-void AudioController::setVideoOutput(QObject *newVideoOutput)
+void AudioController::setVideoOutput(QObject* newVideoOutput)
 {
     m_player->setVideoOutput(newVideoOutput);
 }

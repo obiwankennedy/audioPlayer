@@ -13,6 +13,7 @@ SOURCES += main.cpp maincontroller.cpp \
     commandserver.cpp \
     devicemodel.cpp \
     filteredmodel.cpp \
+    worker/fakenetworkreceiver.cpp \
     worker/filereaderhelper.cpp
 
 
@@ -24,6 +25,7 @@ HEADERS += maincontroller.h \
     commandserver.h \
     devicemodel.h \
     filteredmodel.h \
+    worker/fakenetworkreceiver.h \
     worker/filereaderhelper.h
 
 OTHER_FILES += *.qml resources/qml/*.qml
