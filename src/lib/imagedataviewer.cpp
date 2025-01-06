@@ -1,0 +1,46 @@
+#include "imagedataviewer.h"
+#include <QSGSimpleTextureNode>
+#include <QQuickTextureFactory>
+
+ImageDataViewer::ImageDataViewer()
+{
+    connect(this, &ImageDataViewer::imageChanged, this, &ImageDataViewer::update);
+}
+
+QByteArray ImageDataViewer::imageData() const
+{
+    return m_imageData;
+}
+
+void ImageDataViewer::setImageData(const QByteArray &newImageData)
+{
+    if (m_imageData == newImageData)
+        return;
+    m_imageData = newImageData;
+    emit imageDataChanged();
+}
+
+QImage ImageDataViewer::image() const
+{
+    return m_image;
+}
+
+void ImageDataViewer::setImage(const QImage &newImage)
+{
+    if (m_image == newImage)
+        return;
+    m_image = newImage;
+    emit imageChanged();
+}
+
+QSGNode *ImageDataViewer::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *updatePaintNodeData)
+{
+    QSGSimpleTextureNode *n = static_cast<QSGSimpleTextureNode *>(oldNode);
+    if (!n) {
+        n = new QSGSimpleTextureNode();
+        n->setRect(boundingRect());
+    }
+    auto factory = QQuickTextureFactory::textureFactoryForImage(m_image);
+    n->setTexture(factory->createTexture(window()));
+    return n;
+}

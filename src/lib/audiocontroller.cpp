@@ -38,7 +38,6 @@ void show(int i)
 AudioController::AudioController(QObject* parent)
     : QObject(parent)
     , m_model(new AudioFileModel)
-    , m_server(new CommandServer)
     , m_filteredModel(new FilteredModel)
     , m_pictureProvider(new AlbumPictureProvider())
     , m_player(new QMediaPlayer)
@@ -47,10 +46,8 @@ AudioController::AudioController(QObject* parent)
 {
     sCtrl = this;
     m_player->setAudioOutput(m_audioOutput.get());
-    auto fp = &show;
-    std::function<void(int)> f = std::bind(&AudioController::display, this, std::placeholders::_1);
-
-    m_network = new FakeNetworkReceiver(fp, this);
+    //auto fp = &show;
+    //std::function<void(int)> f = std::bind(&AudioController::display, this, std::placeholders::_1);
 
     auto const& devicesList = QMediaDevices::audioOutputs();
     m_deviceIndex = devicesList.indexOf(QMediaDevices::defaultAudioOutput());
@@ -71,23 +68,12 @@ AudioController::AudioController(QObject* parent)
     };
 
     auto mediaDevice = new QMediaDevices(this);
-    connect(mediaDevice, &QMediaDevices::audioOutputsChanged, this, updateList);
-    connect(m_player.get(), &QMediaPlayer::audioOutputChanged, this, updateList);
+    connect(mediaDevice, &QMediaDevices::audioOutputsChanged, m_devices.get(), updateList);
+    connect(m_player.get(), &QMediaPlayer::audioOutputChanged, m_devices.get(), updateList);
     updateList();
 
     connect(m_audioOutput.get(), &QAudioOutput::volumeChanged, this, &AudioController::volumeChanged);
     connect(m_player.get(), &QMediaPlayer::positionChanged, this, &AudioController::seekChanged);
-    connect(m_player.get(), &QMediaPlayer::positionChanged, this, [this]() {
-        auto songText = title();
-        auto duration = m_player->duration();
-        auto position = m_player->position();
-        auto volume = m_audioOutput->volume();
-        m_server->sendOffStatus(QStringLiteral("%1|duration=%2|position=%3|volume=%4")
-                                    .arg(songText)
-                                    .arg(duration)
-                                    .arg(position)
-                                    .arg(volume));
-    });
 
     auto updateMetaData = [this]() {
         auto meta = m_player->metaData();
@@ -120,15 +106,6 @@ AudioController::AudioController(QObject* parent)
     connect(m_player.get(), &QMediaPlayer::durationChanged, this, &AudioController::durationChanged);
     connect(m_player.get(), &QMediaPlayer::mediaStatusChanged, this, &AudioController::mediaStatus);
 
-    connect(m_server.get(), &CommandServer::play, this, &AudioController::play);
-    connect(m_server.get(), &CommandServer::pause, this, &AudioController::pause);
-    connect(m_server.get(), &CommandServer::next, this, &AudioController::next);
-    connect(m_server.get(), &CommandServer::previous, this, &AudioController::previous);
-    connect(m_server.get(), &CommandServer::increase, this, &AudioController::nextInLineSong);
-    connect(m_server.get(), &CommandServer::volume, m_audioOutput.get(), &QAudioOutput::setVolume);
-    // connect(m_server.get(),&CommandServer::,this, &AudioController::play);
-
-    m_server->startListing();
     m_filteredModel->setSourceModel(m_model.get());
 }
 
@@ -148,26 +125,7 @@ AudioController::~AudioController() = default;
 void AudioController::mediaStatus(QMediaPlayer::MediaStatus status)
 {
     auto updateImage = [this]() {
-        /*auto meta= m_player->metaData();
-        auto keys= meta.keys();
 
-        if(keys.contains(QMediaMetaData::CoverArtImage))
-        {
-            auto img= meta.value(QMediaMetaData::CoverArtImage);
-            m_pictureProvider->setCurrentImage(img.value<QImage>(), title());
-        }
-        else if(keys.contains(QMediaMetaData::ThumbnailImage))
-        {
-            auto img= meta.value(QMediaMetaData::ThumbnailImage);
-            m_pictureProvider->setCurrentImage(img.value<QImage>(), title());
-        }
-        else
-        {
-            m_pictureProvider->setCurrentImage({}, {});
-        }
-
-
-        emit albumArtChanged();*/
     };
 
     switch (status) {
@@ -286,6 +244,19 @@ void AudioController::display(int i)
     //qDebug() << "timer:" << i;
 }
 
+void AudioController::setContentData(const QByteArray &data)
+{
+    m_buffer.close();
+    m_buffer.setBuffer(nullptr);
+    m_data.release();
+    m_data.reset(new QByteArray(data));
+
+    m_buffer.setBuffer(m_data.get());
+    m_buffer.open(QIODevice::ReadOnly);
+    m_player->setSourceDevice(&m_buffer, m_content);
+    m_player->play();
+}
+
 void AudioController::setDeviceIndex(int index)
 {
     if (index < 0 || m_deviceIndex == index)
@@ -304,6 +275,11 @@ void AudioController::setDeviceIndex(int index)
 int AudioController::deviceIndex() const
 {
     return m_deviceIndex;
+}
+
+QUrl AudioController::content() const
+{
+    return m_content;
 }
 
 bool AudioController::hasVideo() const
@@ -380,13 +356,8 @@ void AudioController::updateContent()
     if (info == nullptr)
         return;
     m_title = QString("%1 - %2").arg(info->m_title, info->m_artist);
-    m_content = QUrl::fromLocalFile(info->m_filepath);
+    setContent(QUrl::fromLocalFile(info->m_filepath));
     m_player->setSource(m_content);
-    if(m_decoder) {
-//        m_decoder->setAudioFormat(m_player->au);
-        m_decoder->setSource(m_content);
-        m_decoder->start();
-    }
 
     emit titleChanged();
 }
@@ -406,6 +377,14 @@ void AudioController::setSeek(qint64 move)
     m_player->setPosition(move);
 }
 
+void AudioController::setContent(const QUrl &url)
+{
+    if(url == m_content)
+        return;
+    m_content = url;
+    emit contentChanged();
+}
+
 void AudioController::play()
 {
     if (!m_content.isValid())
@@ -418,12 +397,12 @@ QObject* AudioController::videoOutput() const
     return m_player->videoOutput();
 }
 
-void AudioController::setVideoOutput(QObject* newVideoOutput)
+void AudioController::setVideoOutput(QObject *output)
 {
-    m_player->setVideoOutput(newVideoOutput);
+    m_player->setVideoOutput(output);
 }
 
-void AudioController::setDecoder(QAudioDecoder *decoder)
+void AudioController::setMuted(bool b)
 {
-    m_decoder = decoder;
+    m_audioOutput->setMuted(b);
 }

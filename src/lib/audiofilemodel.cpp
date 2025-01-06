@@ -169,10 +169,6 @@ bool AudioFileModel::appendSongs(const QList<QVariantMap>& pathlist)
     });
     endInsertRows();
 
-    /* QtConcurrent::run([this]() {
-         auto songList= songs();
-         readMetaData(songList, this, m_dataImage);
-     });*/
     return true;
 }
 

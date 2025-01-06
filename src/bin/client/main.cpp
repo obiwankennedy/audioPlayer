@@ -1,6 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-
+#include <QQuickStyle>
 
 int main(int arg, char** argv)
 {
@@ -10,7 +10,7 @@ int main(int arg, char** argv)
     app.setOrganizationName(QStringLiteral("AudioClient"));
     app.setOrganizationDomain(QStringLiteral("org.rolisteam"));
 
-    //QQuickStyle::setStyle("Universal");
+    QQuickStyle::setStyle("Universal");
 
     QQmlApplicationEngine engine;
     QObject::connect(

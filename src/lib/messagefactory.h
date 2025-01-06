@@ -13,10 +13,12 @@ namespace factory
 {
 
 QByteArray buildMessage(const QString& service, const QString& action, const QHash<QString, QVariant> &parameter);
-QHash<QString, QVariant>  model2Parameter(AudioFileModel* model);
+QJsonArray model2Parameter(AudioFileModel* model);
 
 QJsonObject messageToObject(const QString& message);
 constants::Action actionToEnum(const QJsonObject& obj);
+
+QByteArray fileToArray(const QString& file);
 };
 
 #endif // MESSAGEFACTORY_H

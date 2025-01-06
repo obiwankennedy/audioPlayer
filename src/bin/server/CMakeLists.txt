@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-find_package(Qt6 REQUIRED COMPONENTS Core DBus Quick Network Svg Multimedia WebSockets)
+find_package(Qt6 REQUIRED COMPONENTS Core DBus Quick Network Svg Multimedia WebSockets Concurrent)
 qt_standard_project_setup(REQUIRES 6.5)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,6 +22,7 @@ target_link_libraries(audioServer PRIVATE
     Qt6::Core
     Qt6::Network
     Qt6::WebSockets
+    Qt6::Concurrent
     Qt6::DBus
     Qt6::Svg
     Qt6::Multimedia

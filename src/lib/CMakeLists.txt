@@ -45,6 +45,7 @@ SOURCES
     filteredmodel.cpp
     audiofilemodel.h
     audiofilemodel.cpp
+    SOURCES imagedataviewer.h imagedataviewer.cpp
 )
 
 add_subdirectory(worker)

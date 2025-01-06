@@ -36,7 +36,7 @@ private:
     std::unique_ptr<QWebSocketServer> m_server;
     std::vector<QWebSocket*> m_clients;
     std::unique_ptr<MainController> m_ctrl;
-    std::unique_ptr<WebSocketDecoder> m_decoder;
+    bool m_streamMusic{false};
     int m_port{10999};
 };
 

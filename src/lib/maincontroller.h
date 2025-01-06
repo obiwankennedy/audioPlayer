@@ -22,17 +22,16 @@
 
 #include <QAbstractItemModel>
 #include <QObject>
-#include <QStringList>
-#include <memory>
 #include <QQmlEngine>
 #include <QQmlParserStatus>
+#include <QStringList>
+#include <memory>
 
 #include "audiocontroller.h"
 #include "audiofilemodel.h"
 #include "filteredmodel.h"
 
-class MainController : public QObject
-{
+class MainController : public QObject {
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
@@ -48,10 +47,10 @@ class MainController : public QObject
 
 public:
     explicit MainController(QObject* parent);
-    MainController(const MainController &) = delete;
-    MainController(MainController &&) = delete;
-    MainController &operator=(const MainController &) = delete;
-    MainController &operator=(MainController &&) = delete;
+    MainController(const MainController&) = delete;
+    MainController(MainController&&) = delete;
+    MainController& operator=(const MainController&) = delete;
+    MainController& operator=(MainController&&) = delete;
     virtual ~MainController() override;
 
     QString filename() const { return m_filename; }
@@ -65,7 +64,7 @@ public:
 
     void saveSettings();
 
-    QAbstractItemModel *outputModel() const;
+    QAbstractItemModel* outputModel() const;
     int deviceIndex() const;
 
     bool hasVideo() const;
@@ -73,7 +72,7 @@ public:
     static MainController* create(QQmlEngine* qmlEngine, QJSEngine* jsEngine);
 
 public slots:
-    void addFiles(const QStringList& file, int idx);
+    void addFiles(const QList<QUrl>& file, int idx);
     void addDirectory(int idx, const QString& url);
     // void exploreDir(const QString& path);
     void saveFile();

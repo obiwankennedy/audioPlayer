@@ -2,33 +2,48 @@
 #include "messagefactory.h"
 #include "constants.h"
 #include <QJsonObject>
+#include <QtConcurrent>
 
 ServerManager::ServerManager(QObject *parent)
-    : QObject{parent}, m_server(new QWebSocketServer("MusicServer",QWebSocketServer::NonSecureMode,this)), m_ctrl(new MainController(nullptr)),
-    m_decoder(new WebSocketDecoder)
+    : QObject{parent}, m_server(new QWebSocketServer("MusicServer",QWebSocketServer::NonSecureMode,this)), m_ctrl(new MainController(nullptr))
 {
     auto audio = m_ctrl->audioCtrl();
 
-    audio->setDecoder(m_decoder.get());
+    connect(audio, &AudioController::contentChanged, this, [this](){
+        if(!m_streamMusic)
+            return;
+        const QUrl content = m_ctrl->audioCtrl()->content();
+            auto msg = factory::buildMessage(constants::audio,constants::newSong,{{constants::uri,content.toString()}});
+            std::for_each(std::begin(m_clients), std::end(m_clients), [msg](QWebSocket* client){
+                client->sendTextMessage(msg);
+            });
+            auto data = factory::fileToArray(content.toLocalFile());
+            std::for_each(std::begin(m_clients), std::end(m_clients), [data](QWebSocket* client){
+                client->sendBinaryMessage(data);
+            });
+    });
 
+    connect(audio, &AudioController::titleChanged, this, [this](){
+        auto audio = m_ctrl->audioCtrl();
+        auto info = audio->model()->songInfoAt(audio->songIndex());
 
-    connect(m_decoder.get(), &QAudioDecoder::formatChanged, this, [this](const QAudioFormat& format){
-        auto msg = factory::buildMessage(constants::audio,constants::format,{{constants::sampleRate, format.sampleRate()},
-                                                                               {constants::channelCount, format.channelCount()},
-                                                                               {constants::sampleFormat, format.sampleFormat()}});
-        qDebug() << "server formatChanged";
+        auto msg = factory::buildMessage(constants::audio,constants::select,{{constants::info::album,audio->albumArt()},
+            {constants::info::album,info->m_album},
+            {constants::info::index,audio->songIndex()},
+            {constants::info::title,info->m_title},
+            {constants::info::artist,info->m_artist},
+            {constants::info::time,info->m_time}
+        });
         std::for_each(std::begin(m_clients), std::end(m_clients), [msg](QWebSocket* client){
             client->sendTextMessage(msg);
         });
     });
 
-
-    connect(m_decoder.get(), &QAudioDecoder::bufferReady, this, [this](){
-        auto buffer = m_decoder->read();
-        QByteArray data(buffer.data<char>(), buffer.byteCount());
-        qDebug() << "server bufferReady";
-        std::for_each(std::begin(m_clients), std::end(m_clients), [data](QWebSocket* client){
-            client->sendBinaryMessage(data);
+    connect(audio, &AudioController::seekChanged, this, [this](){
+        auto audio = m_ctrl->audioCtrl();
+        auto msg = factory::buildMessage(constants::audio,constants::seek,{{constants::info::value, audio->seek()}});
+        std::for_each(std::begin(m_clients), std::end(m_clients), [msg](QWebSocket* client){
+            client->sendTextMessage(msg);
         });
     });
 
@@ -63,7 +78,6 @@ void ServerManager::setPort(int newPort)
 
 void ServerManager::processText(const QString& message)
 {
-    qDebug() << "server processText";
     auto s = qobject_cast<QWebSocket*>(sender());
     if(!s)
         return;
@@ -71,10 +85,16 @@ void ServerManager::processText(const QString& message)
     auto msg = factory::messageToObject(message);
     auto act = factory::actionToEnum(msg);
     auto audio = m_ctrl->audioCtrl();
+    qDebug() << "server processText" << message;
 
     switch(act)
     {
     case constants::Action::PlayAct:
+        if(msg.contains(constants::info::index))
+        {
+            auto index = msg[constants::info::index].toInt();
+            audio->setSongIndex(index);
+        }
         audio->play();
         break;
     case constants::Action::StopAct:
@@ -92,10 +112,20 @@ void ServerManager::processText(const QString& message)
     case constants::Action::RandomAct:
         audio->setMode(AudioController::SHUFFLE);
         break;
+    case constants::Action::VolumeOnAct:
+        audio->setMuted(false);
+        break;
+    case constants::Action::MuteAct:
+        audio->setMuted(true);
+        break;
     case constants::Action::SelectAct:
         audio->filteredModel()->setSearch(msg[constants::json::pattern].toString());
         break;
-    case constants::Action::AudioFormat:
+    case constants::Action::StreamMusicAct:
+        m_streamMusic = true;
+        break;
+    case constants::Action::PlayOnServerAct:
+        m_streamMusic = false;
         break;
     default:
         break;
@@ -114,13 +144,6 @@ void ServerManager::updateClient(QWebSocket* s)
         return;
 
     auto b = factory::model2Parameter(m_ctrl->audioModel());
-
-    s->sendTextMessage(factory::buildMessage(constants::audio,constants::model,b));
-
-    auto format = m_decoder->audioFormat();
-    auto msg = factory::buildMessage(constants::audio,constants::format,{{constants::sampleRate, format.sampleRate()},
-                                                                           {constants::channelCount, format.channelCount()},
-                                                                           {constants::sampleFormat, format.sampleFormat()}});
-
+    auto msg = factory::buildMessage(constants::audio,constants::model,{{constants::json::songs, b}});
     s->sendTextMessage(msg);
 }

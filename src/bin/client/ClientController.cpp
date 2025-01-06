@@ -2,30 +2,32 @@
 #include "messagefactory.h"
 #include "constants.h"
 #include <QJsonObject>
+#include <QAudioOutput>
+#include <QJsonArray>
 
 ClientController::ClientController(QObject *parent)
-    : QObject{parent}, m_socket(new QWebSocket), m_buffer(&m_data)
+    : QObject{parent}, m_socket(new QWebSocket)
 {
+
     connect(m_socket, &QWebSocket::binaryMessageReceived, this, &ClientController::receivedBinaryData);
     connect(m_socket, &QWebSocket::textMessageReceived, this, &ClientController::receivedTextData);
-    connect(m_socket, &QWebSocket::errorOccurred, this, [this](){
-        qDebug() << m_socket->errorString();
-    });
-
-    m_buffer.open(QIODevice::ReadWrite);
-
-    m_sink = new QAudioSink();
-    connect(m_sink, &QAudioSink::stateChanged, this, [this](QtAudio::State state){
-        qDebug() << "client state:" << state;
-        m_state = state;
-
-        if(state == QAudio::StoppedState)
+    connect(m_socket, &QWebSocket::connected, this, [this](){
+        if(!m_connected)
         {
-            if(m_sink->error() != QAudio::NoError)
-            {
-                qDebug() << "client Error:" << m_sink->error();
-            }
+            m_connected = true;
+            emit connectedChanged();
         }
+    });
+    connect(m_socket, &QWebSocket::disconnected, this, [this](){
+        if(m_connected)
+        {
+            m_connected = false;
+            emit connectedChanged();
+            connectTo();
+        }
+    });
+    connect(m_socket, &QWebSocket::errorOccurred, this, [this](){
+        qDebug() << "error socket:"<< m_socket->errorString();
     });
 }
 
@@ -36,21 +38,8 @@ void ClientController::connectTo()
 
 void ClientController::receivedBinaryData(const QByteArray& array)
 {
-    if(!m_sink)
-        return;
-
-    m_data.append(array);
-    /*auto pos = m_buffer.pos();
-    m_buffer.write(array);
-    m_buffer.seek(pos);*/
-
-    qDebug() << "client data" << m_data.size() << m_state << m_buffer.pos();
-
-    if(m_state != QtAudio::ActiveState)
-    {
-        qDebug() << "Start reading" << m_buffer.size();
-        m_sink->start(&m_buffer);
-    }
+    qDebug() << "data received" << array.size();
+    emit songDataChanged(array);
 }
 
 void ClientController::receivedTextData(const QString& message)
@@ -59,22 +48,25 @@ void ClientController::receivedTextData(const QString& message)
     auto msg = factory::messageToObject(message);
     auto act = factory::actionToEnum(msg);
 
-    qDebug() << "text received" << act << msg;
+    auto obj = msg[constants::audio].toObject();
+
+    //qDebug() << "text received" << act << constants::NewSongAct;
     switch(act)
     {
     case constants::AudioModel:
-        qDebug() << "model:" <<msg;
+        emit modelDataChanged(obj);
         break;
-    case constants::AudioFormat:
-    {
-        /*QAudioFormat format;
-        format.setSampleFormat(static_cast<QAudioFormat::SampleFormat>(msg[constants::sampleFormat].toInt()));
-        format.setChannelCount(msg[constants::channelCount].toInt());
-        format.setSampleRate(msg[constants::sampleRate].toInt());*/
-        qDebug() << "client CReate m_sink";
+    case constants::NewSongAct:
+        qDebug() << obj[constants::uri].toString();
+        emit songFileChanged(QUrl(obj[constants::uri].toString()));
+        break;
+    case constants::SelectAct:
+        emit songInfoChanged(obj);
+        break;
+    case constants::SeekAct:
+        emit seekChanged(obj[constants::info::value].toDouble());
+        break;
 
-    }
-        break;
     default:
         break;
     }
@@ -93,15 +85,12 @@ void ClientController::setUrl(const QUrl &newUrl)
     emit urlChanged();
 }
 
-void ClientController::play()
+void ClientController::sendCommand(const QString& cmd, const QHash<QString, QVariant>& params)
 {
-    m_socket->sendTextMessage(factory::buildMessage(constants::audio,constants::play,{}));
+    m_socket->sendTextMessage(factory::buildMessage(constants::audio,cmd,params));
 }
-void ClientController::previous()
+
+bool ClientController::connected() const
 {
-    m_socket->sendTextMessage(factory::buildMessage(constants::audio,constants::previous,{}));
-}
-void ClientController::next()
-{
-    m_socket->sendTextMessage(factory::buildMessage(constants::audio,constants::next,{}));
+    return m_connected;
 }

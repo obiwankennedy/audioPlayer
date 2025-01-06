@@ -1,21 +1,21 @@
 import QtQuick
 import QtCore
 import QtQuick.Controls
-import QtQuick.Layouts
 import QtQuick.Dialogs
+import QtQuick.Layouts
 import QtQuick.Controls.Universal
-import Customization
 import Views
-import Controllers
+import Customization
 
-ApplicationWindow {
+ApplicationWindow
+{
     id: root
-    visible: true
+
+    property bool darkMode: true
+
     width: 800
     height: 400
-    property real viewScale: 1
-    property int idx: 0
-    property bool darkMode: true
+    visible: true
 
     onDarkModeChanged: Theme.nightMode = root.darkMode
     Universal.theme: root.darkMode ? Universal.Dark: Universal.Light
@@ -35,62 +35,8 @@ ApplicationWindow {
 
     header: AudioPlayer {
         id: audioPlayer
-        ctrl: MainController.audioCtrl
+        ctrl: MainController
         onSettings: settingDialog.open()
-        //height: 50
-    }
-
-    FileDialog {
-        id: openDialog
-        title: qsTr("Load playlist from File")
-        currentFolder:  StandardPaths.writableLocation(StandardPaths.MusicLocation)
-        fileMode: FileDialog.OpenFile
-        nameFilters: ["Playlist (*.apl *.m3u)"]
-        onAccepted: {
-            MainController.setFilename(openDialog.selectedFile)
-            MainController.loadFile();
-            close()
-        }
-        onRejected: close()
-    }
-
-    FolderDialog {
-        id: openDir
-        title: qsTr("Add directory at selection")
-        currentFolder: StandardPaths.writableLocation(StandardPaths.MusicLocation)
-        onAccepted: {
-            MainController.addDirectory(view.currentIndex,openDir.selectedFolder);
-            close()
-        }
-        onRejected: close()
-    }
-
-    FileDialog {
-        id: addAudioFiles
-        title: qsTr("Load playlist from File")
-        currentFolder: StandardPaths.writableLocation(StandardPaths.MusicLocation)
-        fileMode: FileDialog.OpenFiles
-        nameFilters: ["Audiofiles (*.mp3 *.mpc *.flac *.ogg *.wma)"]
-        onAccepted: {
-            MainController.addFiles(addAudioFiles.selectedFiles, view.currentIndex);
-            close()
-        }
-        onRejected: close()
-    }
-
-    FileDialog {
-        id: saveDialog
-        title: qsTr("Save playlist into File")
-        currentFolder: StandardPaths.writableLocation(StandardPaths.MusicLocation)
-        fileMode: FileDialog.SaveFile
-        defaultSuffix: "apl"
-        nameFilters: ["Playlist (*.apl)"]
-        onAccepted: {
-            MainController.setFilename(saveDialog.selectedFile)
-            MainController.saveFile();
-            close()
-        }
-        onRejected: close()
     }
 
     Dialog {
@@ -109,7 +55,7 @@ ApplicationWindow {
             ComboBox {
                 id: output
                 Layout.preferredWidth: 200
-                model: MainController.outputModel
+                model: MainController.audioCtrl.outputModel
                 textRole: "display"
                 onCurrentIndexChanged: MainController.deviceIndex = output.currentIndex
                 Component.onCompleted: {
@@ -130,8 +76,6 @@ ApplicationWindow {
         standardButtons: Dialog.Ok
     }
 
-
-
     ScrollView {
         anchors.fill: parent
         ListView {
@@ -147,14 +91,14 @@ ApplicationWindow {
             highlight: Rectangle { color: Universal.accent; radius: 5 }
 
             Connections {
-                target: MainController.audioCtrl
-                function onSongIndexChanged() {
-                    view.positionViewAtIndex(MainController.audioCtrl.songIndex, ListView.Center)//view.ensureVisible(ctrl.audioCtrl.songIndex)
+                target: MainController
+                function onIndexChanged() {
+                    view.positionViewAtIndex(MainController.index, ListView.Center)//view.ensureVisible(ctrl.audioCtrl.songIndex)
                 }
             }
             focus: true
             clip: true
-            model: MainController.filteredModel
+            model: MainController.audioCtrl.filteredModel
             delegate:  Item {
                 width: view.width
                 height: 40
@@ -170,17 +114,17 @@ ApplicationWindow {
                         Label {//title
                             text: title
                             Layout.preferredWidth: lyt.width/2
-                            font.bold: MainController.audioCtrl.songIndex === model.songIndex
+                            font.bold: MainController.index === model.songIndex
                             clip: true
                         }
                         Label {//artist
                             text: artist
                             Layout.fillWidth: true
-                            font.bold: MainController.audioCtrl.songIndex === model.songIndex
+                            font.bold: MainController.index === model.songIndex
                         }
                         Label {//time
                             text: time
-                            font.bold: MainController.audioCtrl.songIndex === model.songIndex
+                            font.bold: MainController.index === model.songIndex
                         }
                     }
 
@@ -196,17 +140,16 @@ ApplicationWindow {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     from: 0
-                    to: MainController.audioCtrl.duration
-                    value: MainController.audioCtrl.seek
-                    visible: MainController.audioCtrl.songIndex === model.songIndex
+                    to: MainController.duration
+                    value: MainController.position
+                    visible: MainController.index === model.songIndex
 
                 }
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
                     onDoubleClicked:{
-                        MainController.audioCtrl.songIndex = model.songIndex;
-                        MainController.audioCtrl.play()
+                        MainController.play(model.songIndex)
                     }
                     onClicked: (mouse)=>{
                         if (mouse.button === Qt.RightButton)
@@ -241,7 +184,6 @@ ApplicationWindow {
             }
         }
     }
-
 
 
 }

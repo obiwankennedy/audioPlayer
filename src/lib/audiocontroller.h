@@ -25,13 +25,12 @@
 #include <QObject>
 #include <QPointer>
 #include <QUrl>
-#include <QAudioDecoder>
+#include <QBuffer>
 
 #include "albumpictureprovider.h"
 #include "audiofilemodel.h"
 #include "devicemodel.h"
 #include "filteredmodel.h"
-#include "worker/fakenetworkreceiver.h"
 
 #include <deque>
 #include <memory>
@@ -56,6 +55,7 @@ class AudioController : public QObject {
     Q_PROPERTY(DeviceModel* devices READ devices CONSTANT)
     Q_PROPERTY(bool hasVideo READ hasVideo NOTIFY hasVideoChanged FINAL)
     Q_PROPERTY(QObject* videoOutput READ videoOutput WRITE setVideoOutput NOTIFY videoOutputChanged)
+    Q_PROPERTY(QUrl content READ content WRITE setContent NOTIFY contentChanged FINAL)
 public:
     enum PlayingMode {
         LOOP,
@@ -83,18 +83,19 @@ public:
     DeviceModel* devices() const;
     void setDeviceIndex(int);
     int deviceIndex() const;
+    QUrl content() const;
 
     bool hasVideo() const;
 
     QObject* videoOutput() const;
-    void setVideoOutput(QObject* newVideoOutput);
-    void setDecoder(QAudioDecoder* decoder);
-    // static AudioController* sCtrl;
+    void setVideoOutput(QObject* output);
 public slots:
+    void setMuted(bool b);
     void setSongIndex(int song);
     void setMode(PlayingMode mode);
     void setVolume(float vol);
     void setSeek(qint64 move);
+    void setContent(const QUrl& url);
 
     void play();
     void pause();
@@ -103,6 +104,8 @@ public slots:
     void find(const QString& text);
     void updateAudioDevices();
     void display(int i);
+
+    void setContentData(const QByteArray& data);
 
 signals:
     void songIndexChanged();
@@ -115,6 +118,7 @@ signals:
     void playingChanged();
     void albumArtChanged();
     void hasVideoChanged();
+    void contentChanged();
 
     void videoOutputChanged();
     void deviceIndexChanged();
@@ -136,8 +140,8 @@ private:
     std::unique_ptr<QMediaPlayer> m_player;
     std::unique_ptr<QAudioOutput> m_audioOutput;
     std::unique_ptr<DeviceModel> m_devices;
-    QPointer<QAudioDecoder> m_decoder;
-    FakeNetworkReceiver* m_network { nullptr };
+    QBuffer m_buffer;
+    std::unique_ptr<QByteArray> m_data;
 
     PlayingMode m_mode = SHUFFLE;
 

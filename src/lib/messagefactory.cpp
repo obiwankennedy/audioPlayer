@@ -2,6 +2,8 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QFile>
+#include <qjsonarray.h>
 #include "constants.h"
 
 namespace factory
@@ -34,25 +36,23 @@ QByteArray buildMessage(const QString &service, const QString &action, const QHa
     return doc.toJson();
 }
 
-QHash<QString, QVariant> model2Parameter(AudioFileModel *model)
+QJsonArray model2Parameter(AudioFileModel *model)
 {
-    QHash<QString, QVariant> res;
-
-    auto songs = model->songs();
-    QList<QHash<QString, QVariant>> list;
+    QJsonArray res;
+    auto const& songs = model->songs();
     int i = 0;
     for(auto s : songs)
     {
-        QHash<QString, QVariant> info;
+        QJsonObject info;
         info[constants::info::album] = s->m_album;
-        info[constants::info::time] = s->m_album;
-        info[constants::info::title] = s->m_album;
-        info[constants::info::artiste] = s->m_album;
+        info[constants::info::time] = static_cast<int>(s->m_time);
+        info[constants::info::title] = s->m_title;
+        info[constants::info::artist] = s->m_artist;
+        info[constants::info::path] = s->m_filepath;
         info[constants::info::index] = i;
         ++i;
-        list.append(info);
+        res.append(info);
     }
-    res.insert(constants::json::songs, QVariant::fromValue(list));
     return res;
 }
 
@@ -65,8 +65,13 @@ constants::Action actionToEnum(const QJsonObject &obj)
         {constants::select,constants::SelectAct},
         {constants::loop,constants::LoopAct},
         {constants::random,constants::RandomAct},
-        {constants::format,constants::AudioFormat},
         {constants::model,constants::AudioModel},
+        {constants::newSong,constants::NewSongAct},
+        {constants::volumeOn,constants::VolumeOnAct},
+        {constants::seek,constants::SeekAct},
+        {constants::mute,constants::MuteAct},
+        {constants::streamMusic,constants::StreamMusicAct},
+        {constants::playOnServer,constants::PlayOnServerAct},
         {constants::next,constants::NextAct}};
 
     return actions.value(obj[constants::json::action].toString());
@@ -77,4 +82,16 @@ QJsonObject messageToObject(const QString &message)
     return QJsonDocument::fromJson(message.toLocal8Bit()).object();
 }
 
+
+QByteArray fileToArray(const QString& filename)
+{
+    QFile file(filename);
+
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "error - Can't read:"<< filename ;
+    }
+
+    return file.readAll();
+}
 }

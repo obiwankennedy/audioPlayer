@@ -23,12 +23,11 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QQmlContext>
 #include <QSettings>
 #include <QUrl>
-#include <QQmlContext>
 
 #include "worker/filereaderhelper.h"
-
 
 MainController* MainController::create(QQmlEngine* qmlEngine, QJSEngine* jsEngine)
 {
@@ -37,12 +36,14 @@ MainController* MainController::create(QQmlEngine* qmlEngine, QJSEngine* jsEngin
     return ctrl;
 }
 
-MainController::MainController(QObject* parent) : QObject(parent), m_audioCtrl(new AudioController)
+MainController::MainController(QObject* parent)
+    : QObject(parent)
+    , m_audioCtrl(new AudioController)
 {
     connect(m_audioCtrl.get(), &AudioController::deviceIndexChanged, this, &MainController::deviceIndexChanged);
     connect(m_audioCtrl.get(), &AudioController::hasVideoChanged, this, &MainController::hasVideoChanged);
     loadSettings();
-    if(!m_filename.isEmpty())
+    if (!m_filename.isEmpty())
         loadFile();
 }
 
@@ -83,23 +84,23 @@ void MainController::resetData()
 
 void MainController::setFilename(QString filename)
 {
-    if(m_filename == filename)
+    if (m_filename == filename)
         return;
 
-    m_filename= QUrl(filename).toLocalFile();
+    m_filename = QUrl(filename).toLocalFile();
     qDebug() << m_filename << "filename";
     emit filenameChanged(m_filename);
 }
 
 void MainController::addToExport(int songIndex)
 {
-    auto model= audioModel();
+    auto model = audioModel();
     model->addToExport(songIndex);
 }
 
 void MainController::resetExport()
 {
-    auto model= audioModel();
+    auto model = audioModel();
     model->cleanExportList();
 }
 
@@ -111,15 +112,14 @@ void MainController::exportList()
 
 void MainController::removeSelection()
 {
-    auto fmodel= filteredModel();
-    if(fmodel->search().isEmpty())
+    auto fmodel = filteredModel();
+    if (fmodel->search().isEmpty())
         return;
-    auto size= fmodel->rowCount();
+    auto size = fmodel->rowCount();
     std::vector<int> idxs;
-    auto model= audioModel();
-    for(int i= 0; i < size; ++i)
-    {
-        auto sourceIndex= fmodel->mapToSource(fmodel->index(i, 0));
+    auto model = audioModel();
+    for (int i = 0; i < size; ++i) {
+        auto sourceIndex = fmodel->mapToSource(fmodel->index(i, 0));
         idxs.push_back(sourceIndex.row());
     }
     std::sort(std::begin(idxs), std::end(idxs), std::greater<int>());
@@ -133,9 +133,9 @@ void MainController::setDeviceIndex(int index)
 
 void MainController::loadFile()
 {
-    if(m_filename.endsWith("m3u"))
+    if (m_filename.endsWith("m3u"))
         FileReaderHelper::readM3u(m_filename, m_audioCtrl->model());
-    else if(m_filename.endsWith("apl"))
+    else if (m_filename.endsWith("apl"))
         FileReaderHelper::readAudioList(m_filename, m_audioCtrl->model());
 
     m_recentFiles.prepend(m_filename);
@@ -144,7 +144,7 @@ void MainController::loadFile()
 
 void MainController::saveFile()
 {
-    if(!m_filename.endsWith(".apl"))
+    if (!m_filename.endsWith(".apl"))
         m_filename.append(".apl");
     FileReaderHelper::writeAudioList(m_filename, m_audioCtrl->model());
     saveSettings();
@@ -162,29 +162,29 @@ void MainController::saveSettings()
 void MainController::loadSettings()
 {
     QSettings setting("AudioPlayer", "AudioPlayer");
-    m_recentFiles= setting.value("recentFiles").toStringList();
-    m_filename= setting.value("lastFile").toString();
-    auto songIdx= setting.value("lastPlayedSong").toInt();
+    m_recentFiles = setting.value("recentFiles").toStringList();
+    m_filename = setting.value("lastFile").toString();
+    auto songIdx = setting.value("lastPlayedSong").toInt();
     m_audioCtrl->setSongIndex(songIdx);
 }
 
-void MainController::addFiles(const QStringList& files, int idx)
+void MainController::addFiles(const QList<QUrl>& files, int idx)
 {
     std::vector<QString> list;
     std::transform(files.begin(), files.end(), std::back_inserter(list),
-                   [](const QString& path) { return QUrl(path).toLocalFile(); });
-    auto model= m_audioCtrl->model();
+        [](const QUrl& path) { return path.toLocalFile(); });
+    auto model = m_audioCtrl->model();
     model->insertSongAt(idx, list);
 }
 
 void MainController::addDirectory(int idx, const QString& url)
 {
-    auto vec= FileReaderHelper::findAllAudioFiles(QUrl(url).toLocalFile());
-    auto model= m_audioCtrl->model();
+    auto vec = FileReaderHelper::findAllAudioFiles(QUrl(url).toLocalFile());
+    auto model = m_audioCtrl->model();
     model->insertSongAt(idx, vec);
 }
 
-QAbstractItemModel *MainController::outputModel() const
+QAbstractItemModel* MainController::outputModel() const
 {
     return m_audioCtrl->devices();
 }
@@ -198,4 +198,3 @@ bool MainController::hasVideo() const
 {
     return m_audioCtrl->hasVideo();
 }
-
