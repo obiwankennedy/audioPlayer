@@ -4,7 +4,9 @@
 
 ImageDataViewer::ImageDataViewer()
 {
+    setFlag(QQuickItem::ItemHasContents, true);
     connect(this, &ImageDataViewer::imageChanged, this, &ImageDataViewer::update);
+    connect(this, &ImageDataViewer::geometryChange, this, &ImageDataViewer::update);
 }
 
 QByteArray ImageDataViewer::imageData() const
@@ -38,9 +40,11 @@ QSGNode *ImageDataViewer::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePa
     QSGSimpleTextureNode *n = static_cast<QSGSimpleTextureNode *>(oldNode);
     if (!n) {
         n = new QSGSimpleTextureNode();
-        n->setRect(boundingRect());
     }
+    qDebug() << "update PaintNode" << n->rect();
+    n->setRect(boundingRect());
     auto factory = QQuickTextureFactory::textureFactoryForImage(m_image);
-    n->setTexture(factory->createTexture(window()));
+    if(factory)
+        n->setTexture(factory->createTexture(window()));
     return n;
 }

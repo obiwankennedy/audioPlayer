@@ -13,14 +13,14 @@ ApplicationWindow
 
     property bool darkMode: true
 
-    width: 800
-    height: 400
+    width: 1220/2
+    height: 2712/2
     visible: true
 
     onDarkModeChanged: Theme.nightMode = root.darkMode
     Universal.theme: root.darkMode ? Universal.Dark: Universal.Light
 
-    menuBar: MenuBar {
+    /*menuBar: MenuBar {
         id: menu
         FileMenu {
             ctrl: MainController
@@ -31,15 +31,19 @@ ApplicationWindow
             onDarkModeChanged: root.darkMode = darkMode
             onHidePlayer: audioPlayer.visible = !audioPlayer.visible
         }
+    }*/
+
+    onClosing: {
+        MainController.stop()
     }
 
     header: AudioPlayer {
         id: audioPlayer
         ctrl: MainController
-        onSettings: settingDialog.open()
+        onSettings: settings.open()
     }
 
-    Dialog {
+    /*Dialog {
         id: settingDialog
         title: qsTr("Settings")
         parent: Overlay.overlay
@@ -60,7 +64,8 @@ ApplicationWindow
                 onCurrentIndexChanged: MainController.deviceIndex = output.currentIndex
                 Component.onCompleted: {
                     console.log("deviceIndex:",MainController.deviceIndex)
-                    output.currentIndex= MainController.deviceIndex
+
+                    //output.currentIndex= MainController.deviceIndex
                 }
             }
             Label {
@@ -74,15 +79,32 @@ ApplicationWindow
             }
         }
         standardButtons: Dialog.Ok
+    }*/
+
+    Drawer {
+        id: settings
+        width: 0.80 * root.width
+        height: root.height
+        edge: Qt.RightEdge
+        Settings {
+            ctrl: MainController
+            anchors.fill: parent
+            anchors.margins: 20
+        }
     }
 
     ScrollView {
+        id: scrollView
         anchors.fill: parent
+        ScrollBar.vertical.policy: MainController.smallUI ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
+        ScrollBar.vertical.width: 30
+        ScrollBar.vertical.interactive: true
         ListView {
             id: view
             anchors.fill: parent
-            anchors.rightMargin: 20
+            anchors.rightMargin: 30
             anchors.bottomMargin: 20
+            interactive: true
 
             Component.onCompleted: view.currentIndex = MainController.audioCtrl.songIndex
 
@@ -99,7 +121,8 @@ ApplicationWindow
             focus: true
             clip: true
             model: MainController.audioCtrl.filteredModel
-            delegate:  Item {
+            delegate:  Item {
+            //    color: "red"
                 width: view.width
                 height: 40
                 clip: true
@@ -152,33 +175,8 @@ ApplicationWindow
                         MainController.play(model.songIndex)
                     }
                     onClicked: (mouse)=>{
-                        if (mouse.button === Qt.RightButton)
-                             contextMenu.popup()
-                        else if(mouse.button === Qt.LeftButton)
+                        if(mouse.button === Qt.LeftButton)
                             view.currentIndex = index
-                    }
-
-                    Menu {
-                        id: contextMenu
-                        MenuItem {
-                            text: "Insert content of Directory…"
-                            onTriggered: openDir.open()
-                        }
-
-                        MenuItem {
-                          text: qsTr("Mark song to be exported")
-                          onTriggered: MainController.addToExport(model.songIndex)
-                        }
-
-                        MenuItem {
-                            text: "Insert files…"
-                            onTriggered: addAudioFiles.open()
-                        }
-
-                        MenuItem {
-                            text: "Remove current selection…"
-                            onTriggered: MainController.removeSelection()
-                        }
                     }
                 }
             }

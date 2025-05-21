@@ -25,14 +25,13 @@ AlbumPictureProvider::AlbumPictureProvider() : QQuickImageProvider(QQmlImageProv
 
 void AlbumPictureProvider::setCurrentImage(const QImage& img, const QString& id)
 {
-    //qDebug() << "AlbumPictureProvider Set Current Image &&&&&"  << id << img.isNull();
     m_expectedId= id;
     m_currentImage= img;
+    emit currentImageChanged(img);
 }
 
 QImage AlbumPictureProvider::requestImage(const QString& id, QSize* size, const QSize& requestedSize)
 {
-    //qDebug() << "AlbumPictureProvider Request image";
     Q_UNUSED(size)
     Q_UNUSED(requestedSize)
     if(id == m_expectedId)

@@ -8,9 +8,13 @@ MainController::MainController(QObject* parent)
     , m_clientCtrl(new ClientController)
     , m_audioCtrl(new AudioController)
 {
-    m_clientCtrl->setUrl(QUrl("ws://localhost:10999"));
+    m_clientCtrl->setUrl(smallUI() ? QUrl("ws://192.168.1.2:10999") : QUrl("ws://localhost:10999"));
 
     connect(m_clientCtrl.get(), &ClientController::songDataChanged, m_audioCtrl.get(), &AudioController::setContentData);
+    connect(m_clientCtrl.get(), &ClientController::imageChanged, this, [this](const QByteArray& array){
+        m_image  = QImage::fromData(array);
+        emit imageChanged();
+    });
     connect(m_clientCtrl.get(), &ClientController::songFileChanged, m_audioCtrl.get(), &AudioController::setContent);
     connect(m_clientCtrl.get(), &ClientController::seekChanged, this, &MainController::setPosition);
     connect(m_clientCtrl.get(), &ClientController::songInfoChanged, this, [this](const QJsonObject& obj) {
@@ -26,7 +30,7 @@ MainController::MainController(QObject* parent)
         auto songArray = obj[constants::json::songs].toArray();
         QList<QVariantMap> pathlist;
 
-        for (auto const& songref : songArray) {
+        for (auto const& songref : std::as_const(songArray)) {
             auto song = songref.toObject();
             pathlist.append({ { "path", song[constants::info::path].toString() },
                 { "artist", song[constants::info::artist].toString() },
@@ -98,6 +102,11 @@ void MainController::setPlayingMode(PlayingMode mode)
     m_mode = mode;
 }
 
+void MainController::find(const QString &pattern)
+{
+    m_audioCtrl->find(pattern);
+}
+
 MainController::PlayingMode MainController::mode() const
 {
     return m_mode;
@@ -165,5 +174,59 @@ QImage MainController::image() const
 
 bool MainController::hasImage() const
 {
-    return !m_img.isNull();
+    return !m_image.isNull();
+}
+
+float MainController::volume() const
+{
+    return m_volume;
+}
+
+void MainController::setVolume(float newVolume)
+{
+    if (qFuzzyCompare(m_volume, newVolume))
+        return;
+    m_volume = newVolume;
+    emit volumeChanged();
+    QHash<QString, QVariant> params;
+    params.insert(constants::volume, newVolume);
+    m_clientCtrl->sendCommand(constants::info::volume, params);
+}
+
+bool MainController::paused() const
+{
+    return static_cast<QMediaPlayer::PlaybackState>(m_playBackState) == QMediaPlayer::PausedState;
+}
+
+bool MainController::stopped() const
+{
+    return static_cast<QMediaPlayer::PlaybackState>(m_playBackState) == QMediaPlayer::StoppedState;
+}
+
+bool MainController::playing() const
+{
+    return static_cast<QMediaPlayer::PlaybackState>(m_playBackState) == QMediaPlayer::PlayingState;
+}
+
+int MainController::playBackState() const
+{
+    return m_playBackState;
+}
+
+void MainController::setPlayBackState(int newPlayBackState)
+{
+    if (m_playBackState == newPlayBackState)
+        return;
+    m_playBackState = newPlayBackState;
+    emit playBackStateChanged();
+}
+
+bool MainController::smallUI() const
+{
+    return true;
+#ifdef ANDROID
+    return true;
+#else
+    return false;
+#endif
 }

@@ -42,6 +42,7 @@ MainController::MainController(QObject* parent)
 {
     connect(m_audioCtrl.get(), &AudioController::deviceIndexChanged, this, &MainController::deviceIndexChanged);
     connect(m_audioCtrl.get(), &AudioController::hasVideoChanged, this, &MainController::hasVideoChanged);
+    connect(m_audioCtrl.get(), &AudioController::stateChanged, this, &MainController::stateChanged);
     loadSettings();
     if (!m_filename.isEmpty())
         loadFile();

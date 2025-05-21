@@ -27,12 +27,16 @@
 
 class AlbumPictureProvider : public QQuickImageProvider
 {
+    Q_OBJECT
 public:
     AlbumPictureProvider();
 
     QString id() { return m_expectedId; }
     void setCurrentImage(const QImage& img, const QString& id);
     QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize) override;
+
+signals:
+    void currentImageChanged(QImage img);
 
 private:
     QImage m_currentImage;

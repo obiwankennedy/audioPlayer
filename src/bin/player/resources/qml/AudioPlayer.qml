@@ -122,15 +122,7 @@ Frame {
                     Layout.preferredWidth: 32
                     Layout.leftMargin: 32
                 }
-                Item {
-                    Layout.fillWidth: true
-                }
-                TextField {
-                    id: find
-                    placeholderText: qsTr("Find")
-                    onEditingFinished: ctrl.find(find.text)
-                    Layout.preferredWidth: 130
-                }
+
             }
         }
     }

@@ -89,6 +89,7 @@ signals:
     void filenameChanged(QString filename);
     void deviceIndexChanged();
     void hasVideoChanged();
+    void stateChanged(const QMediaPlayer::PlaybackState& state);
 
 protected:
     void loadSettings();

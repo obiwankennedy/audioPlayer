@@ -20,6 +20,7 @@
 #include "audiofilemodel.h"
 
 #include <QImage>
+#ifndef ANDROID
 #include <taglib/attachedpictureframe.h>
 #include <taglib/fileref.h>
 #include <taglib/id3v1tag.h>
@@ -32,6 +33,7 @@
 #include <taglib/tstring.h>
 #include <taglib/vorbisfile.h>
 #include <taglib/xiphcomment.h>
+#endif
 
 #include <QtConcurrent/QtConcurrent>
 
@@ -44,6 +46,7 @@ QString timeToText(quint64 second)
 
 QImage readCoverImageFromMP3(const QString& file)
 {
+    #ifndef ANDROID
     TagLib::MPEG::File mpgTagger(file.toLocal8Bit());
     auto tagv2= mpgTagger.ID3v2Tag(true);
     if(!tagv2)
@@ -62,10 +65,15 @@ QImage readCoverImageFromMP3(const QString& file)
     QImage image;
     image.loadFromData((const uchar*)picFrame->picture().data(), picFrame->picture().size());
     return image;
+    #else
+    return {};
+    #endif
+
 }
 
 void readMetaData(const std::vector<AudioFileInfo*>& vec, AudioFileModel* model, QHash<QString, QImage>& dataImage)
 {
+    #ifndef ANDROID
     int i= 0;
     qDebug() << "Beginning meta data reading ";
     std::for_each(vec.begin(), vec.end(), [&i, &model, &dataImage](AudioFileInfo* info) {
@@ -106,6 +114,7 @@ void readMetaData(const std::vector<AudioFileInfo*>& vec, AudioFileModel* model,
         ++i;
     });
     qDebug() << "End meta data reading ";
+    #endif
 }
 
 AudioFileModel::AudioFileModel(QObject* parent) : QAbstractListModel(parent) {}

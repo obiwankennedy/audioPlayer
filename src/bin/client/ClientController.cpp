@@ -1,33 +1,32 @@
 #include "ClientController.h"
-#include "messagefactory.h"
 #include "constants.h"
-#include <QJsonObject>
+#include "messagefactory.h"
 #include <QAudioOutput>
 #include <QJsonArray>
+#include <QJsonObject>
 
-ClientController::ClientController(QObject *parent)
-    : QObject{parent}, m_socket(new QWebSocket)
+ClientController::ClientController(QObject* parent)
+    : QObject { parent }
+    , m_socket(new QWebSocket)
 {
 
     connect(m_socket, &QWebSocket::binaryMessageReceived, this, &ClientController::receivedBinaryData);
     connect(m_socket, &QWebSocket::textMessageReceived, this, &ClientController::receivedTextData);
-    connect(m_socket, &QWebSocket::connected, this, [this](){
-        if(!m_connected)
-        {
+    connect(m_socket, &QWebSocket::connected, this, [this]() {
+        if (!m_connected) {
             m_connected = true;
             emit connectedChanged();
         }
     });
-    connect(m_socket, &QWebSocket::disconnected, this, [this](){
-        if(m_connected)
-        {
+    connect(m_socket, &QWebSocket::disconnected, this, [this]() {
+        if (m_connected) {
             m_connected = false;
             emit connectedChanged();
             connectTo();
         }
     });
-    connect(m_socket, &QWebSocket::errorOccurred, this, [this](){
-        qDebug() << "error socket:"<< m_socket->errorString();
+    connect(m_socket, &QWebSocket::errorOccurred, this, [this]() {
+        qDebug() << "error socket:" << m_socket->errorString();
     });
 }
 
@@ -39,7 +38,16 @@ void ClientController::connectTo()
 void ClientController::receivedBinaryData(const QByteArray& array)
 {
     qDebug() << "data received" << array.size();
-    emit songDataChanged(array);
+    QByteArray song;
+    song.append(static_cast<quint8>(constants::DataType::MusicFile));
+
+    QByteArray img;
+    img.append(static_cast<quint8>(constants::DataType::ImageFile));
+
+    if(array.startsWith(song))
+        emit songDataChanged(array.sliced(song.size()));
+    else if(array.startsWith(img))
+        emit imageChanged(array.sliced(img.size()));
 }
 
 void ClientController::receivedTextData(const QString& message)
@@ -50,9 +58,8 @@ void ClientController::receivedTextData(const QString& message)
 
     auto obj = msg[constants::audio].toObject();
 
-    //qDebug() << "text received" << act << constants::NewSongAct;
-    switch(act)
-    {
+    // qDebug() << "text received" << act << constants::NewSongAct;
+    switch (act) {
     case constants::AudioModel:
         emit modelDataChanged(obj);
         break;
@@ -66,7 +73,9 @@ void ClientController::receivedTextData(const QString& message)
     case constants::SeekAct:
         emit seekChanged(obj[constants::info::value].toDouble());
         break;
-
+    case constants::StateAct:
+        emit stateChange(obj[constants::state].toInt());
+        break;
     default:
         break;
     }
@@ -77,7 +86,7 @@ QUrl ClientController::url() const
     return m_url;
 }
 
-void ClientController::setUrl(const QUrl &newUrl)
+void ClientController::setUrl(const QUrl& newUrl)
 {
     if (m_url == newUrl)
         return;
@@ -87,7 +96,7 @@ void ClientController::setUrl(const QUrl &newUrl)
 
 void ClientController::sendCommand(const QString& cmd, const QHash<QString, QVariant>& params)
 {
-    m_socket->sendTextMessage(factory::buildMessage(constants::audio,cmd,params));
+    m_socket->sendTextMessage(factory::buildMessage(constants::audio, cmd, params));
 }
 
 bool ClientController::connected() const

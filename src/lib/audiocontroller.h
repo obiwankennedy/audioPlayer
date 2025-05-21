@@ -21,20 +21,20 @@
 #define AUDIOCONTROLLER_H
 
 #include <QAudioOutput>
+#include <QBuffer>
 #include <QMediaPlayer>
 #include <QObject>
 #include <QPointer>
 #include <QUrl>
-#include <QBuffer>
 
 #include "albumpictureprovider.h"
 #include "audiofilemodel.h"
 #include "devicemodel.h"
 #include "filteredmodel.h"
 
+#include <QQmlEngine>
 #include <deque>
 #include <memory>
-#include <QQmlEngine>
 
 class CommandServer;
 class AudioController : public QObject {
@@ -119,6 +119,7 @@ signals:
     void albumArtChanged();
     void hasVideoChanged();
     void contentChanged();
+    void stateChanged(QMediaPlayer::PlaybackState status);
 
     void videoOutputChanged();
     void deviceIndexChanged();

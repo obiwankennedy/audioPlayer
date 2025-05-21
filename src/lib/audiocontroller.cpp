@@ -46,9 +46,10 @@ AudioController::AudioController(QObject* parent)
 {
     sCtrl = this;
     m_player->setAudioOutput(m_audioOutput.get());
-    //auto fp = &show;
-    //std::function<void(int)> f = std::bind(&AudioController::display, this, std::placeholders::_1);
+    // auto fp = &show;
+    // std::function<void(int)> f = std::bind(&AudioController::display, this, std::placeholders::_1);
 
+    connect(m_player.get(), &QMediaPlayer::playbackStateChanged, this, &AudioController::stateChanged);
     auto const& devicesList = QMediaDevices::audioOutputs();
     m_deviceIndex = devicesList.indexOf(QMediaDevices::defaultAudioOutput());
     QStringList deviceNameList;
@@ -79,11 +80,7 @@ AudioController::AudioController(QObject* parent)
         auto meta = m_player->metaData();
 
         auto keys = meta.keys();
-        auto tracks = m_player->audioTracks();
-        qDebug() << keys << title();
-        for (const auto& track : tracks) {
-            qDebug() << track.keys() << "\n";
-        }
+        //auto tracks = m_player->audioTracks();
 
         if (keys.contains(QMediaMetaData::CoverArtImage)) {
             auto img = meta.value(QMediaMetaData::CoverArtImage);
@@ -141,7 +138,7 @@ void AudioController::mediaStatus(QMediaPlayer::MediaStatus status)
     default:
         break;
     }
-    // qDebug() << "status:" << status;//BufferedMedia
+
     emit playingChanged();
 }
 
@@ -241,10 +238,10 @@ DeviceModel* AudioController::devices() const
 
 void AudioController::display(int i)
 {
-    //qDebug() << "timer:" << i;
+    // qDebug() << "timer:" << i;
 }
 
-void AudioController::setContentData(const QByteArray &data)
+void AudioController::setContentData(const QByteArray& data)
 {
     m_buffer.close();
     m_buffer.setBuffer(nullptr);
@@ -370,6 +367,7 @@ void AudioController::setMode(PlayingMode mode)
 }
 void AudioController::setVolume(float vol)
 {
+    qDebug() << "vol" << vol;
     m_audioOutput->setVolume(vol);
 }
 void AudioController::setSeek(qint64 move)
@@ -377,9 +375,9 @@ void AudioController::setSeek(qint64 move)
     m_player->setPosition(move);
 }
 
-void AudioController::setContent(const QUrl &url)
+void AudioController::setContent(const QUrl& url)
 {
-    if(url == m_content)
+    if (url == m_content)
         return;
     m_content = url;
     emit contentChanged();
@@ -397,7 +395,7 @@ QObject* AudioController::videoOutput() const
     return m_player->videoOutput();
 }
 
-void AudioController::setVideoOutput(QObject *output)
+void AudioController::setVideoOutput(QObject* output)
 {
     m_player->setVideoOutput(output);
 }

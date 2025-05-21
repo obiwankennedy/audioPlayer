@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Quick Gui DBus Svg Multimedia QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick Gui Svg Multimedia QuickControls2)
 qt_standard_project_setup(REQUIRES 6.5)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -45,22 +45,34 @@ SOURCES
     filteredmodel.cpp
     audiofilemodel.h
     audiofilemodel.cpp
-    SOURCES imagedataviewer.h imagedataviewer.cpp
+    imagedataviewer.h
+    imagedataviewer.cpp
 )
 
 add_subdirectory(worker)
 
+if(ANDROID)
 target_link_libraries(core PRIVATE
     Qt6::Core
     Qt6::Quick
     Qt6::Gui
-    Qt6::DBus
+    Qt6::Svg
+    Qt6::Multimedia
+    Qt6::QuickControls2
+    customLibplugin
+)
+else()
+target_link_libraries(core PRIVATE
+    Qt6::Core
+    Qt6::Quick
+    Qt6::Gui
     Qt6::Svg
     Qt6::Multimedia
     Qt6::QuickControls2
     PkgConfig::TAGLIB
     customLibplugin
 )
+endif()
 target_include_directories(core
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}

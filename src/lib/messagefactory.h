@@ -19,6 +19,7 @@ QJsonObject messageToObject(const QString& message);
 constants::Action actionToEnum(const QJsonObject& obj);
 
 QByteArray fileToArray(const QString& file);
+QByteArray imageToArray(const QImage& img);
 };
 
 #endif // MESSAGEFACTORY_H
