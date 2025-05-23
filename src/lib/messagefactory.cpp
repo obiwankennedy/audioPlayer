@@ -47,6 +47,7 @@ QJsonArray model2Parameter(AudioFileModel* model)
         info[constants::info::title] = s->m_title;
         info[constants::info::artist] = s->m_artist;
         info[constants::info::path] = s->m_filepath;
+        info[constants::info::tags] = QJsonArray::fromStringList(s->m_tags);
         info[constants::info::index] = i;
         ++i;
         res.append(info);
@@ -83,6 +84,8 @@ constants::Action actionToEnum(const QJsonObject& obj)
         { constants::state, constants::StateAct },
         { constants::streamMusic, constants::StreamMusicAct },
         { constants::playOnServer, constants::PlayOnServerAct },
+        { constants::setTag, constants::SetTagAct },
+        { constants::RemoveTag, constants::RemoveTagAct },
         { constants::next, constants::NextAct }
     };
 

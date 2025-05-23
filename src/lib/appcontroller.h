@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef MAINCONTROLLER_H
-#define MAINCONTROLLER_H
+#ifndef APPCONTROLLER_H
+#define APPCONTROLLER_H
 
 #include <QAbstractItemModel>
 #include <QObject>
@@ -31,7 +31,8 @@
 #include "audiofilemodel.h"
 #include "filteredmodel.h"
 
-class MainController : public QObject {
+class AppController : public QObject
+{
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
@@ -46,21 +47,20 @@ class MainController : public QObject {
     Q_PROPERTY(bool hasVideo READ hasVideo NOTIFY hasVideoChanged FINAL)
 
 public:
-    explicit MainController(QObject* parent);
-    MainController(const MainController&) = delete;
-    MainController(MainController&&) = delete;
-    MainController& operator=(const MainController&) = delete;
-    MainController& operator=(MainController&&) = delete;
-    virtual ~MainController() override;
+    explicit AppController(QObject* parent);
+    virtual ~AppController() override;
 
     QString filename() const { return m_filename; }
     QStringList recentFiles() const;
+
+
 
     FilteredModel* filteredModel() const;
     AudioController* audioCtrl() const;
 
     QAbstractItemModel* model() const;
     AudioFileModel* audioModel() const;
+
 
     void saveSettings();
 
@@ -69,12 +69,11 @@ public:
 
     bool hasVideo() const;
 
-    static MainController* create(QQmlEngine* qmlEngine, QJSEngine* jsEngine);
+    static AppController* create(QQmlEngine* qmlEngine, QJSEngine* jsEngine);
 
 public slots:
     void addFiles(const QList<QUrl>& file, int idx);
     void addDirectory(int idx, const QString& url);
-    // void exploreDir(const QString& path);
     void saveFile();
     void loadFile();
     void resetData();
@@ -100,4 +99,4 @@ private:
     QStringList m_recentFiles;
 };
 
-#endif // MAINCONTROLLER_H
+#endif // APPCONTROLLER_H

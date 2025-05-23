@@ -8,7 +8,7 @@
 ServerManager::ServerManager(QObject* parent)
     : QObject { parent }
     , m_server(new QWebSocketServer("MusicServer", QWebSocketServer::NonSecureMode, this))
-    , m_ctrl(new MainController(nullptr))
+    , m_ctrl(new AppController(nullptr))
 {
     auto audio = m_ctrl->audioCtrl();
     auto imgs = audio->pictureProvider();
@@ -146,6 +146,22 @@ void ServerManager::processText(const QString& message)
         break;
     case constants::Action::PlayOnServerAct:
         m_streamMusic = false;
+        break;
+    case constants::Action::RemoveTagAct:
+    {
+        auto tag = params[constants::tag].toString();
+        auto forbidden = params[constants::forbidden].toBool();
+        qDebug() << "Remove tag act" <<tag << forbidden;
+        audio->filteredTagModel()->removeTag(tag,forbidden);
+    }
+        break;
+    case constants::Action::SetTagAct:
+    {
+        auto tag = params[constants::tag].toString();
+        auto forbidden = params[constants::forbidden].toBool();
+        qDebug() << "add tag act" <<tag << forbidden;
+        audio->filteredTagModel()->addTag(tag,forbidden);
+    }
         break;
     default:
         break;

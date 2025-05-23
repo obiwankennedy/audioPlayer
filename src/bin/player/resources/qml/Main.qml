@@ -23,10 +23,10 @@ ApplicationWindow {
     menuBar: MenuBar {
         id: menu
         FileMenu {
-            ctrl: MainController
+            ctrl: AppController
         }
         EditMenu {
-            ctrl:MainController
+            ctrl:AppController
             darkMode: root.darkMode
             onDarkModeChanged: root.darkMode = darkMode
             onHidePlayer: audioPlayer.visible = !audioPlayer.visible
@@ -35,7 +35,7 @@ ApplicationWindow {
 
     header: AudioPlayer {
         id: audioPlayer
-        ctrl: MainController.audioCtrl
+        ctrl: AppController.audioCtrl
         onSettings: settingDialog.open()
         //height: 50
     }
@@ -47,8 +47,8 @@ ApplicationWindow {
         fileMode: FileDialog.OpenFile
         nameFilters: ["Playlist (*.apl *.m3u)"]
         onAccepted: {
-            MainController.setFilename(openDialog.selectedFile)
-            MainController.loadFile();
+            AppController.setFilename(openDialog.selectedFile)
+            AppController.loadFile();
             close()
         }
         onRejected: close()
@@ -59,7 +59,7 @@ ApplicationWindow {
         title: qsTr("Add directory at selection")
         currentFolder: StandardPaths.writableLocation(StandardPaths.MusicLocation)
         onAccepted: {
-            MainController.addDirectory(view.currentIndex,openDir.selectedFolder);
+            AppController.addDirectory(view.currentIndex,openDir.selectedFolder);
             close()
         }
         onRejected: close()
@@ -72,7 +72,7 @@ ApplicationWindow {
         fileMode: FileDialog.OpenFiles
         nameFilters: ["Audiofiles (*.mp3 *.mpc *.flac *.ogg *.wma)"]
         onAccepted: {
-            MainController.addFiles(addAudioFiles.selectedFiles, view.currentIndex);
+            AppController.addFiles(addAudioFiles.selectedFiles, view.currentIndex);
             close()
         }
         onRejected: close()
@@ -86,160 +86,45 @@ ApplicationWindow {
         defaultSuffix: "apl"
         nameFilters: ["Playlist (*.apl)"]
         onAccepted: {
-            MainController.setFilename(saveDialog.selectedFile)
-            MainController.saveFile();
+            AppController.setFilename(saveDialog.selectedFile)
+            AppController.saveFile();
             close()
         }
         onRejected: close()
     }
 
-    Dialog {
-        id: settingDialog
-        title: qsTr("Settings")
-        parent: Overlay.overlay
-        x: Math.round((parent.width - width) / 2)
-        y: Math.round((parent.height - height) / 2)
-        GridLayout {
 
-            columns: 2
-            Label {
-                text: qsTr("Audio output")
-            }
-
-            ComboBox {
-                id: output
-                Layout.preferredWidth: 200
-                model: MainController.outputModel
-                textRole: "display"
-                onCurrentIndexChanged: MainController.deviceIndex = output.currentIndex
-                Component.onCompleted: {
-                    console.log("deviceIndex:",MainController.deviceIndex)
-                    output.currentIndex= MainController.deviceIndex
-                }
-            }
-            Label {
-                text: qsTr("Refresh the list")
-            }
-
-            Button {
-                id: refresh
-                icon.name: "view-refresh"
-                onClicked: MainController.audioCtrl.updateAudioDevices()
-            }
-        }
-        standardButtons: Dialog.Ok
+    ContextMenu {
+        id: contextMenu
     }
 
-
-
-    ScrollView {
+    PlayList {
+        id: playList
         anchors.fill: parent
-        ListView {
-            id: view
-            anchors.fill: parent
-            anchors.rightMargin: 20
-            anchors.bottomMargin: 20
+        onClickOnItem: (index, tags, selected, mouse) => {
+                           console.log("ClickOn item",tags," i:",index," s:",selected)
+                           if (mouse.button === Qt.RightButton) {
+                               contextMenu.tagsList = tags
+                               contextMenu.songIndex = index
+                               contextMenu.popup()
+                           }
+                           else if(mouse.button === Qt.LeftButton && mouse.modifiers === Qt.NoModifier){
+                               AppController.model.clearSelection()
+                               playList.currentIndex = index
+                               AppController.model.select([index])
+                           }
+                           else if(mouse.button === Qt.LeftButton && mouse.modifiers === Qt.ShiftModifier) {
+                               console.log("Select elements")
+                               let ids = []
+                               let max = Math.max(index, playList.currentIndex)
+                               let min = Math.min(index, playList.currentIndex)
+                               for(let i = min; i < max+1; ++i )
+                                    ids.push(i)
 
-            Component.onCompleted: view.currentIndex = MainController.audioCtrl.songIndex
-
-            highlightMoveDuration: 20
-
-            highlight: Rectangle { color: Universal.accent; radius: 5 }
-
-            Connections {
-                target: MainController.audioCtrl
-                function onSongIndexChanged() {
-                    view.positionViewAtIndex(MainController.audioCtrl.songIndex, ListView.Center)//view.ensureVisible(ctrl.audioCtrl.songIndex)
-                }
-            }
-            focus: true
-            clip: true
-            model: MainController.filteredModel
-            delegate:  Item {
-                width: view.width
-                height: 40
-                clip: true
-                Frame {
-                    id: control
-                    width: view.width
-                    height: 40
-
-                    RowLayout {
-                        id: lyt
-                        anchors.fill: parent
-                        Label {//title
-                            text: title
-                            Layout.preferredWidth: lyt.width/2
-                            font.bold: MainController.audioCtrl.songIndex === model.songIndex
-                            clip: true
-                        }
-                        Label {//artist
-                            text: artist
-                            Layout.fillWidth: true
-                            font.bold: MainController.audioCtrl.songIndex === model.songIndex
-                        }
-                        Label {//time
-                            text: time
-                            font.bold: MainController.audioCtrl.songIndex === model.songIndex
-                        }
-                    }
-
-                    background: Rectangle {
-                      color: model.isSelectedForExport ? "darkgreen" : "transparent"
-                      //border.width: 1
-                      border.color: control.Universal.chromeDisabledLowColor
-                    }
-                }
-                ProgressBar {
-                    height: 1
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    from: 0
-                    to: MainController.audioCtrl.duration
-                    value: MainController.audioCtrl.seek
-                    visible: MainController.audioCtrl.songIndex === model.songIndex
-
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    onDoubleClicked:{
-                        MainController.audioCtrl.songIndex = model.songIndex;
-                        MainController.audioCtrl.play()
-                    }
-                    onClicked: (mouse)=>{
-                        if (mouse.button === Qt.RightButton)
-                             contextMenu.popup()
-                        else if(mouse.button === Qt.LeftButton)
-                            view.currentIndex = index
-                    }
-
-                    Menu {
-                        id: contextMenu
-                        MenuItem {
-                            text: "Insert content of Directory…"
-                            onTriggered: openDir.open()
-                        }
-
-                        MenuItem {
-                          text: qsTr("Mark song to be exported")
-                          onTriggered: MainController.addToExport(model.songIndex)
-                        }
-
-                        MenuItem {
-                            text: "Insert files…"
-                            onTriggered: addAudioFiles.open()
-                        }
-
-                        MenuItem {
-                            text: "Remove current selection…"
-                            onTriggered: MainController.removeSelection()
-                        }
-                    }
-                }
-            }
-        }
+                               console.log("Ids: ",ids.join(','))
+                               AppController.model.select(ids)
+                           }
+                       }
     }
 
 

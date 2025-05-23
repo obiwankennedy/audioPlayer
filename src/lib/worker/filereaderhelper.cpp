@@ -73,13 +73,14 @@ void FileReaderHelper::writeAudioList(const QString& filename, AudioFileModel* m
         obj["artist"]= song->m_artist;
         obj["album"]= song->m_album;
         obj["time"]= static_cast<long long int>(song->m_time);
+        obj["tags"] = QJsonArray::fromStringList(song->m_tags);
         array.append(obj);
     }
 
     auto images= model->dataImage();
     auto keys= images->keys();
     QJsonArray imgArray;
-    for(auto const& key : qAsConst(keys))
+    for(auto const& key : std::as_const(keys))
     {
         auto value= images->value(key);
         if(value.isNull())
@@ -119,19 +120,20 @@ void FileReaderHelper::readAudioList(const QString& filename, AudioFileModel* mo
 
     auto array= mainObj["songs"].toArray();
     QList<QVariantMap> vec;
-    for(auto const& value : qAsConst(array))
+    for(auto const& value : std::as_const(array))
     {
         auto obj= value.toObject();
         vec.append(QVariantMap({{"path", obj["path"].toString()},
                                 {"title", obj["title"].toString()},
                                 {"artist", obj["artist"].toString()},
                                 {"album", obj["album"].toString()},
+                                {"tags", obj["tags"].toArray().toVariantList()},
                                 {"time", obj["time"].toInt()}}));
     }
 
     auto images= model->dataImage();
     auto imgarray= mainObj["images"].toArray();
-    for(auto const& imageObjRef : qAsConst(imgarray))
+    for(auto const& imageObjRef : std::as_const(imgarray))
     {
         auto obj= imageObjRef.toObject();
 
@@ -154,12 +156,13 @@ std::vector<QString> FileReaderHelper::findAllAudioFiles(const QString& dir)
                                               << "*.flac"
                                               << "*.ogg",
                                 QDir::Files);
-    for(const QString &s : list)
+    for(const QString &s : std::as_const(list))
     {
         vec.push_back(direct.absoluteFilePath(s));
     }
 
-    for(const QString &p : direct.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+    auto entries = direct.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for(const QString &p : std::as_const(entries))
     {
         auto vec1= findAllAudioFiles(direct.absoluteFilePath(p));
         vec.insert(vec.end(), vec1.begin(), vec1.end());
@@ -185,7 +188,7 @@ void FileReaderHelper::exportFileToDirectory(AudioFileModel* model)
     if(!proc.waitForFinished())
         return;
 
-    /*for(const auto& song : qAsConst(songPaths))
+    /*for(const auto& song : std::as_const(songPaths))
     {
         qDebug() << QString("http://blog.rolisteam.org/file/export_music/%1").arg(song);
     }*/

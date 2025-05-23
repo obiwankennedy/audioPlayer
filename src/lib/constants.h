@@ -22,7 +22,9 @@ enum Action {
     NewSongAct,
     SeekAct,
     SetVolumeAct,
-    StateAct
+    StateAct,
+    SetTagAct,
+    RemoveTagAct
 };
 
 enum class DataType : quint8 {
@@ -42,6 +44,7 @@ namespace info {
     constexpr auto album { "album" };
     constexpr auto artist { "artist" };
     constexpr auto path { "path" };
+    constexpr auto tags { "tags" };
     constexpr auto title { "title" };
     constexpr auto time { "time" };
     constexpr auto index { "index" };
@@ -60,6 +63,8 @@ constexpr auto stop { "stop" };
 constexpr auto pause { "pause" };
 constexpr auto random { "random" };
 constexpr auto loop { "loop" };
+constexpr auto setTag { "setTag" };
+constexpr auto RemoveTag { "rmTag" };
 constexpr auto unique { "unique" };
 constexpr auto forward { "forward" };
 constexpr auto select { "select" };
@@ -72,6 +77,8 @@ constexpr auto playOnServer { "playOnServer" };
 constexpr auto seek { "seek" };
 constexpr auto volume { "volume" };
 constexpr auto state { "state" };
+constexpr auto tag { "tag" };
+constexpr auto forbidden { "forbidden" };
 
 // field
 constexpr auto sampleRate { "sampleRate" };

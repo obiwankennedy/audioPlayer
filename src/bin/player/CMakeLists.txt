@@ -24,7 +24,10 @@ QML_FILES
     resources/qml/AudioPlayer.qml
     resources/qml/EditMenu.qml
     resources/qml/FileMenu.qml
+    resources/qml/ContextMenu.qml
     resources/qml/ImageButton.qml
+    resources/qml/PlayList.qml
+    resources/qml/TagsFilter.qml
     resources/qml/Main.qml
 )
 

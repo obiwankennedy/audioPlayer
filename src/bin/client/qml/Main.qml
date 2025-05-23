@@ -87,7 +87,6 @@ ApplicationWindow
         height: root.height
         edge: Qt.RightEdge
         Settings {
-            ctrl: MainController
             anchors.fill: parent
             anchors.margins: 20
         }
@@ -120,7 +119,7 @@ ApplicationWindow
             }
             focus: true
             clip: true
-            model: MainController.audioCtrl.filteredModel
+            model: MainController.audioCtrl.filteredModel //filteredModel  filteredTagModel
             delegate:  Item {
             //    color: "red"
                 width: view.width
@@ -152,7 +151,7 @@ ApplicationWindow
                     }
 
                     background: Rectangle {
-                      color: model.isSelectedForExport ? "darkgreen" : "transparent"
+                      color: model.selected ? "#0b3d8c" : model.isSelectedForExport ? "darkgreen" : "transparent"
                       //border.width: 1
                       border.color: control.Universal.chromeDisabledLowColor
                     }

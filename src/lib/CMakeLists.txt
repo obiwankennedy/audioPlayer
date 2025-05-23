@@ -8,7 +8,7 @@ find_package(PkgConfig)
 pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib)
 set(CMAKE_AUTORCC ON)
 
-set(source maincontroller.cpp
+set(source appcontroller.cpp
     albumpictureprovider.cpp
     artcoverimage.cpp
     commandserver.cpp
@@ -18,7 +18,7 @@ set(source maincontroller.cpp
     worker/filereaderhelper.cpp
     )
 
-set(header maincontroller.h
+set(header appcontroller.h
     albumpictureprovider.h
     artcoverimage.h
     commandserver.h
@@ -37,8 +37,8 @@ URI
 VERSION
     1.0
 SOURCES
-    maincontroller.h
-    maincontroller.cpp
+appcontroller.h
+appcontroller.cpp
     audiocontroller.h
     audiocontroller.cpp
     filteredmodel.h
@@ -47,6 +47,7 @@ SOURCES
     audiofilemodel.cpp
     imagedataviewer.h
     imagedataviewer.cpp
+    SOURCES tagmodel.h tagmodel.cpp
 )
 
 add_subdirectory(worker)

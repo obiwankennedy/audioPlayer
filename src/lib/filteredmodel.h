@@ -23,6 +23,28 @@
 #include <QSortFilterProxyModel>
 #include <QQmlEngine>
 
+class TagFilteredModel : public QSortFilterProxyModel
+{
+    Q_OBJECT
+    QML_ELEMENT
+public:
+    explicit TagFilteredModel(QObject* parent= nullptr);
+
+    int songIndexToSource(int songIndex);
+
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+
+public slots:
+    void addTag(const QString& tag, bool forbidden = false);
+    void removeTag(const QString& tag, bool forbidden = false);
+
+
+private:
+    QSet<QString> m_allowed;
+    QSet<QString> m_forbidden;
+};
+
 class FilteredModel : public QSortFilterProxyModel
 {
     Q_OBJECT
@@ -31,8 +53,10 @@ public:
     explicit FilteredModel(QObject* parent= nullptr);
 
     QString search() const;
-    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
     void setSearch(const QString& search);
+
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
 private:
     QString m_search;

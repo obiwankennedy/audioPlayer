@@ -36,6 +36,7 @@ MainController::MainController(QObject* parent)
                 { "artist", song[constants::info::artist].toString() },
                 { "album", song[constants::info::album].toString() },
                 { "title", song[constants::info::title].toString() },
+                { "tags", song[constants::info::tags].toArray().toVariantList() },
                 { "time", song[constants::info::time].toInt() } });
         }
         model->appendSongs(pathlist);
@@ -107,6 +108,22 @@ void MainController::find(const QString &pattern)
     m_audioCtrl->find(pattern);
 }
 
+void MainController::filterTag(const QString &tag, bool forbidden)
+{
+    QHash<QString, QVariant> params;
+    params.insert(constants::tag, tag);
+    params.insert(constants::forbidden, forbidden);
+    m_clientCtrl->sendCommand(constants::setTag, params);
+}
+
+void MainController::removeFilterTag(const QString &tag, bool forbidden)
+{
+    QHash<QString, QVariant> params;
+    params.insert(constants::tag, tag);
+    params.insert(constants::forbidden, forbidden);
+    m_clientCtrl->sendCommand(constants::RemoveTag, params);
+}
+
 MainController::PlayingMode MainController::mode() const
 {
     return m_mode;
@@ -137,7 +154,6 @@ qreal MainController::position() const
 
 void MainController::setPosition(qreal newPosition)
 {
-    // qDebug() << "position" << newPosition << m_syncWithServer << m_duration;
     if (qFuzzyCompare(m_position, newPosition))
         return;
 

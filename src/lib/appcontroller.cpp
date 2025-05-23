@@ -17,7 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "maincontroller.h"
+#include "appcontroller.h"
 #include "audiocontroller.h"
 #include "audiofilemodel.h"
 
@@ -29,61 +29,61 @@
 
 #include "worker/filereaderhelper.h"
 
-MainController* MainController::create(QQmlEngine* qmlEngine, QJSEngine* jsEngine)
+AppController* AppController::create(QQmlEngine* qmlEngine, QJSEngine* jsEngine)
 {
-    auto ctrl = new MainController(nullptr);
+    auto ctrl = new AppController(nullptr);
     qmlEngine->addImageProvider("album", ctrl->audioCtrl()->pictureProvider());
     return ctrl;
 }
 
-MainController::MainController(QObject* parent)
+AppController::AppController(QObject* parent)
     : QObject(parent)
     , m_audioCtrl(new AudioController)
 {
-    connect(m_audioCtrl.get(), &AudioController::deviceIndexChanged, this, &MainController::deviceIndexChanged);
-    connect(m_audioCtrl.get(), &AudioController::hasVideoChanged, this, &MainController::hasVideoChanged);
-    connect(m_audioCtrl.get(), &AudioController::stateChanged, this, &MainController::stateChanged);
+    connect(m_audioCtrl.get(), &AudioController::deviceIndexChanged, this, &AppController::deviceIndexChanged);
+    connect(m_audioCtrl.get(), &AudioController::hasVideoChanged, this, &AppController::hasVideoChanged);
+    connect(m_audioCtrl.get(), &AudioController::stateChanged, this, &AppController::stateChanged);
     loadSettings();
     if (!m_filename.isEmpty())
         loadFile();
 }
 
-QStringList MainController::recentFiles() const
+QStringList AppController::recentFiles() const
 {
     return m_recentFiles;
 }
 
-FilteredModel* MainController::filteredModel() const
+FilteredModel* AppController::filteredModel() const
 {
     return m_audioCtrl->filteredModel();
 }
 
-AudioController* MainController::audioCtrl() const
+AudioController* AppController::audioCtrl() const
 {
     return m_audioCtrl.get();
 }
 
-MainController::~MainController()
+AppController::~AppController()
 {
     saveSettings();
 }
 
-QAbstractItemModel* MainController::model() const
+QAbstractItemModel* AppController::model() const
 {
     return m_audioCtrl->model();
 }
 
-AudioFileModel* MainController::audioModel() const
+AudioFileModel* AppController::audioModel() const
 {
     return m_audioCtrl->model();
 }
 
-void MainController::resetData()
+void AppController::resetData()
 {
     m_audioCtrl->resetModel();
 }
 
-void MainController::setFilename(QString filename)
+void AppController::setFilename(QString filename)
 {
     if (m_filename == filename)
         return;
@@ -93,25 +93,25 @@ void MainController::setFilename(QString filename)
     emit filenameChanged(m_filename);
 }
 
-void MainController::addToExport(int songIndex)
+void AppController::addToExport(int songIndex)
 {
     auto model = audioModel();
     model->addToExport(songIndex);
 }
 
-void MainController::resetExport()
+void AppController::resetExport()
 {
     auto model = audioModel();
     model->cleanExportList();
 }
 
-void MainController::exportList()
+void AppController::exportList()
 {
     FileReaderHelper::exportFileToDirectory(audioModel());
     resetExport();
 }
 
-void MainController::removeSelection()
+void AppController::removeSelection()
 {
     auto fmodel = filteredModel();
     if (fmodel->search().isEmpty())
@@ -127,12 +127,12 @@ void MainController::removeSelection()
     model->removeSongs(idxs);
 }
 
-void MainController::setDeviceIndex(int index)
+void AppController::setDeviceIndex(int index)
 {
     m_audioCtrl->setDeviceIndex(index);
 }
 
-void MainController::loadFile()
+void AppController::loadFile()
 {
     if (m_filename.endsWith("m3u"))
         FileReaderHelper::readM3u(m_filename, m_audioCtrl->model());
@@ -143,7 +143,7 @@ void MainController::loadFile()
     saveSettings();
 }
 
-void MainController::saveFile()
+void AppController::saveFile()
 {
     if (!m_filename.endsWith(".apl"))
         m_filename.append(".apl");
@@ -151,7 +151,7 @@ void MainController::saveFile()
     saveSettings();
 }
 
-void MainController::saveSettings()
+void AppController::saveSettings()
 {
     QSettings setting("AudioPlayer", "AudioPlayer");
 
@@ -160,7 +160,7 @@ void MainController::saveSettings()
     setting.setValue("lastPlayedSong", m_audioCtrl->songIndex());
 }
 
-void MainController::loadSettings()
+void AppController::loadSettings()
 {
     QSettings setting("AudioPlayer", "AudioPlayer");
     m_recentFiles = setting.value("recentFiles").toStringList();
@@ -169,7 +169,7 @@ void MainController::loadSettings()
     m_audioCtrl->setSongIndex(songIdx);
 }
 
-void MainController::addFiles(const QList<QUrl>& files, int idx)
+void AppController::addFiles(const QList<QUrl>& files, int idx)
 {
     std::vector<QString> list;
     std::transform(files.begin(), files.end(), std::back_inserter(list),
@@ -178,24 +178,24 @@ void MainController::addFiles(const QList<QUrl>& files, int idx)
     model->insertSongAt(idx, list);
 }
 
-void MainController::addDirectory(int idx, const QString& url)
+void AppController::addDirectory(int idx, const QString& url)
 {
     auto vec = FileReaderHelper::findAllAudioFiles(QUrl(url).toLocalFile());
     auto model = m_audioCtrl->model();
     model->insertSongAt(idx, vec);
 }
 
-QAbstractItemModel* MainController::outputModel() const
+QAbstractItemModel* AppController::outputModel() const
 {
     return m_audioCtrl->devices();
 }
 
-int MainController::deviceIndex() const
+int AppController::deviceIndex() const
 {
     return m_audioCtrl->deviceIndex();
 }
 
-bool MainController::hasVideo() const
+bool AppController::hasVideo() const
 {
     return m_audioCtrl->hasVideo();
 }

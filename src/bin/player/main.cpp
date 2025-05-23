@@ -26,7 +26,7 @@
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
-#include "maincontroller.h"
+#include "appcontroller.h"
 
 
 int main(int argc, char* argv[])
@@ -46,6 +46,12 @@ int main(int argc, char* argv[])
                 QCoreApplication::exit(-1);
         },
         Qt::QueuedConnection);
+
+    QObject::connect(        &engine, &QQmlApplicationEngine::warnings, &app,
+                     [](const QList<QQmlError>& warning) {
+                         for(auto w : warning)
+            qDebug() << "warning:" << w.toString();
+    });
 
     engine.loadFromModule("Views", "Main");
 

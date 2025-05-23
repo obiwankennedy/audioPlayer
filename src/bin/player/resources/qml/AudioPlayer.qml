@@ -26,12 +26,12 @@ Frame {
                 source: ctrl.albumArt ? "image://album/%1".arg(ctrl.albumArt) : "qrc:/resources/icons/Album.svg"
                 sourceSize.width: 100
                 sourceSize.height: 100
-                visible: !MainController.hasVideo
+                visible: !AppController.hasVideo
             }
             VideoOutput {
                 id: videoOutputImage
                 anchors.fill: parent
-                visible: MainController.hasVideo
+                visible: AppController.hasVideo
                 fillMode: VideoOutput.PreserveAspectFit
             }
         }
@@ -115,14 +115,24 @@ Frame {
                     Layout.preferredWidth: 32
                 }
                 ImageButton {
-                    onClicked: _root.settings()
+                    onClicked: tagsFilter.open()
                     source: "qrc:/resources/icons/settings.svg"
                     rotation: -90
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 32
                     Layout.leftMargin: 32
+
+                    TagsFilter {
+                        id: tagsFilter
+                    }
                 }
 
+    TextField {
+        id: find
+        placeholderText: qsTr("Find")
+        onEditingFinished: ctrl.find(find.text)
+        Layout.preferredWidth: 130
+    }
             }
         }
     }

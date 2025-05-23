@@ -21,7 +21,10 @@
 
 #include "audiofilemodel.h"
 
-FilteredModel::FilteredModel(QObject* parent) : QSortFilterProxyModel(parent) {}
+FilteredModel::FilteredModel(QObject* parent) : QSortFilterProxyModel(parent)
+{
+    setDynamicSortFilter(true);
+}
 
 QString FilteredModel::search() const
 {
@@ -42,4 +45,77 @@ void FilteredModel::setSearch(const QString& search)
 {
     m_search= search;
     invalidateFilter();
+}
+
+///////////////////////
+/// \brief TagFilteredModel::TagFilteredModel
+/// \param parent
+//////////////////////
+TagFilteredModel::TagFilteredModel(QObject *parent)
+{
+setDynamicSortFilter(true);
+}
+
+bool TagFilteredModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    if(m_allowed.isEmpty() && m_forbidden.isEmpty())
+        return true;
+
+    QModelIndex index= sourceModel()->index(sourceRow, 0, sourceParent);
+    auto title= index.data(AudioFileModel::TitleRole).toString();
+    auto tags= index.data(AudioFileModel::TagsRole).toStringList();
+
+    auto isAllowed = [this](const QStringList& tags){
+        if(m_allowed.isEmpty())
+            return true;
+        bool res = false;
+        for(auto const& tag : tags)
+        {
+            if(m_allowed.contains(tag))
+                res = true;
+        }
+        return res;
+    };
+
+    auto isForbidden = [this](const QStringList& tags){
+              if(m_forbidden.isEmpty())
+                  return false;
+              bool res = false;
+              for(auto const& tag : tags)
+              {
+                  if(m_forbidden.contains(tag))
+                      res = true;
+              }
+              return res;
+    };
+
+    return isAllowed(tags) && !isForbidden(tags);
+
+}
+
+void TagFilteredModel::addTag(const QString &tag, bool forbidden)
+{
+    if(forbidden)
+        m_forbidden.insert(tag);
+    else
+        m_allowed.insert(tag);
+
+    invalidateFilter();
+}
+
+void TagFilteredModel::removeTag(const QString &tag, bool forbidden)
+{
+    if(forbidden)
+        m_forbidden.remove(tag);
+    else
+        m_allowed.remove(tag);
+
+    invalidateFilter();
+}
+
+int TagFilteredModel::songIndexToSource(int songIndex)
+{
+    auto c = mapToSource(index(songIndex, 0, QModelIndex()));
+    qDebug() << "songIndex: " << songIndex << " - " << c.row();
+    return c.data(AudioFileModel::IndexRole).toInt();;
 }

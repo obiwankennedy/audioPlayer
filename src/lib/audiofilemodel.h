@@ -35,6 +35,7 @@ struct AudioFileInfo
     QString m_title;
     QString m_album;
     quint64 m_time; // in second
+    QStringList m_tags;
 };
 
 class AudioFileModel : public QAbstractListModel
@@ -50,7 +51,9 @@ public:
         AlbumRole,
         TimeRole,
         IndexRole,
-        ExportSelectedRole
+        ExportSelectedRole,
+        TagsRole,
+        SelectedRole
     };
 
     explicit AudioFileModel(QObject* parent= nullptr);
@@ -75,6 +78,7 @@ public:
 
     void insertSongAt(int i, const std::vector<QString>& vec);
     void resetModel();
+    void addTag(const QString& tag);
 
     void addToExport(int i);
     void cleanExportList();
@@ -83,9 +87,18 @@ public:
 
     QHash<QString, QImage>* dataImage();
 
+
+public slots:
+    void clearSelection();
+    void select(const QList<int> &ids);
+    void unselect(const QList<int> &ids);
+    void refreshMetaData();
+
+
 private:
     std::vector<std::unique_ptr<AudioFileInfo>> m_data;
     std::vector<int> m_selectedToExport;
+    QSet<int> m_selection;
     QHash<QString, QImage> m_dataImage;
 };
 

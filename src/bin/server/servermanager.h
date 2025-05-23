@@ -6,7 +6,7 @@
 #include <QWebSocket>
 #include <QWebSocketServer>
 #include <memory.h>
-#include "maincontroller.h"
+#include "appcontroller.h"
 #include "websocketdecoder.h"
 
 class ServerManager : public QObject
@@ -35,7 +35,7 @@ signals:
 private:
     std::unique_ptr<QWebSocketServer> m_server;
     std::vector<QWebSocket*> m_clients;
-    std::unique_ptr<MainController> m_ctrl;
+    std::unique_ptr<AppController> m_ctrl;
     bool m_streamMusic{false};
     int m_port{10999};
 };

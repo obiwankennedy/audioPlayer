@@ -155,13 +155,19 @@ QVariant AudioFileModel::data(const QModelIndex& index, int role) const
     case IndexRole:
         var= index.row();
         break;
+    case SelectedRole:
+        //qDebug() << "selceted;" << m_selection;
+        var= m_selection.contains(index.row());
+        break;
     case ExportSelectedRole:
     {
         auto it= std::find(std::begin(m_selectedToExport), std::end(m_selectedToExport), index.row());
         var= (it != std::end(m_selectedToExport));
-        break;
     }
     break;
+    case TagsRole:
+        var = item->m_tags;
+        break;
     }
 
     return var;
@@ -173,7 +179,7 @@ bool AudioFileModel::appendSongs(const QList<QVariantMap>& pathlist)
     std::for_each(pathlist.begin(), pathlist.end(), [this](const QVariantMap& map) {
         std::unique_ptr<AudioFileInfo> info(
             new AudioFileInfo({map["path"].toString(), map["artist"].toString().trimmed(),
-                               map["title"].toString().trimmed(), map["album"].toString(), map["time"].toUInt()}));
+                               map["title"].toString().trimmed(), map["album"].toString(), map["time"].toUInt(),map["tags"].toStringList()}));
         m_data.push_back(std::move(info));
     });
     endInsertRows();
@@ -187,6 +193,21 @@ AudioFileInfo* AudioFileModel::songInfoAt(int index) const
         return nullptr;
 
     return m_data.at(static_cast<std::size_t>(index)).get();
+}
+
+void AudioFileModel::addTag(const QString& tag)
+{
+    std::for_each(std::begin(m_selection), std::end(m_selection), [this, tag](int idx){
+        auto s = songInfoAt(idx);
+        if(!s)
+            return;
+        if(s->m_tags.contains(tag))
+            s->m_tags.removeAll(tag);
+        else
+            s->m_tags.append(tag);
+
+        emit dataChanged(index(idx),index(idx),QList<int>(TagsRole));
+    });
 }
 
 bool AudioFileModel::removeSongs(const std::vector<int>& songs)
@@ -207,6 +228,8 @@ QHash<int, QByteArray> AudioFileModel::roleNames() const
                                         {TimeRole, "time"},
                                         {AlbumRole, "album"},
                                         {IndexRole, "songIndex"},
+                                        {TagsRole, "tags"},
+                                        {SelectedRole, "selected"},
                                         {ExportSelectedRole, "isSelectedForExport"}});
     return hash;
 }
@@ -224,7 +247,7 @@ void AudioFileModel::infoUpdated(int i)
 {
     emit dataChanged(index(i, 0), index(i, 0), QVector<int>() << ArtistRole << TitleRole << TimeRole);
 }
-
+#include <QThreadPool>
 void AudioFileModel::insertSongAt(int i, const std::vector<QString>& vec)
 {
 
@@ -245,7 +268,33 @@ void AudioFileModel::insertSongAt(int i, const std::vector<QString>& vec)
     }
     endInsertRows();
 
-    QtConcurrent::run([this, songs]() { readMetaData(songs, this, m_dataImage); });
+    QThreadPool::globalInstance()->start([this, songs]() { readMetaData(songs, this, m_dataImage); });
+}
+
+void AudioFileModel::refreshMetaData()
+{
+    int min=-1;
+    int max=-1;
+    std::vector<AudioFileInfo*> songs;
+    for(auto i : std::as_const(m_selection))
+    {
+        if(min < 0)
+            min = i;
+        if(max < 0)
+            max = i;
+
+        auto s = songInfoAt(i);
+        songs.push_back(s);
+        min = std::min(min, i);
+        max = std::max(max, i);
+    }
+
+    QThreadPool::globalInstance()->start([this, songs, min, max]() {
+        readMetaData(songs, this, m_dataImage);
+        emit dataChanged(index(min), index(max), QVector<int>{});
+    });
+
+
 }
 
 void AudioFileModel::resetModel()
@@ -265,6 +314,42 @@ void AudioFileModel::cleanExportList()
     beginResetModel();
     m_selectedToExport.clear();
     endResetModel();
+}
+
+void AudioFileModel::clearSelection()
+{
+    int min=-1;
+    int max=-1;
+    for(auto i : std::as_const(m_selection))
+    {
+        if(min < 0)
+            min = i;
+        if(max < 0)
+            max = i;
+
+        min = std::min(min, i);
+        max = std::max(max, i);
+    }
+    m_selection.clear();
+    emit dataChanged(index(min), index(max), QVector<int>{SelectedRole});
+}
+
+void AudioFileModel::select(const QList<int> &ids)
+{
+    for(auto i : ids)
+    {
+        m_selection.insert(i);
+        emit dataChanged(index(i), index(i), QVector<int>{SelectedRole});
+    }
+}
+
+void AudioFileModel::unselect(const QList<int> &ids)
+{
+    for(auto i : ids)
+    {
+        m_selection.remove(i);
+        emit dataChanged(index(i), index(i), QVector<int>{SelectedRole});
+    }
 }
 
 const std::vector<int>& AudioFileModel::exportList() const

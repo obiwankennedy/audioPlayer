@@ -6,7 +6,10 @@ ImageDataViewer::ImageDataViewer()
 {
     setFlag(QQuickItem::ItemHasContents, true);
     connect(this, &ImageDataViewer::imageChanged, this, &ImageDataViewer::update);
-    connect(this, &ImageDataViewer::geometryChange, this, &ImageDataViewer::update);
+    connect(this, &ImageDataViewer::xChanged, this, &ImageDataViewer::update);
+    connect(this, &ImageDataViewer::yChanged, this, &ImageDataViewer::update);
+    connect(this, &ImageDataViewer::widthChanged, this, &ImageDataViewer::update);
+    connect(this, &ImageDataViewer::heightChanged, this, &ImageDataViewer::update);
 }
 
 QByteArray ImageDataViewer::imageData() const

@@ -8,7 +8,8 @@
 #include "ClientController.h"
 #include "audiocontroller.h"
 
-class MainController : public QObject {
+class MainController : public QObject
+{
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
@@ -82,6 +83,8 @@ public slots:
     void pause();
     void setPlayingMode(MainController::PlayingMode mode);
     void find(const QString& pattern);
+    void filterTag(const QString& tag, bool forbidden);
+    void removeFilterTag(const QString& tag, bool forbidden);
 
 signals:
     void playingModeChanged();

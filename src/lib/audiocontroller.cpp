@@ -39,15 +39,15 @@ AudioController::AudioController(QObject* parent)
     : QObject(parent)
     , m_model(new AudioFileModel)
     , m_filteredModel(new FilteredModel)
+    , m_filterTagModel(new TagFilteredModel)
     , m_pictureProvider(new AlbumPictureProvider())
     , m_player(new QMediaPlayer)
     , m_audioOutput(new QAudioOutput)
     , m_devices(new DeviceModel)
+    , m_tagsModel(new TagModel)
 {
     sCtrl = this;
     m_player->setAudioOutput(m_audioOutput.get());
-    // auto fp = &show;
-    // std::function<void(int)> f = std::bind(&AudioController::display, this, std::placeholders::_1);
 
     connect(m_player.get(), &QMediaPlayer::playbackStateChanged, this, &AudioController::stateChanged);
     auto const& devicesList = QMediaDevices::audioOutputs();
@@ -103,7 +103,9 @@ AudioController::AudioController(QObject* parent)
     connect(m_player.get(), &QMediaPlayer::durationChanged, this, &AudioController::durationChanged);
     connect(m_player.get(), &QMediaPlayer::mediaStatusChanged, this, &AudioController::mediaStatus);
 
-    m_filteredModel->setSourceModel(m_model.get());
+    m_filterTagModel->setSourceModel(m_model.get());
+    m_filteredModel->setSourceModel(m_filterTagModel.get());
+    //m_filteredModel->setSourceModel(m_model.get());
 }
 
 int AudioController::songIndex() const
@@ -189,6 +191,8 @@ void AudioController::nextInLineSong()
 {
     auto it = m_previousIndex.rbegin();
     auto val = (*it) + 1;
+    if(val >= m_filterTagModel->rowCount())
+        return;
     setSongIndex(val);
     play();
 }
@@ -196,9 +200,12 @@ void AudioController::shuffleSong()
 {
     static auto seed1 = std::chrono::system_clock::now().time_since_epoch().count();
     static std::mt19937 rng(seed1);
-    auto r = m_model->rowCount() - 1;
+    auto r = m_filterTagModel->rowCount() - 1;
+
     std::uniform_int_distribution<qint64> dist(0, r);
-    setSongIndex(static_cast<int>(dist(rng)));
+    auto index = static_cast<int>(dist(rng));
+    qDebug() << "shuffle song:"<<m_filterTagModel->rowCount() << index << m_filterTagModel->songIndexToSource(index);
+    setSongIndex(m_filterTagModel->songIndexToSource(index));
     play();
 }
 
@@ -252,6 +259,17 @@ void AudioController::setContentData(const QByteArray& data)
     m_buffer.open(QIODevice::ReadOnly);
     m_player->setSourceDevice(&m_buffer, m_content);
     m_player->play();
+}
+
+void AudioController::addTag(const QString &tag)
+{
+
+    m_model->addTag(tag );//m_filterTagModel->songIndexToSource(songIndex)
+}
+
+void AudioController::refreshMetaData()
+{
+    m_model->refreshMetaData();
 }
 
 void AudioController::setDeviceIndex(int index)
@@ -403,4 +421,14 @@ void AudioController::setVideoOutput(QObject* output)
 void AudioController::setMuted(bool b)
 {
     m_audioOutput->setMuted(b);
+}
+
+TagFilteredModel *AudioController::filteredTagModel() const
+{
+    return m_filterTagModel.get();
+}
+
+TagModel* AudioController::tags() const
+{
+    return m_tagsModel.get();
 }

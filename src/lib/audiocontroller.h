@@ -29,15 +29,18 @@
 
 #include "albumpictureprovider.h"
 #include "audiofilemodel.h"
+#include "filteredmodel.h"
 #include "devicemodel.h"
 #include "filteredmodel.h"
+#include "tagmodel.h"
 
 #include <QQmlEngine>
 #include <deque>
 #include <memory>
 
 class CommandServer;
-class AudioController : public QObject {
+class AudioController : public QObject
+{
     Q_OBJECT
     QML_ELEMENT
     Q_PROPERTY(int songIndex READ songIndex WRITE setSongIndex NOTIFY songIndexChanged)
@@ -46,7 +49,8 @@ class AudioController : public QObject {
     Q_PROPERTY(float volume READ volume WRITE setVolume NOTIFY volumeChanged)
     Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged)
     Q_PROPERTY(qint64 seek READ seek WRITE setSeek NOTIFY seekChanged)
-    Q_PROPERTY(AudioFileModel* model READ model NOTIFY modelChanged)
+    Q_PROPERTY(AudioFileModel* model READ model CONSTANT)
+    Q_PROPERTY(TagFilteredModel* filteredTagModel READ filteredTagModel CONSTANT)
     Q_PROPERTY(bool playing READ isPlaying NOTIFY playingChanged)
     Q_PROPERTY(FilteredModel* filteredModel READ filteredModel CONSTANT)
     Q_PROPERTY(QString songImage READ songImage NOTIFY songIndexChanged)
@@ -56,6 +60,7 @@ class AudioController : public QObject {
     Q_PROPERTY(bool hasVideo READ hasVideo NOTIFY hasVideoChanged FINAL)
     Q_PROPERTY(QObject* videoOutput READ videoOutput WRITE setVideoOutput NOTIFY videoOutputChanged)
     Q_PROPERTY(QUrl content READ content WRITE setContent NOTIFY contentChanged FINAL)
+    Q_PROPERTY(TagModel* tags READ tags CONSTANT)
 public:
     enum PlayingMode {
         LOOP,
@@ -89,6 +94,10 @@ public:
 
     QObject* videoOutput() const;
     void setVideoOutput(QObject* output);
+    TagFilteredModel *filteredTagModel() const;
+
+    TagModel* tags() const;
+
 public slots:
     void setMuted(bool b);
     void setSongIndex(int song);
@@ -106,13 +115,14 @@ public slots:
     void display(int i);
 
     void setContentData(const QByteArray& data);
+    void addTag(const QString& tag);
+    void refreshMetaData();
 
 signals:
     void songIndexChanged();
     void modeChanged();
     void volumeChanged();
     void seekChanged();
-    void modelChanged();
     void durationChanged(qint64 duration);
     void titleChanged();
     void playingChanged();
@@ -135,12 +145,14 @@ protected slots:
 
 private:
     std::unique_ptr<AudioFileModel> m_model;
+    std::unique_ptr<TagFilteredModel> m_filterTagModel;
     std::unique_ptr<CommandServer> m_server;
     std::unique_ptr<FilteredModel> m_filteredModel;
     std::unique_ptr<AlbumPictureProvider> m_pictureProvider;
     std::unique_ptr<QMediaPlayer> m_player;
     std::unique_ptr<QAudioOutput> m_audioOutput;
     std::unique_ptr<DeviceModel> m_devices;
+    std::unique_ptr<TagModel> m_tagsModel;
     QBuffer m_buffer;
     std::unique_ptr<QByteArray> m_data;
 
