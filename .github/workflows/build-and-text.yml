@@ -1,0 +1,110 @@
+# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
+
+# mkdir -p app/usr/share/icons/hicolor/256x256/apps
+# cp ${{ github.workspace }}/assets/logo.png app/usr/share/icons/hicolor/256x256/apps/AudioPlayer.png
+
+name: CMake on multiple platforms
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-lastest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: 6.8.3
+          setup-python: false
+          cache: true
+
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CXX_COMPILER=g++-10 -DBUILD_TESTING=ON
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+
+      - name: Run DeployQt
+        working-directory: ${{ github.workspace }}/build
+        run: |
+          sudo apt install libfuse2 libxcb-cursor0
+          wget -c -nv https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -O linuxdeployqt-continuous-x86_64.AppImage
+          chmod +x linuxdeployqt-continuous-x86_64.AppImage
+          mkdir -p app/usr/bin
+          cp src/bin/player/audioPlayer app/usr/bin/audioPlayer
+          
+          mkdir -p app/usr/share/applications
+          echo -e "[Desktop Entry]\nType=Application\nName=AudioPlayer\nComment=AudioPlayer made with qt\nExec=AudioPlayer\nCategories=Game;" >> app/usr/share/applications/AudioPlayer.desktop
+          ./linuxdeployqt-continuous-x86_64.AppImage app/usr/share/applications/AudioPlayer.desktop -verbose=2 -appimage -qmldir=${{ github.workspace }}/qml
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: AudioPlayer-ubuntu
+          path: ${{ github.workspace }}/build/AudioPlayer-*.AppImage
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: 6.8.3
+          setup-python: false
+
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_TESTING=OFF
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+
+      - name: Run DeployQt
+        working-directory: ${{ github.workspace }}/build
+        run: windeployqt src/bin/player/audioPlayer.exe --qmldir=${{ github.workspace }}/qml
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: AudioPlayer-windows
+          path: ${{ github.workspace }}/build/bin/
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: 6.8.3
+          setup-python: false
+
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_TESTING=ON
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+
+      - name: Run DeployQt
+        working-directory: ${{ github.workspace }}/build/bin
+        run: |
+          mv audioPlayer.app AudioPlayer.app
+          macdeployqt AudioPlayer.app -qmldir=${{ github.workspace }}/qml -dmg -verbose=2
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: AudioPlayer-macos
+          path: ${{ github.workspace }}/build/bin/AudioPlayer.dmg
