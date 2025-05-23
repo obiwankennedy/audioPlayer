@@ -9,6 +9,9 @@
 *.so
 *.dll
 *.dylib
+*pixmaps/*
+*.png
+*.xpm
 
 # Qt-es
 
@@ -24,4 +27,6 @@ build/*
 preferences/*
 .fr-*
 music-icon-pack-design*
-src/*
+*.txt.user
+*.m3u
+*.qpl
