@@ -7,7 +7,6 @@
 #include <QWebSocketServer>
 #include <memory.h>
 #include "appcontroller.h"
-#include "websocketdecoder.h"
 
 class ServerManager : public QObject
 {
@@ -15,7 +14,6 @@ class ServerManager : public QObject
     Q_PROPERTY(int port READ port WRITE setPort NOTIFY portChanged FINAL)
 public:
     explicit ServerManager(QObject *parent = nullptr);
-
 
     int port() const;
     void setPort(int newPort);

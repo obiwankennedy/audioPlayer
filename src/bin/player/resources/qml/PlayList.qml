@@ -40,6 +40,8 @@ ScrollView {
                 width: view.width
                 height: 40
 
+                ToolTip.text: tags
+
                 RowLayout {
                     id: lyt
                     anchors.fill: parent
@@ -50,7 +52,7 @@ ScrollView {
                         clip: true
                     }
                     Label {//artist
-                        text: "%1 - %2".arg(artist).arg(model.tags.join(','))
+                        text: artist
                         Layout.fillWidth: true
                         font.bold: AppController.audioCtrl.songIndex === model.songIndex
                     }

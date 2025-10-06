@@ -121,8 +121,6 @@ AudioFileModel::AudioFileModel(QObject* parent) : QAbstractListModel(parent) {}
 
 int AudioFileModel::rowCount(const QModelIndex& parent) const
 {
-    // For list models only the root node (an invalid parent) should return the list's size. For all
-    // other (valid) parents, rowCount() should return 0 so that it does not become a tree model.
     if(parent.isValid())
         return 0;
 
@@ -175,7 +173,7 @@ QVariant AudioFileModel::data(const QModelIndex& index, int role) const
 
 bool AudioFileModel::appendSongs(const QList<QVariantMap>& pathlist)
 {
-    beginInsertRows(QModelIndex(), m_data.size(), pathlist.size() + m_data.size());
+    beginInsertRows(QModelIndex(), m_data.size(), pathlist.size() + m_data.size()-1);
     std::for_each(pathlist.begin(), pathlist.end(), [this](const QVariantMap& map) {
         std::unique_ptr<AudioFileInfo> info(
             new AudioFileInfo({map["path"].toString(), map["artist"].toString().trimmed(),

@@ -157,8 +157,8 @@ void MainController::setPosition(qreal newPosition)
     if (qFuzzyCompare(m_position, newPosition))
         return;
 
-    if (m_syncWithServer)
-        m_audioCtrl->setSeek(newPosition);
+   // if (m_syncWithServer)
+     //   m_audioCtrl->setSeek(newPosition);
     m_position = newPosition;
     emit positionChanged();
 }
@@ -204,6 +204,8 @@ void MainController::setVolume(float newVolume)
         return;
     m_volume = newVolume;
     emit volumeChanged();
+    if (m_syncWithServer)
+        m_audioCtrl->setVolume(newVolume);
     QHash<QString, QVariant> params;
     params.insert(constants::volume, newVolume);
     m_clientCtrl->sendCommand(constants::info::volume, params);

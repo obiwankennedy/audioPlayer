@@ -59,7 +59,7 @@ ApplicationWindow {
         title: qsTr("Add directory at selection")
         currentFolder: StandardPaths.writableLocation(StandardPaths.MusicLocation)
         onAccepted: {
-            AppController.addDirectory(view.currentIndex,openDir.selectedFolder);
+            AppController.addDirectory(playList.currentIndex,openDir.selectedFolder);
             close()
         }
         onRejected: close()
@@ -72,7 +72,7 @@ ApplicationWindow {
         fileMode: FileDialog.OpenFiles
         nameFilters: ["Audiofiles (*.mp3 *.mpc *.flac *.ogg *.wma)"]
         onAccepted: {
-            AppController.addFiles(addAudioFiles.selectedFiles, view.currentIndex);
+            AppController.addFiles(addAudioFiles.selectedFiles, playList.currentIndex);
             close()
         }
         onRejected: close()

@@ -10,5 +10,6 @@ else()
           add_subdirectory(server)
           add_subdirectory(player)
           add_subdirectory(client)
+          add_subdirectory(fsHelper)
 endif()
 

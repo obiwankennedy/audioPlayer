@@ -31,7 +31,7 @@ Frame {
     SmallPlayer {
         id: player
         anchors.fill: parent
-        property QtObject ctrl: _root.ctrl
+        ctrl: _root.ctrl
     }
 
     ImageButton {

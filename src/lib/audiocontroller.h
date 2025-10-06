@@ -117,6 +117,7 @@ public slots:
     void setContentData(const QByteArray& data);
     void addTag(const QString& tag);
     void refreshMetaData();
+    void removeFile(int index, bool onDisk = false);
 
 signals:
     void songIndexChanged();

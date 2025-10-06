@@ -8,6 +8,8 @@ import Controllers
 ColumnLayout {
     id: root
 
+    required property QtObject ctrl
+
     Item {
         id: panelImg
         Layout.fillHeight: true

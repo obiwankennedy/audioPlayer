@@ -250,6 +250,7 @@ void AudioController::display(int i)
 
 void AudioController::setContentData(const QByteArray& data)
 {
+    qDebug() << "setContent data" << data;
     m_buffer.close();
     m_buffer.setBuffer(nullptr);
     m_data.release();
@@ -270,6 +271,20 @@ void AudioController::addTag(const QString &tag)
 void AudioController::refreshMetaData()
 {
     m_model->refreshMetaData();
+}
+#include <QFileInfo>
+void AudioController::removeFile(int index, bool onDisk)
+{
+    if(onDisk)
+    {
+        auto song = m_model->songInfoAt(index);
+        QFileInfo info(song->m_filepath);
+        if(info.exists())
+        {
+            QFile::moveToTrash(song->m_filepath);
+        }
+    }
+    m_model->removeSongs({index});
 }
 
 void AudioController::setDeviceIndex(int index)

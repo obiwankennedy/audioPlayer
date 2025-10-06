@@ -13,6 +13,17 @@ ServerManager::ServerManager(QObject* parent)
     auto audio = m_ctrl->audioCtrl();
     auto imgs = audio->pictureProvider();
 
+    connect(m_server.get(), &QWebSocketServer::serverError, this, [this](QWebSocketProtocol::CloseCode closeCode){
+        qDebug() << "ServerError:" << closeCode;
+    });
+    connect(m_server.get(), &QWebSocketServer::sslErrors, this, [this](const QList<QSslError>& errors){
+        for(auto const& e : errors)
+            qDebug() << "SslError:" << e.errorString();
+    });
+    connect(m_server.get(), &QWebSocketServer::acceptError, this, [this](const QAbstractSocket::SocketError& socketError){
+        qDebug() << "acceptError:" << socketError;
+    });
+
     connect(imgs, &AlbumPictureProvider::currentImageChanged, this, [this](const QImage& img){
         auto data = factory::imageToArray(img);
         data.prepend(static_cast<quint8>(constants::DataType::ImageFile));
@@ -97,6 +108,7 @@ void ServerManager::setPort(int newPort)
 void ServerManager::processText(const QString& message)
 {
     auto s = qobject_cast<QWebSocket*>(sender());
+    qDebug() << "server processText" << message << s;
     if (!s)
         return;
 
@@ -104,7 +116,6 @@ void ServerManager::processText(const QString& message)
     auto act = factory::actionToEnum(msg);
     auto params = msg[constants::json::parameter].toObject();
     auto audio = m_ctrl->audioCtrl();
-    qDebug() << "server processText" << message;
 
     switch (act) {
     case constants::Action::PlayAct:
