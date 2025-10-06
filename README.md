@@ -13,7 +13,7 @@ Since that, it has been rewritten a couple of times.
 ![standalone](screenshots/standalone.png)
 
 
-## Android client
+## Android client
 
 ![android](screenshots/Android-client.jpg)
 
