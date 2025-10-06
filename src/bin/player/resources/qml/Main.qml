@@ -7,6 +7,7 @@ import QtQuick.Controls.Universal
 import Customization
 import Views
 import Controllers
+import Customization
 
 ApplicationWindow {
     id: root

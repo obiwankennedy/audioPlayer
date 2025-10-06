@@ -6,6 +6,27 @@ The original goal was to implement an application using Qt and as many as possib
 
 Since that, it has been rewritten a couple of times. 
 
+# ScreenShot
+
+## Stand Alone client
+
+![standalone](screenshots/standalone.png)
+
+
+## Android client
+
+![android](screenshots/Android-client.jpg)
+
+
+# Binaries in this project:
+
+|Binary|Description|
+|--|--|
+|AudioClient|Client that connects to the server, display the playlist and send command to the server. It can also play the music in remote mode (not working on all platform). |
+|AudioPlayer|All in one application: playlist, audio features and views|
+|AudioServer|AudioServer dedicated to be use in local network. It can play the music or send files to be played on the remote control application's device.|
+|fsHelper| QWidget app to help renaming folders to improving the hierarchy of folder.|
+
 # Current Features:
 
 * Stand Alone application
@@ -17,7 +38,7 @@ Since that, it has been rewritten a couple of times.
 * Playlist defined by tags
 * Search
 * MetaData reading
-* UI in QML
+* UI in QML
 * Playing on server side
 * Playing on client side
 * light and dark mode
